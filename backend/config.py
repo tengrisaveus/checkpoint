@@ -12,7 +12,11 @@ class Settings(BaseSettings):
 
     model_config = {"env_file": ".env"}
 
+    @property
+    def db_url(self) -> str:
+        return self.database_url.replace("postgres://", "postgresql://", 1)
+
 
 @lru_cache
 def get_settings():
-    return Settings() # type: ignore
+    return Settings()  # type: ignore
