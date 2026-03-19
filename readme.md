@@ -1,6 +1,6 @@
 # Checkpoint 🎮
 
-A game tracking application inspired by Letterboxd and Backloggd. Track your gaming library, rate and review games, and see your gaming statistics.
+A game tracking application. Track your gaming library, rate and review games, and see your gaming statistics.
 
 ## Tech Stack
 
