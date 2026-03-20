@@ -12,9 +12,14 @@ export default function Navbar() {
             Checkpoint 🎮
           </Link>
           {user && (
-            <Link to="/library" className="text-gray-300 hover:text-white transition">
-              My Library
-            </Link>
+            <>
+              <Link to="/library" className="text-gray-300 hover:text-white transition">
+                My Library
+              </Link>
+              <Link to="/stats" className="text-gray-300 hover:text-white transition">
+                Stats
+              </Link>
+            </>
           )}
         </div>
 

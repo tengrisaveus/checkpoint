@@ -6,6 +6,7 @@ import Register from "./pages/Register"
 import Search from "./pages/Search"
 import GameDetail from "./pages/GameDetail"
 import Library from "./pages/Library"
+import Stats from "./pages/Stats"
 import ProtectedRoute from "./ProtectedRoute"
 
 function App() {
@@ -21,6 +22,11 @@ function App() {
           <Route path="/library" element={
             <ProtectedRoute>
               <Library />
+            </ProtectedRoute>
+          } />
+          <Route path="/stats" element={
+            <ProtectedRoute>
+              <Stats />
             </ProtectedRoute>
           } />
         </Routes>

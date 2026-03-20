@@ -56,6 +56,42 @@ def get_library(
 ):
     return db.query(UserGame).filter(UserGame.user_id == current_user.id).all()
 
+@router.get("/stats")
+def get_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    entries = db.query(UserGame).filter(UserGame.user_id == current_user.id).all()
+
+    if not entries:
+        return {
+            "total_games": 0,
+            "by_status": {},
+            "average_rating": None,
+            "rated_count": 0,
+            "reviewed_count": 0,
+        }
+
+    total = len(entries)
+
+    by_status = {}
+    for entry in entries:
+        status = str(entry.status)
+        by_status[status] = by_status.get(status, 0) + 1
+
+    rated = [e for e in entries if e.rating is not None]
+    avg_rating = round(sum(float(e.rating) for e in rated) / len(rated), 1) if rated else None #type: ignore
+
+    reviewed = [e for e in entries if e.review] #type: ignore
+
+    return {
+        "total_games": total,
+        "by_status": by_status,
+        "average_rating": avg_rating,
+        "rated_count": len(rated),
+        "reviewed_count": len(reviewed),
+    }
+
 
 @router.put("/{game_id}", response_model=UserGameResponse)
 def update_game(
@@ -101,3 +137,4 @@ def remove_game(
     db.commit()
 
     return {"detail": "Game removed from library"}
+
