@@ -29,5 +29,12 @@ export interface LibraryEntry {
   updated_at: string
 }
 
+export interface SteamReview {
+  score: number
+  total_positive: number
+  total_negative: number
+  total_reviews: number
+}
+
 export const GAME_STATUSES = ["Playing", "Completed", "Want to Play", "Dropped"] as const
 export type GameStatus = typeof GAME_STATUSES[number]

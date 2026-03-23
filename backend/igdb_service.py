@@ -78,7 +78,6 @@ async def igdb_request(endpoint: str, query: str):
 
 async def search_games(query: str):
     """Searches IGDB by game name and returns up to 10 results."""
-    # Apicalypse sorgusunu bozabilecek tırnak ve noktalı virgül karakterlerini temizle
     clean_query = query.replace('"', "").replace(";", "").strip()
     if not clean_query:
         return []
@@ -90,7 +89,6 @@ async def search_games(query: str):
 
 async def get_game_detail(game_id: int):
     """Fetches full details of a specific game from IGDB."""
-    # game_id FastAPI tarafından integer olarak doğrulanır, sorgu injection riski yok
     return await igdb_request(
         "games",
         f"fields name, cover.url, first_release_date, summary, storyline, genres.name, platforms.name, involved_companies.company.name, rating, aggregated_rating; where id = {game_id};",
