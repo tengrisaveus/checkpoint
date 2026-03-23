@@ -1,9 +1,9 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import datetime
-from typing import Optional
 from enum import Enum
 
 
+# Allowed game statuses; stored as strings in the DB via .value
 class GameStatus(str, Enum):
     playing = "Playing"
     completed = "Completed"
@@ -18,6 +18,7 @@ class UserCreate(BaseModel):
 
 
 class LoginRequest(BaseModel):
+    # No password validation here — the hash comparison handles incorrect passwords
     email: EmailStr
     password: str
 
@@ -28,20 +29,22 @@ class UserResponse(BaseModel):
     email: str
     created_at: datetime
 
+    # from_attributes allows Pydantic to read values from SQLAlchemy model instances
     model_config = ConfigDict(from_attributes=True)
 
 
 class UserGameCreate(BaseModel):
     game_id: int
     status: GameStatus
-    rating: Optional[float] = Field(default=None, ge=1, le=10)
-    review: Optional[str] = Field(default=None, max_length=2000)
+    rating: float | None = Field(default=None, ge=1, le=10)  # 1–10 scale
+    review: str | None = Field(default=None, max_length=2000)
 
 
 class UserGameUpdate(BaseModel):
-    status: Optional[GameStatus] = None
-    rating: Optional[float] = Field(default=None, ge=1, le=10)
-    review: Optional[str] = Field(default=None, max_length=2000)
+    # All fields optional — only provided fields will be updated (partial update)
+    status: GameStatus | None = None
+    rating: float | None = Field(default=None, ge=1, le=10)  # 1–10 scale
+    review: str | None = Field(default=None, max_length=2000)
 
 
 class UserGameResponse(BaseModel):
@@ -55,4 +58,5 @@ class UserGameResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    # from_attributes allows Pydantic to read values from SQLAlchemy model instances
     model_config = ConfigDict(from_attributes=True)

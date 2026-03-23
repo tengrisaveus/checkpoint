@@ -15,6 +15,10 @@ async def add_game(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """
+    Adds a game to the user's library.
+    Fetches metadata from IGDB and upgrades the cover thumbnail to full size.
+    """
     existing = db.query(UserGame).filter(
         UserGame.user_id == current_user.id,
         UserGame.game_id == game_data.game_id,
@@ -22,7 +26,7 @@ async def add_game(
     if existing:
         raise HTTPException(status_code=400, detail="Game already in library")
 
-    # IGDB'den oyun bilgisini çek
+    # Fetch game metadata from IGDB to store name and cover alongside the entry
     results = await get_game_detail(game_data.game_id)
     if not results:
         raise HTTPException(status_code=404, detail="Game not found on IGDB")
@@ -30,6 +34,7 @@ async def add_game(
     game_info = results[0]
     cover_url = None
     if game_info.get("cover") and game_info["cover"].get("url"):
+        # IGDB returns thumbnail URLs (t_thumb); upgrade to full cover size (t_cover_big)
         cover_url = game_info["cover"]["url"].replace("t_thumb", "t_cover_big")
 
     new_entry = UserGame(
@@ -54,13 +59,18 @@ def get_library(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Returns all games in the current user's library."""
     return db.query(UserGame).filter(UserGame.user_id == current_user.id).all()
 
+
+# IMPORTANT: /stats must be defined before /{game_id} (PUT) to avoid any future
+# route conflicts if a GET /{game_id} endpoint is ever added.
 @router.get("/stats")
 def get_stats(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Returns aggregate stats for the user's library: totals, status breakdown, ratings, and reviews."""
     entries = db.query(UserGame).filter(UserGame.user_id == current_user.id).all()
 
     if not entries:
@@ -100,6 +110,10 @@ def update_game(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """
+    Updates status, rating, or review for a game in the user's library.
+    Only fields explicitly provided (non-None) are updated (partial update semantics).
+    """
     entry = db.query(UserGame).filter(
         UserGame.user_id == current_user.id,
         UserGame.game_id == game_id,
@@ -126,6 +140,7 @@ def remove_game(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Removes a game from the user's library. Returns 404 if the game isn't in the library."""
     entry = db.query(UserGame).filter(
         UserGame.user_id == current_user.id,
         UserGame.game_id == game_id,
