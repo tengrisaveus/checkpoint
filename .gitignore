@@ -21,3 +21,5 @@ node_modules/
 # Database
 *.db
 *.sqlite3
+
+checkpoint-claude-code-summary.md
