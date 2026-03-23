@@ -5,6 +5,7 @@ import { useAuth } from "../AuthContext"
 import { GAME_STATUSES } from "../types"
 import type { Game } from "../types"
 import { getCoverUrl, getYear } from "../utils"
+import RatingSelector from "../components/RatingSelector"
 
 export default function GameDetail() {
   const { id } = useParams()
@@ -13,7 +14,7 @@ export default function GameDetail() {
   const [game, setGame] = useState<Game | null>(null)
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState("")
-  const [rating, setRating] = useState("")
+  const [rating, setRating] = useState<number | null>(null)
   const [review, setReview] = useState("")
   const [success, setSuccess] = useState("")
   const [error, setError] = useState("")
@@ -33,7 +34,7 @@ export default function GameDetail() {
       await api.post("/library", {
         game_id: Number(id),
         status,
-        rating: rating ? Number(rating) : null,
+        rating: rating,
         review: review || null,
       })
       setSuccess("Added to library!")
@@ -95,16 +96,10 @@ export default function GameDetail() {
                 ))}
               </select>
 
-              <input
-                type="number"
-                placeholder="Rating (1-10)"
-                value={rating}
-                onChange={(e) => setRating(e.target.value)}
-                min="1"
-                max="10"
-                step="0.5"
-                className="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="space-y-1">
+                <p className="text-gray-400 text-sm">Rating {rating ? `(${rating}/10)` : "(optional)"}</p>
+                <RatingSelector value={rating} onChange={setRating} />
+              </div>
 
               <textarea
                 placeholder="Write a review (optional)"

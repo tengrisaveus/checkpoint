@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import api from "../api"
 import { GAME_STATUSES } from "../types"
 import type { LibraryEntry } from "../types"
+import RatingSelector from "../components/RatingSelector"
 
 interface LibraryEntryWithGame extends LibraryEntry {
   game_name: string
@@ -13,6 +14,7 @@ export default function Library() {
   const [entries, setEntries] = useState<LibraryEntryWithGame[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("")
+  const [expandedRatingId, setExpandedRatingId] = useState<number | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -26,6 +28,18 @@ export default function Library() {
     try {
       await api.delete(`/library/${gameId}`)
       setEntries((prev) => prev.filter((e) => e.game_id !== gameId))
+    } catch {
+      // ignore
+    }
+  }
+
+  const handleRatingChange = async (gameId: number, newRating: number | null) => {
+    try {
+      await api.put(`/library/${gameId}`, { rating: newRating })
+      setEntries((prev) =>
+        prev.map((e) => (e.game_id === gameId ? { ...e, rating: newRating } : e))
+      )
+      setExpandedRatingId(null)
     } catch {
       // ignore
     }
@@ -113,10 +127,24 @@ export default function Library() {
                     ))}
                   </select>
 
-                  {entry.rating && <span className="text-yellow-400 text-sm">★ {entry.rating}</span>}
+                  <button
+                    onClick={() => setExpandedRatingId(expandedRatingId === entry.game_id ? null : entry.game_id)}
+                    className="text-yellow-400 text-sm hover:text-yellow-300 transition"
+                  >
+                    {entry.rating ? `★ ${entry.rating}` : "Rate"}
+                  </button>
                 </div>
 
                 {entry.review && <p className="text-gray-400 text-sm mt-2">{entry.review}</p>}
+
+                {expandedRatingId === entry.game_id && (
+                  <div className="mt-2">
+                    <RatingSelector
+                      value={entry.rating}
+                      onChange={(v) => handleRatingChange(entry.game_id, v)}
+                    />
+                  </div>
+                )}
               </div>
 
               <button onClick={() => handleDelete(entry.game_id)} className="text-red-400 hover:text-red-300 text-sm">
