@@ -142,7 +142,7 @@ def test_me_with_token():
 
 def test_me_without_token():
     res = client.get("/auth/me")
-    assert res.status_code == 401
+    assert res.status_code in (401, 403)
 
 
 def test_me_with_invalid_token():

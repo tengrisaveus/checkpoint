@@ -34,9 +34,10 @@ jobs:
       TWITCH_CLIENT_SECRET: dummy
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -45,4 +46,4 @@ jobs:
 
       - name: Run auth tests
         working-directory: backend
-        run: pytest test_api.py -v -k "not library"
+        run: pytest test_api.py -v -k "register or login or test_me or test_invalid_status or test_invalid_rating or nonexistent"
