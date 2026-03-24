@@ -1,0 +1,65 @@
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../AuthContext"
+import useTitle from "../hooks/useTitle"
+import { useEffect } from "react"
+
+export default function Home() {
+  useTitle("Checkpoint — Track Your Games")
+  const { user, loading } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!loading && user) navigate("/search")
+  }, [user, loading, navigate])
+
+  if (loading || user) return null
+
+  return (
+    <div className="min-h-screen bg-slate-950">
+      {/* Hero */}
+      <div className="max-w-4xl mx-auto px-4 pt-24 pb-16 text-center">
+        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+          Track Your <span className="text-red-500">Gaming</span> Journey
+        </h1>
+        <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+          Keep a record of every game you play. Rate, review, and see your stats — all in one place.
+        </p>
+        <div className="flex gap-4 justify-center">
+          <button
+            onClick={() => navigate("/register")}
+            className="px-8 py-3 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition text-lg"
+          >
+            Get Started
+          </button>
+          <button
+            onClick={() => navigate("/search")}
+            className="px-8 py-3 rounded bg-slate-800 text-slate-300 font-semibold hover:bg-slate-700 transition text-lg border border-slate-700"
+          >
+            Browse Games
+          </button>
+        </div>
+      </div>
+
+      {/* Features */}
+      <div className="max-w-4xl mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-slate-900 rounded-lg p-6 border border-slate-800 text-center">
+            <div className="text-4xl mb-4">🔍</div>
+            <h3 className="text-white font-semibold text-lg mb-2">Search</h3>
+            <p className="text-slate-400 text-sm">Browse thousands of games from the IGDB database</p>
+          </div>
+          <div className="bg-slate-900 rounded-lg p-6 border border-slate-800 text-center">
+            <div className="text-4xl mb-4">📚</div>
+            <h3 className="text-white font-semibold text-lg mb-2">Track</h3>
+            <p className="text-slate-400 text-sm">Mark games as Playing, Completed, Want to Play, or Dropped</p>
+          </div>
+          <div className="bg-slate-900 rounded-lg p-6 border border-slate-800 text-center">
+            <div className="text-4xl mb-4">📊</div>
+            <h3 className="text-white font-semibold text-lg mb-2">Stats</h3>
+            <p className="text-slate-400 text-sm">See your gaming statistics with charts and insights</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

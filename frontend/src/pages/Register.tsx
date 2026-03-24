@@ -4,14 +4,13 @@ import { useNavigate, Link } from "react-router-dom"
 import useTitle from "../hooks/useTitle"
 
 export default function Register() {
+  useTitle("Register")
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const { register } = useAuth()
   const navigate = useNavigate()
-
-  useTitle("Register")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,8 +24,8 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-lg w-full max-w-md">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="bg-slate-900 p-8 rounded-lg w-full max-w-md border border-slate-800">
         <h1 className="text-2xl font-bold text-white mb-6 text-center">Register</h1>
 
         {error && (
@@ -39,33 +38,33 @@ export default function Register() {
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
           />
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
           />
           <input
             type="password"
             placeholder="Password (min 6 characters)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
           />
           <button
             type="submit"
-            className="w-full p-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+            className="w-full p-3 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition"
           >
             Register
           </button>
         </form>
 
-        <p className="text-gray-400 text-center mt-4">
+        <p className="text-slate-400 text-center mt-4">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-400 hover:underline">Login</Link>
+          <Link to="/login" className="text-red-400 hover:underline">Login</Link>
         </p>
       </div>
     </div>

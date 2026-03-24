@@ -20,8 +20,8 @@ export default function RatingSelector({ value, onChange, readonly }: RatingSele
           disabled={readonly}
           className={`w-8 h-8 rounded text-sm font-medium transition ${
             value !== null && n <= value
-              ? "bg-yellow-400 text-gray-900"
-              : "bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white"
+              ? "bg-yellow-400 text-slate-900"
+              : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
           } ${readonly ? "cursor-default" : "cursor-pointer"}`}
         >
           {n}

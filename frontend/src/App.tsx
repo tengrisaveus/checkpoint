@@ -1,14 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "./AuthContext"
 import Navbar from "./Navbar"
+import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import Search from "./pages/Search"
 import GameDetail from "./pages/GameDetail"
 import Library from "./pages/Library"
 import Stats from "./pages/Stats"
-import ProtectedRoute from "./ProtectedRoute"
 import NotFound from "./pages/NotFound"
+import ProtectedRoute from "./ProtectedRoute"
 
 function App() {
   return (
@@ -16,7 +17,8 @@ function App() {
       <AuthProvider>
         <Navbar />
         <Routes>
-          <Route path="/" element={<Search />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/game/:id" element={<GameDetail />} />
