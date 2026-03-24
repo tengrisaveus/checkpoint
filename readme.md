@@ -1,6 +1,6 @@
 # Checkpoint 🎮
 
-A full-stack game tracking application inspired by [Letterboxd](https://letterboxd.com/) and [Backloggd](https://www.backloggd.com/). Search games, build your library, rate and review them, and track your gaming stats.
+A full-stack game tracking application. Search games, build your library, rate and review them, and track your gaming stats.
 
 🔗 **Live Demo:** [checkpoint-delta.vercel.app](https://checkpoint-delta.vercel.app)
 📄 **API Docs:** [Swagger UI](https://checkpoint-api-a06342829980.herokuapp.com/docs)
