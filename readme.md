@@ -98,6 +98,15 @@ checkpoint/
 
 ## Getting Started
 
+### Quick Start (Docker)
+```bash
+docker compose up --build
+```
+
+Backend runs on `http://localhost:8000`, PostgreSQL on port 5432.
+
+> Requires a `.env` file in the project root with `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`.
+
 ### Prerequisites
 - Python 3.12+
 - Node.js 18+
