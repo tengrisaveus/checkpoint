@@ -8,6 +8,7 @@ import GameDetail from "./pages/GameDetail"
 import Library from "./pages/Library"
 import Stats from "./pages/Stats"
 import ProtectedRoute from "./ProtectedRoute"
+import NotFound from "./pages/NotFound"
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
               <Stats />
             </ProtectedRoute>
           } />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

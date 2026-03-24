@@ -3,9 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../AuthContext";
 import { GAME_STATUSES } from "../types";
-import type { Game } from "../types";
+import type { Game, LibraryEntry } from "../types";
 import { getCoverUrl, getYear } from "../utils";
 import RatingSelector from "../components/RatingSelector";
+import useTitle from "../hooks/useTitle";
+import Toast from "../components/Toast";
+import { DetailSkeleton } from "../components/Skeleton";
 
 export default function GameDetail() {
   const { id } = useParams();
@@ -18,6 +21,9 @@ export default function GameDetail() {
   const [review, setReview] = useState("");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [existingEntry, setExistingEntry] = useState<LibraryEntry | null>(null);
+
+  useTitle(game?.name || "Loading...");
 
   useEffect(() => {
     api
@@ -26,6 +32,24 @@ export default function GameDetail() {
       .catch(() => navigate("/"))
       .finally(() => setLoading(false));
   }, [id, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    api
+      .get("/library")
+      .then((res) => {
+        const found = res.data.find(
+          (e: LibraryEntry) => e.game_id === Number(id),
+        );
+        if (found) {
+          setExistingEntry(found);
+          setStatus(found.status);
+          setRating(found.rating);
+          setReview(found.review || "");
+        }
+      })
+      .catch(() => {});
+  }, [user, id]);
 
   const handleAddToLibrary = async () => {
     if (!status) return;
@@ -46,8 +70,10 @@ export default function GameDetail() {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-gray-900 text-gray-400 p-8">
-        Loading...
+      <div className="min-h-screen bg-gray-900 p-8">
+        <div className="max-w-4xl mx-auto">
+          <DetailSkeleton />
+        </div>
       </div>
     );
   if (!game) return null;
@@ -107,18 +133,21 @@ export default function GameDetail() {
         {user && (
           <div className="bg-gray-800 rounded-lg p-6 mt-8">
             <h2 className="text-xl font-semibold text-white mb-4">
-              Add to Library
+              {existingEntry ? "In Your Library" : "Add to Library"}
             </h2>
-
             {success && (
-              <p className="bg-green-500/20 text-green-400 p-3 rounded mb-4">
-                {success}
-              </p>
+              <Toast
+                message={success}
+                type="success"
+                onClose={() => setSuccess("")}
+              />
             )}
             {error && (
-              <p className="bg-red-500/20 text-red-400 p-3 rounded mb-4">
-                {error}
-              </p>
+              <Toast
+                message={error}
+                type="error"
+                onClose={() => setError("")}
+              />
             )}
 
             <div className="space-y-4">
@@ -156,7 +185,7 @@ export default function GameDetail() {
                 onClick={handleAddToLibrary}
                 className="px-6 py-3 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
               >
-                Add to Library
+                {existingEntry ? "Update" : "Add to Library"}
               </button>
             </div>
           </div>

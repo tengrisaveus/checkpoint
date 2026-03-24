@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useAuth } from "../AuthContext"
 import { useNavigate, Link } from "react-router-dom"
+import useTitle from "../hooks/useTitle"
 
 export default function Register() {
   const [username, setUsername] = useState("")
@@ -9,6 +10,8 @@ export default function Register() {
   const [error, setError] = useState("")
   const { register } = useAuth()
   const navigate = useNavigate()
+
+  useTitle("Register")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

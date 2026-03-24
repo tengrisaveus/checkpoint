@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useAuth } from "../AuthContext"
 import { useNavigate, Link } from "react-router-dom"
+import useTitle from "../hooks/useTitle"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -8,6 +9,8 @@ export default function Login() {
   const [error, setError] = useState("")
   const { login } = useAuth()
   const navigate = useNavigate()
+
+  useTitle("Login")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

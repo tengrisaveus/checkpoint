@@ -1,28 +1,31 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import api from "../api"
-import type { Game } from "../types"
-import { getCoverUrl, getYear } from "../utils"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api";
+import type { Game } from "../types";
+import { getCoverUrl, getYear } from "../utils";
+import useTitle from "../hooks/useTitle";
+import { CardSkeleton } from "../components/Skeleton";
 
 export default function Search() {
-  const [query, setQuery] = useState("")
-  const [results, setResults] = useState<Game[]>([])
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  useTitle("Search");
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!query.trim()) return
-    setLoading(true)
+    e.preventDefault();
+    if (!query.trim()) return;
+    setLoading(true);
     try {
-      const res = await api.get("/games/search", { params: { query } })
-      setResults(res.data)
+      const res = await api.get("/games/search", { params: { query } });
+      setResults(res.data);
     } catch {
-      setResults([])
+      setResults([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 p-8">
@@ -46,7 +49,13 @@ export default function Search() {
           </button>
         </form>
 
-        {loading && <p className="text-gray-400">Searching...</p>}
+        {loading && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        )}
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {results.map((game) => (
@@ -56,15 +65,24 @@ export default function Search() {
               className="bg-gray-800 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500 transition"
             >
               {getCoverUrl(game) ? (
-                <img src={getCoverUrl(game)!} alt={game.name} className="w-full h-64 object-cover" />
+                <img
+                  src={getCoverUrl(game)!}
+                  alt={game.name}
+                  className="w-full h-64 object-cover"
+                />
               ) : (
-                <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-500">No Cover</div>
+                <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-500">
+                  No Cover
+                </div>
               )}
               <div className="p-3">
-                <h3 className="text-white font-semibold text-sm truncate">{game.name}</h3>
+                <h3 className="text-white font-semibold text-sm truncate">
+                  {game.name}
+                </h3>
                 <p className="text-gray-400 text-xs mt-1">
                   {getYear(game.first_release_date)}
-                  {game.genres && ` · ${game.genres.map(g => g.name).join(", ")}`}
+                  {game.genres &&
+                    ` · ${game.genres.map((g) => g.name).join(", ")}`}
                 </p>
               </div>
             </div>
@@ -76,5 +94,5 @@ export default function Search() {
         )}
       </div>
     </div>
-  )
+  );
 }

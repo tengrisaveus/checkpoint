@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import api from "../api"
 import { useAuth } from "../AuthContext"
+import useTitle from "../hooks/useTitle"
 
 interface StatsData {
   total_games: number
@@ -29,6 +30,8 @@ export default function Stats() {
       .catch(() => setStats(null))
       .finally(() => setLoading(false))
   }, [])
+
+  useTitle("Stats")
 
   if (loading) return <div className="min-h-screen bg-gray-900 text-gray-400 p-8">Loading...</div>
   if (!stats) return null
