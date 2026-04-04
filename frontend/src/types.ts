@@ -36,5 +36,17 @@ export interface SteamReview {
   total_reviews: number
 }
 
+export interface DiaryEntry {
+  id: number
+  game_id: number
+  game_name: string
+  game_cover_url: string | null
+  played_at: string
+  status: string
+  rating: number | null
+  note: string | null
+  created_at: string
+}
+
 export const GAME_STATUSES = ["Playing", "Completed", "Want to Play", "Dropped"] as const
 export type GameStatus = typeof GAME_STATUSES[number]

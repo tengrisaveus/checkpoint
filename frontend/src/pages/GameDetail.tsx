@@ -22,6 +22,8 @@ export default function GameDetail() {
   const [success, setSuccess] = useState("")
   const [error, setError] = useState("")
   const [existingEntry, setExistingEntry] = useState<LibraryEntry | null>(null)
+  const [diaryDate, setDiaryDate] = useState(new Date().toISOString().split("T")[0])
+  const [diaryNote, setDiaryNote] = useState("")
 
   useTitle(game?.name || "Loading...")
 
@@ -59,7 +61,6 @@ export default function GameDetail() {
           review: review || null,
         })
         setExistingEntry({ ...existingEntry, status, rating, review })
-        setSuccess("Updated!")
       } else {
         await api.post("/library", {
           game_id: Number(id),
@@ -67,10 +68,22 @@ export default function GameDetail() {
           rating: rating,
           review: review || null,
         })
-        setSuccess("Added to library!")
       }
+
+      if (diaryDate) {
+        await api.post("/diary", {
+          game_id: Number(id),
+          played_at: diaryDate,
+          status,
+          rating: rating,
+          note: diaryNote || null,
+        })
+      }
+
+      setSuccess(existingEntry ? "Updated & logged!" : "Added to library & diary!")
+      setDiaryNote("")
     } catch {
-      setError("Already in library or error occurred")
+      setError("Something went wrong")
     }
   }
 
@@ -152,6 +165,26 @@ export default function GameDetail() {
                 maxLength={2000}
                 className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 resize-none border border-slate-700"
               />
+
+              <div className="border-t border-slate-700 pt-4 mt-4">
+                <p className="text-slate-400 text-sm mb-3">Diary Entry (optional)</p>
+                <div className="space-y-3">
+                  <input
+                    type="date"
+                    value={diaryDate}
+                    onChange={(e) => setDiaryDate(e.target.value)}
+                    className="w-full p-3 rounded bg-slate-800 text-white outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
+                  />
+                  <textarea
+                    placeholder="Quick note (optional)"
+                    value={diaryNote}
+                    onChange={(e) => setDiaryNote(e.target.value)}
+                    rows={2}
+                    maxLength={500}
+                    className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 resize-none border border-slate-700"
+                  />
+                </div>
+              </div>
 
               <button
                 onClick={handleAddToLibrary}

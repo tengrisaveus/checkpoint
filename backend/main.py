@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from router_auth import router as auth_router
 from router_games import router as games_router
 from router_library import router as library_router
+from router_diary import router as diary_router
 
 app = FastAPI()
 
@@ -20,7 +21,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(games_router, prefix="/games", tags=["Games"])
 app.include_router(library_router, prefix="/library", tags=["Library"])
-
+app.include_router(diary_router, prefix="/diary", tags=["Diary"])
 
 @app.get("/")
 def root():
