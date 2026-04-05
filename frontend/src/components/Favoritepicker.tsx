@@ -8,7 +8,7 @@ interface LibraryEntryWithGame extends LibraryEntry {
 
 interface FavoritePickerProps {
   library: LibraryEntryWithGame[]
-  currentFavorites: number[]
+  currentFavorites: number[]  
   onSelect: (gameId: number) => void
   onClose: () => void
 }
