@@ -28,7 +28,7 @@ export default function Search() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-8">
+    <div className="min-h-screen bg-[#0d0015] p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-6">Search Games</h1>
 
@@ -38,12 +38,12 @@ export default function Search() {
             placeholder="Search for a game..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
+            className="flex-1 p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
             required
           />
           <button
             type="submit"
-            className="px-6 py-3 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+            className="px-6 py-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition"
           >
             Search
           </button>
@@ -60,16 +60,16 @@ export default function Search() {
             <div
               key={game.id}
               onClick={() => navigate(`/game/${game.id}`)}
-              className="bg-slate-900 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-red-500 transition border border-slate-800"
+              className="bg-[#1a0a2e] rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-fuchsia-500 transition border border-[#2d1b4e]"
             >
               {getCoverUrl(game) ? (
                 <img src={getCoverUrl(game)!} alt={game.name} className="w-full h-64 object-cover" />
               ) : (
-                <div className="w-full h-64 bg-slate-800 flex items-center justify-center text-slate-500">No Cover</div>
+                <div className="w-full h-64 bg-[#2d1b4e] flex items-center justify-center text-[#8a6baa]">No Cover</div>
               )}
               <div className="p-3">
                 <h3 className="text-white font-semibold text-sm truncate">{game.name}</h3>
-                <p className="text-slate-400 text-xs mt-1">
+                <p className="text-[#a78bba] text-xs mt-1">
                   {getYear(game.first_release_date)}
                   {game.genres && ` · ${game.genres.map(g => g.name).join(", ")}`}
                 </p>
@@ -79,7 +79,7 @@ export default function Search() {
         </div>
 
         {results.length === 0 && !loading && query && (
-          <p className="text-slate-400 text-center">No games found</p>
+          <p className="text-[#a78bba] text-center">No games found</p>
         )}
       </div>
     </div>

@@ -88,7 +88,7 @@ export default function GameDetail() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-slate-950 p-8">
+    <div className="min-h-screen bg-[#0d0015] p-8">
       <div className="max-w-4xl mx-auto">
         <DetailSkeleton />
       </div>
@@ -97,14 +97,14 @@ export default function GameDetail() {
   if (!game) return null
 
   return (
-    <div className="min-h-screen bg-slate-950 p-8">
+    <div className="min-h-screen bg-[#0d0015] p-8">
       {success && <Toast message={success} type="success" onClose={() => setSuccess("")} />}
       {error && <Toast message={error} type="error" onClose={() => setError("")} />}
 
       <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate(-1)}
-          className="text-slate-400 hover:text-white mb-6 inline-block"
+          className="text-[#a78bba] hover:text-white mb-6 inline-block"
         >
           ← Back
         </button>
@@ -113,28 +113,28 @@ export default function GameDetail() {
           {getCoverUrl(game) ? (
             <img src={getCoverUrl(game)!} alt={game.name} className="w-64 h-80 object-cover rounded-lg" />
           ) : (
-            <div className="w-64 h-80 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500">No Cover</div>
+            <div className="w-64 h-80 bg-[#2d1b4e] rounded-lg flex items-center justify-center text-[#8a6baa]">No Cover</div>
           )}
 
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-white">{game.name}</h1>
-            <p className="text-slate-400 mt-2">
+            <p className="text-[#a78bba] mt-2">
               {getYear(game.first_release_date)}
               {game.genres && ` · ${game.genres.map((g) => g.name).join(", ")}`}
             </p>
-            {game.platforms && <p className="text-slate-500 text-sm mt-1">{game.platforms.map((p) => p.name).join(", ")}</p>}
-            {game.involved_companies && <p className="text-slate-500 text-sm mt-1">{game.involved_companies.map((c) => c.company.name).join(", ")}</p>}
+            {game.platforms && <p className="text-[#8a6baa] text-sm mt-1">{game.platforms.map((p) => p.name).join(", ")}</p>}
+            {game.involved_companies && <p className="text-[#8a6baa] text-sm mt-1">{game.involved_companies.map((c) => c.company.name).join(", ")}</p>}
             {game.aggregated_rating && (
               <span className="inline-block mt-3 bg-green-400/20 text-green-400 px-3 py-1 rounded text-sm font-medium">
                 Critic: {game.aggregated_rating.toFixed(0)}/100
               </span>
             )}
-            {game.summary && <p className="text-slate-300 mt-4">{game.summary}</p>}
+            {game.summary && <p className="text-[#c4a8d8] mt-4">{game.summary}</p>}
           </div>
         </div>
 
         {user && (
-          <div className="bg-slate-900 rounded-lg p-6 mt-8 border border-slate-800">
+          <div className="bg-[#1a0a2e] rounded-lg p-6 mt-8 border border-[#2d1b4e]">
             <h2 className="text-xl font-semibold text-white mb-4">
               {existingEntry ? "In Your Library" : "Add to Library"}
             </h2>
@@ -143,7 +143,7 @@ export default function GameDetail() {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full p-3 rounded bg-slate-800 text-white outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
+                className="w-full p-3 rounded bg-[#2d1b4e] text-white outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
                 required
               >
                 <option value="">Select status</option>
@@ -153,7 +153,7 @@ export default function GameDetail() {
               </select>
 
               <div className="space-y-1">
-                <p className="text-slate-400 text-sm">Rating {rating ? `(${rating}/10)` : "(optional)"}</p>
+                <p className="text-[#a78bba] text-sm">Rating {rating ? `(${rating}/10)` : "(optional)"}</p>
                 <RatingSelector value={rating} onChange={setRating} />
               </div>
 
@@ -163,17 +163,17 @@ export default function GameDetail() {
                 onChange={(e) => setReview(e.target.value)}
                 rows={3}
                 maxLength={2000}
-                className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 resize-none border border-slate-700"
+                className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 resize-none border border-[#3d2b5e]"
               />
 
-              <div className="border-t border-slate-700 pt-4 mt-4">
-                <p className="text-slate-400 text-sm mb-3">Diary Entry (optional)</p>
+              <div className="border-t border-[#3d2b5e] pt-4 mt-4">
+                <p className="text-[#a78bba] text-sm mb-3">Diary Entry (optional)</p>
                 <div className="space-y-3">
                   <input
                     type="date"
                     value={diaryDate}
                     onChange={(e) => setDiaryDate(e.target.value)}
-                    className="w-full p-3 rounded bg-slate-800 text-white outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
+                    className="w-full p-3 rounded bg-[#2d1b4e] text-white outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
                   />
                   <textarea
                     placeholder="Quick note (optional)"
@@ -181,14 +181,14 @@ export default function GameDetail() {
                     onChange={(e) => setDiaryNote(e.target.value)}
                     rows={2}
                     maxLength={500}
-                    className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 resize-none border border-slate-700"
+                    className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 resize-none border border-[#3d2b5e]"
                   />
                 </div>
               </div>
 
               <button
                 onClick={handleAddToLibrary}
-                className="px-6 py-3 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                className="px-6 py-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition"
               >
                 {existingEntry ? "Update" : "Add to Library"}
               </button>
@@ -197,8 +197,8 @@ export default function GameDetail() {
         )}
 
         {!user && (
-          <p className="text-slate-400 mt-8 text-center">
-            <span onClick={() => navigate("/login")} className="text-red-400 hover:underline cursor-pointer">Login</span>
+          <p className="text-[#a78bba] mt-8 text-center">
+            <span onClick={() => navigate("/login")} className="text-fuchsia-400 hover:underline cursor-pointer">Login</span>
             {" "}to add this game to your library
           </p>
         )}

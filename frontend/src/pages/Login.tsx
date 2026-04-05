@@ -23,12 +23,12 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="bg-slate-900 p-8 rounded-lg w-full max-w-md border border-slate-800">
+    <div className="min-h-screen bg-[#0d0015] flex items-center justify-center">
+      <div className="bg-[#1a0a2e] p-8 rounded-lg w-full max-w-md border border-[#2d1b4e]">
         <h1 className="text-2xl font-bold text-white mb-6 text-center">Login</h1>
 
         {error && (
-          <p className="bg-red-500/20 text-red-400 p-3 rounded mb-4">{error}</p>
+          <p className="bg-fuchsia-500/20 text-fuchsia-400 p-3 rounded mb-4">{error}</p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -37,26 +37,26 @@ export default function Login() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
+            className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 rounded bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-red-500 border border-slate-700"
+            className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
           />
           <button
             type="submit"
-            className="w-full p-3 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+            className="w-full p-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition"
           >
             Login
           </button>
         </form>
 
-        <p className="text-slate-400 text-center mt-4">
+        <p className="text-[#a78bba] text-center mt-4">
           Don't have an account?{" "}
-          <Link to="/register" className="text-red-400 hover:underline">Register</Link>
+          <Link to="/register" className="text-fuchsia-400 hover:underline">Register</Link>
         </p>
       </div>
     </div>

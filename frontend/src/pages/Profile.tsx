@@ -77,18 +77,18 @@ export default function Profile() {
     }
   }
 
-  if (loading) return <div className="min-h-screen bg-slate-950 text-slate-400 p-8">Loading...</div>
+  if (loading) return <div className="min-h-screen bg-[#0d0015] text-[#a78bba] p-8">Loading...</div>
 
   const slots = [0, 1, 2, 3]
 
   return (
-    <div className="min-h-screen bg-slate-950 p-8">
+    <div className="min-h-screen bg-[#0d0015] p-8">
       {success && <Toast message={success} type="success" onClose={() => setSuccess("")} />}
       {error && <Toast message={error} type="error" onClose={() => setError("")} />}
 
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-2">{user?.username}</h1>
-        <p className="text-slate-400 mb-8">{stats?.total_games || 0} games in library</p>
+        <p className="text-[#a78bba] mb-8">{stats?.total_games || 0} games in library</p>
 
         {/* Favorite Games */}
         <div className="mb-10">
@@ -110,14 +110,14 @@ export default function Profile() {
                           className="w-full aspect-[3/4] object-cover rounded-lg"
                         />
                       ) : (
-                        <div className="w-full aspect-[3/4] bg-slate-800 rounded-lg flex items-center justify-center text-slate-500 text-sm">
+                        <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-lg flex items-center justify-center text-[#8a6baa] text-sm">
                           {fav.game_name}
                         </div>
                       )}
                     </div>
                     <button
                       onClick={() => handleRemoveFavorite(fav.game_id)}
-                      className="absolute top-2 right-2 bg-black/60 text-red-400 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-sm"
+                      className="absolute top-2 right-2 bg-black/60 text-fuchsia-400 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-sm"
                     >
                       ✕
                     </button>
@@ -129,7 +129,7 @@ export default function Profile() {
                 <button
                   key={`empty-${i}`}
                   onClick={() => setPickerOpen(true)}
-                  className="w-full aspect-[3/4] bg-slate-900 rounded-lg border-2 border-dashed border-slate-700 flex items-center justify-center text-slate-500 hover:border-red-500 hover:text-red-400 transition cursor-pointer"
+                  className="w-full aspect-[3/4] bg-[#1a0a2e] rounded-lg border-2 border-dashed border-[#3d2b5e] flex items-center justify-center text-[#8a6baa] hover:border-fuchsia-500 hover:text-fuchsia-400 transition cursor-pointer"
                 >
                   <span className="text-3xl">+</span>
                 </button>
@@ -141,28 +141,28 @@ export default function Profile() {
         {/* Quick Stats */}
         {stats && stats.total_games > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-slate-900 rounded-lg p-4 text-center border border-slate-800">
+            <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
               <p className="text-3xl font-bold text-white">{stats.total_games}</p>
-              <p className="text-slate-400 text-sm">Total Games</p>
+              <p className="text-[#a78bba] text-sm">Total Games</p>
             </div>
-            <div className="bg-slate-900 rounded-lg p-4 text-center border border-slate-800">
+            <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
               <p className="text-3xl font-bold text-green-400">{stats.by_status["Completed"] || 0}</p>
-              <p className="text-slate-400 text-sm">Completed</p>
+              <p className="text-[#a78bba] text-sm">Completed</p>
             </div>
-            <div className="bg-slate-900 rounded-lg p-4 text-center border border-slate-800">
+            <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
               <p className="text-3xl font-bold text-yellow-400">{stats.average_rating || "—"}</p>
-              <p className="text-slate-400 text-sm">Avg Rating</p>
+              <p className="text-[#a78bba] text-sm">Avg Rating</p>
             </div>
-            <div className="bg-slate-900 rounded-lg p-4 text-center border border-slate-800">
-              <p className="text-3xl font-bold text-red-400">{stats.rated_count}</p>
-              <p className="text-slate-400 text-sm">Rated</p>
+            <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
+              <p className="text-3xl font-bold text-fuchsia-400">{stats.rated_count}</p>
+              <p className="text-[#a78bba] text-sm">Rated</p>
             </div>
           </div>
         )}
 
         <button
           onClick={() => navigate("/stats")}
-          className="text-red-400 hover:underline text-sm"
+          className="text-fuchsia-400 hover:underline text-sm"
         >
           View detailed stats →
         </button>
