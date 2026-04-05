@@ -57,6 +57,7 @@ class UserGameResponse(BaseModel):
     review: str | None
     created_at: datetime
     updated_at: datetime
+    is_favorite: bool = False
 
     # from_attributes allows Pydantic to read values from SQLAlchemy model instances
     model_config = ConfigDict(from_attributes=True)

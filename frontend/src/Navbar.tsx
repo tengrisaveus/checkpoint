@@ -32,6 +32,12 @@ export default function Navbar() {
                 Stats
               </Link>
               <Link
+                to="/profile"
+                className="text-slate-400 hover:text-white transition"
+              >
+                Profile
+              </Link>
+              <Link
                 to="/diary"
                 className="text-slate-400 hover:text-white transition"
               >

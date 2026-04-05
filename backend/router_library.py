@@ -102,6 +102,47 @@ def get_stats(
         "reviewed_count": len(reviewed),
     }
 
+@router.get("/favorites", response_model=list[UserGameResponse])
+def get_favorites(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns the user's favorite games (max 4)."""
+    return (
+        db.query(UserGame)
+        .filter(UserGame.user_id == current_user.id, UserGame.is_favorite == True)
+        .all()
+    )
+
+
+@router.put("/favorites")
+def update_favorites(
+    game_ids: list[int],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Sets favorite games. Accepts a list of up to 4 game_ids."""
+    if len(game_ids) > 4:
+        raise HTTPException(status_code=400, detail="Maximum 4 favorites allowed")
+
+    # Clear existing favorites
+    db.query(UserGame).filter(
+        UserGame.user_id == current_user.id,
+        UserGame.is_favorite == True,
+    ).update({"is_favorite": False})
+
+    # Set new favorites
+    for gid in game_ids:
+        entry = db.query(UserGame).filter(
+            UserGame.user_id == current_user.id,
+            UserGame.game_id == gid,
+        ).first()
+        if entry:
+            entry.is_favorite = True  # type: ignore
+
+    db.commit()
+    return {"detail": "Favorites updated"}
+
 
 @router.put("/{game_id}", response_model=UserGameResponse)
 def update_game(
