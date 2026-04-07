@@ -26,12 +26,6 @@ export default function Navbar() {
                 My Library
               </Link>
               <Link
-                to="/stats"
-                className="text-[#a78bba] hover:text-white transition"
-              >
-                Stats
-              </Link>
-              <Link
                 to="/profile"
                 className="text-[#a78bba] hover:text-white transition"
               >

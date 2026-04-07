@@ -7,7 +7,6 @@ import Register from "./pages/Register";
 import Search from "./pages/Search";
 import GameDetail from "./pages/GameDetail";
 import Library from "./pages/Library";
-import Stats from "./pages/Stats";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./ProtectedRoute";
 import Diary from "./pages/Diary";
@@ -29,14 +28,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <Library />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/stats"
-            element={
-              <ProtectedRoute>
-                <Stats />
               </ProtectedRoute>
             }
           />

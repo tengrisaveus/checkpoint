@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import api from "../api"
 import { useAuth } from "../AuthContext"
 import type { LibraryEntry } from "../types"
@@ -19,6 +20,13 @@ interface StatsData {
   average_rating: number | null
   rated_count: number
   reviewed_count: number
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  "Playing": "#3b82f6",
+  "Completed": "#22c55e",
+  "Want to Play": "#eab308",
+  "Dropped": "#ef4444",
 }
 
 export default function Profile() {
@@ -80,6 +88,8 @@ export default function Profile() {
   if (loading) return <div className="min-h-screen bg-[#0d0015] text-[#a78bba] p-8">Loading...</div>
 
   const slots = [0, 1, 2, 3]
+  const pieData = stats ? Object.entries(stats.by_status).map(([name, value]) => ({ name, value })) : []
+  const barData = stats ? Object.entries(stats.by_status).map(([name, value]) => ({ name, count: value })) : []
 
   return (
     <div className="min-h-screen bg-[#0d0015] p-8">
@@ -129,7 +139,7 @@ export default function Profile() {
                 <button
                   key={`empty-${i}`}
                   onClick={() => setPickerOpen(true)}
-                  className="w-full aspect-[3/4] bg-[#1a0a2e] rounded-lg border-2 border-dashed border-[#3d2b5e] flex items-center justify-center text-[#8a6baa] hover:border-fuchsia-500 hover:text-fuchsia-400 transition cursor-pointer"
+                  className="w-full aspect-[3/4] bg-[#1a0a2e] rounded-lg border-2 border-dashed border-[#2d1b4e] flex items-center justify-center text-[#8a6baa] hover:border-fuchsia-500 hover:text-fuchsia-400 transition cursor-pointer"
                 >
                   <span className="text-3xl">+</span>
                 </button>
@@ -138,34 +148,79 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Stats Cards */}
         {stats && stats.total_games > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
-              <p className="text-3xl font-bold text-white">{stats.total_games}</p>
-              <p className="text-[#a78bba] text-sm">Total Games</p>
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
+                <p className="text-3xl font-bold text-white">{stats.total_games}</p>
+                <p className="text-[#a78bba] text-sm">Total Games</p>
+              </div>
+              <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
+                <p className="text-3xl font-bold text-green-400">{stats.by_status["Completed"] || 0}</p>
+                <p className="text-[#a78bba] text-sm">Completed</p>
+              </div>
+              <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
+                <p className="text-3xl font-bold text-yellow-400">{stats.average_rating || "—"}</p>
+                <p className="text-[#a78bba] text-sm">Avg Rating</p>
+              </div>
+              <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
+                <p className="text-3xl font-bold text-fuchsia-400">{stats.rated_count}</p>
+                <p className="text-[#a78bba] text-sm">Rated</p>
+              </div>
             </div>
-            <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
-              <p className="text-3xl font-bold text-green-400">{stats.by_status["Completed"] || 0}</p>
-              <p className="text-[#a78bba] text-sm">Completed</p>
+
+            {/* Charts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-[#1a0a2e] rounded-lg p-6 border border-[#2d1b4e]">
+                <h2 className="text-lg font-semibold text-white mb-4">Status Distribution</h2>
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                    >
+                      {pieData.map((entry) => (
+                        <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || "#6b7280"} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-[#1a0a2e] rounded-lg p-6 border border-[#2d1b4e]">
+                <h2 className="text-lg font-semibold text-white mb-4">Games by Status</h2>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={barData}>
+                    <XAxis dataKey="name" tick={{ fill: "#a78bba", fontSize: 12 }} />
+                    <YAxis tick={{ fill: "#a78bba" }} allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                      {barData.map((entry) => (
+                        <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || "#6b7280"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-            <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
-              <p className="text-3xl font-bold text-yellow-400">{stats.average_rating || "—"}</p>
-              <p className="text-[#a78bba] text-sm">Avg Rating</p>
-            </div>
-            <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
-              <p className="text-3xl font-bold text-fuchsia-400">{stats.rated_count}</p>
-              <p className="text-[#a78bba] text-sm">Rated</p>
-            </div>
-          </div>
+          </>
         )}
 
-        <button
-          onClick={() => navigate("/stats")}
-          className="text-fuchsia-400 hover:underline text-sm"
-        >
-          View detailed stats →
-        </button>
+        {stats && stats.total_games === 0 && (
+          <p className="text-[#a78bba] text-center">
+            No games in library yet.
+            <span onClick={() => navigate("/search")} className="text-fuchsia-400 hover:underline cursor-pointer ml-1">
+              Search for games
+            </span>
+          </p>
+        )}
       </div>
 
       {pickerOpen && (
