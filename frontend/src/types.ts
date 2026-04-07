@@ -17,6 +17,9 @@ export interface Game {
   storyline?: string
   rating?: number
   aggregated_rating?: number
+  screenshots?: { url: string }[]
+  artworks?: { url: string }[]
+  websites?: { url: string; category: number }[]
 }
 
 export interface LibraryEntry {

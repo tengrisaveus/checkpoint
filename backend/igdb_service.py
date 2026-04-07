@@ -91,5 +91,5 @@ async def get_game_detail(game_id: int):
     """Fetches full details of a specific game from IGDB."""
     return await igdb_request(
         "games",
-        f"fields name, cover.url, first_release_date, summary, storyline, genres.name, platforms.name, involved_companies.company.name, rating, aggregated_rating; where id = {game_id};",
+        f"fields name, cover.url, first_release_date, summary, storyline, genres.name, platforms.abbreviation, platforms.name, involved_companies.company.name, rating, aggregated_rating, screenshots.url, artworks.url, websites.url, websites.category; where id = {game_id};",
     )
