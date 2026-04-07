@@ -11,6 +11,8 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./ProtectedRoute";
 import Diary from "./pages/Diary";
 import Profile from "./pages/Profile";
+import Lists from "./pages/Lists";
+import ListDetail from "./pages/ListDetail";
 
 function App() {
   return (
@@ -44,6 +46,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Diary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lists"
+            element={
+              <ProtectedRoute>
+                <Lists />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lists/:id"
+            element={
+              <ProtectedRoute>
+                <ListDetail />
               </ProtectedRoute>
             }
           />

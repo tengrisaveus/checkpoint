@@ -9,7 +9,11 @@ export default function Navbar() {
       <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center">
-            <img src="/checkpoint-logo-navbar.png" alt="Checkpoint" className="h-8" />
+            <img
+              src="/checkpoint-logo-navbar.png"
+              alt="Checkpoint"
+              className="h-8"
+            />
           </Link>
           <Link
             to="/search"
@@ -36,6 +40,12 @@ export default function Navbar() {
                 className="text-[#a78bba] hover:text-white transition"
               >
                 Diary
+              </Link>
+              <Link
+                to="/lists"
+                className="text-[#a78bba] hover:text-white transition"
+              >
+                Lists
               </Link>
             </>
           )}

@@ -10,7 +10,7 @@ export interface Game {
   name: string
   cover?: { url: string }
   genres?: { name: string }[]
-  platforms?: { name: string }[]
+  platforms?: { name: string; abbreviation?: string }[]
   involved_companies?: { company: { name: string } }[]
   first_release_date?: number
   summary?: string
@@ -49,6 +49,25 @@ export interface DiaryEntry {
   rating: number | null
   note: string | null
   created_at: string
+}
+
+export interface GameListItem {
+  id: number
+  game_id: number
+  game_name: string
+  game_cover_url: string | null
+  note: string | null
+  position: number
+  created_at: string
+}
+
+export interface GameList {
+  id: number
+  name: string
+  description: string | null
+  created_at: string
+  updated_at: string
+  items?: GameListItem[]
 }
 
 export const GAME_STATUSES = ["Playing", "Completed", "Want to Play", "Dropped"] as const
