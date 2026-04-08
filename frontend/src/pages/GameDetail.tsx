@@ -133,7 +133,7 @@ export default function GameDetail() {
 
       {/* Backdrop */}
       {backdrop && (
-        <div className="relative h-72 md:h-96 overflow-hidden">
+        <div className="relative h-48 md:h-96 overflow-hidden">
           <img src={backdrop} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0d0015] via-[#0d0015]/60 to-transparent" />
         </div>
