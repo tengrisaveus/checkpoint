@@ -55,6 +55,37 @@ def get_diary(
         .all()
     )
 
+@router.get("/monthly")
+def get_monthly_activity(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns monthly diary activity for the last 6 months."""
+    from datetime import date, timedelta
+
+    entries = (
+        db.query(DiaryEntry)
+        .filter(DiaryEntry.user_id == current_user.id)
+        .order_by(DiaryEntry.played_at.desc())
+        .all()
+    )
+
+    monthly: dict[str, int] = {}
+    for entry in entries:
+        month_key = entry.played_at.strftime("%Y-%m")  # type: ignore
+        monthly[month_key] = monthly.get(month_key, 0) + 1
+
+    # Last 6 months
+    today = date.today()
+    result = []
+    for i in range(5, -1, -1):
+        d = today.replace(day=1) - timedelta(days=i * 30)
+        key = d.strftime("%Y-%m")
+        label = d.strftime("%b")
+        result.append({"month": key, "label": label, "count": monthly.get(key, 0)})
+
+    return result
+
 
 @router.delete("/{entry_id}")
 def delete_diary_entry(

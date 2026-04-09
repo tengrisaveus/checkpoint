@@ -13,19 +13,28 @@ interface LibraryEntryWithGame {
   rating: number | null
 }
 
+interface StatsData {
+  total_games: number
+  by_status: Record<string, number>
+  average_rating: number | null
+  completion_ratio: number
+}
+
 export default function Home() {
   const { user, loading, login } = useAuth()
   const navigate = useNavigate()
   const [recentGames, setRecentGames] = useState<LibraryEntryWithGame[]>([])
   const [recentDiary, setRecentDiary] = useState<DiaryEntry[]>([])
+  const [stats, setStats] = useState<StatsData | null>(null)
   const [demoLoading, setDemoLoading] = useState(false)
 
   useTitle(user ? "Home" : "Checkpoint — Track Your Games")
 
   useEffect(() => {
     if (!user) return
-    api.get("/library").then((res) => setRecentGames(res.data.slice(0, 6))).catch(() => {})
-    api.get("/diary").then((res) => setRecentDiary(res.data.slice(0, 5))).catch(() => {})
+    api.get("/library").then((res) => setRecentGames(res.data.slice(0, 8))).catch(() => {})
+    api.get("/diary").then((res) => setRecentDiary(res.data.slice(0, 4))).catch(() => {})
+    api.get("/library/stats").then((res) => setStats(res.data)).catch(() => {})
   }, [user])
 
   const handleDemo = async () => {
@@ -43,10 +52,7 @@ export default function Home() {
   }
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    })
+    return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" })
   }
 
   if (loading) return null
@@ -64,44 +70,34 @@ export default function Home() {
             Keep a record of every game you play. Rate, review, and see your stats — all in one place.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <button
-              onClick={() => navigate("/register")}
-              className="px-8 py-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition text-lg"
-            >
+            <button onClick={() => navigate("/register")} className="px-8 py-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition text-lg">
               Get Started
             </button>
-            <button
-              onClick={() => navigate("/search")}
-              className="px-8 py-3 rounded bg-[#2d1b4e] text-[#c4a8d8] font-semibold hover:bg-[#3d2b5e] transition text-lg border border-[#3d2b5e]"
-            >
+            <button onClick={() => navigate("/search")} className="px-8 py-3 rounded bg-[#2d1b4e] text-[#c4a8d8] font-semibold hover:bg-[#3d2b5e] transition text-lg border border-[#3d2b5e]">
               Browse Games
             </button>
-            <button
-              onClick={handleDemo}
-              disabled={demoLoading}
-              className="px-8 py-3 rounded bg-[#1a0a2e] text-fuchsia-400 font-semibold hover:text-fuchsia-300 transition text-lg border border-fuchsia-500/50"
-            >
+            <button onClick={handleDemo} disabled={demoLoading} className="px-8 py-3 rounded bg-[#1a0a2e] text-fuchsia-400 font-semibold hover:text-fuchsia-300 transition text-lg border border-fuchsia-500/50">
               {demoLoading ? "Logging in..." : "Try Demo"}
             </button>
           </div>
         </div>
 
         <div className="max-w-4xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-[#1a0a2e] rounded-lg p-6 border border-[#2d1b4e] text-center">
-              <div className="text-4xl mb-4">🔍</div>
-              <h3 className="text-white font-semibold text-lg mb-2">Search</h3>
-              <p className="text-[#a78bba] text-sm">Browse thousands of games from the IGDB database</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-[#1a0a2e] rounded-xl p-6 border border-[#2d1b4e]/50 text-center">
+              <div className="text-3xl mb-3">🔍</div>
+              <h3 className="text-white font-medium text-base mb-2">Search</h3>
+              <p className="text-[#8a6baa] text-sm">Browse thousands of games from the IGDB database</p>
             </div>
-            <div className="bg-[#1a0a2e] rounded-lg p-6 border border-[#2d1b4e] text-center">
-              <div className="text-4xl mb-4">📚</div>
-              <h3 className="text-white font-semibold text-lg mb-2">Track</h3>
-              <p className="text-[#a78bba] text-sm">Mark games as Playing, Completed, Want to Play, or Dropped</p>
+            <div className="bg-[#1a0a2e] rounded-xl p-6 border border-[#2d1b4e]/50 text-center">
+              <div className="text-3xl mb-3">📚</div>
+              <h3 className="text-white font-medium text-base mb-2">Track</h3>
+              <p className="text-[#8a6baa] text-sm">Mark games as Playing, Completed, Want to Play, or Dropped</p>
             </div>
-            <div className="bg-[#1a0a2e] rounded-lg p-6 border border-[#2d1b4e] text-center">
-              <div className="text-4xl mb-4">📊</div>
-              <h3 className="text-white font-semibold text-lg mb-2">Stats</h3>
-              <p className="text-[#a78bba] text-sm">See your gaming statistics with charts and insights</p>
+            <div className="bg-[#1a0a2e] rounded-xl p-6 border border-[#2d1b4e]/50 text-center">
+              <div className="text-3xl mb-3">📊</div>
+              <h3 className="text-white font-medium text-base mb-2">Stats</h3>
+              <p className="text-[#8a6baa] text-sm">See your gaming statistics with charts and insights</p>
             </div>
           </div>
         </div>
@@ -110,40 +106,69 @@ export default function Home() {
   }
 
   // Logged in — dashboard
+  const completionDash = stats ? 163.36 - (163.36 * stats.completion_ratio / 100) : 163.36
+
   return (
     <div className="min-h-screen bg-[#0d0015] p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-2">Welcome back, {user.username}</h1>
-        <p className="text-[#a78bba] mb-8">Here's your gaming activity</p>
+
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-full bg-[#2d1b4e] flex items-center justify-center text-2xl font-medium text-fuchsia-400">
+            {user.username?.[0]?.toUpperCase()}
+          </div>
+          <div>
+            <h1 className="text-2xl font-medium text-white">Welcome back, {user.username}</h1>
+            <p className="text-[#8a6baa] text-sm">Here's your gaming activity</p>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        {stats && stats.total_games > 0 && (
+          <div className="grid grid-cols-4 gap-3 mb-8">
+            <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 flex items-center gap-3">
+              <div className="relative w-12 h-12 shrink-0">
+                <svg viewBox="0 0 64 64" className="w-12 h-12 -rotate-90">
+                  <circle cx="32" cy="32" r="26" fill="none" stroke="#2d1b4e" strokeWidth="5" />
+                  <circle cx="32" cy="32" r="26" fill="none" stroke="#22c55e" strokeWidth="5" strokeDasharray="163.36" strokeDashoffset={completionDash} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-medium">{stats.completion_ratio}%</div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">{stats.by_status["Completed"] || 0}/{stats.total_games}</p>
+                <p className="text-[11px] text-[#8a6baa]">Completed</p>
+              </div>
+            </div>
+            <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center flex flex-col justify-center">
+              <p className="text-2xl font-medium text-yellow-400">{stats.average_rating || "—"}</p>
+              <p className="text-[11px] text-[#8a6baa]">Avg rating</p>
+            </div>
+            <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center flex flex-col justify-center">
+              <p className="text-2xl font-medium text-blue-400">{stats.by_status["Playing"] || 0}</p>
+              <p className="text-[11px] text-[#8a6baa]">Playing</p>
+            </div>
+            <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center flex flex-col justify-center">
+              <p className="text-2xl font-medium text-fuchsia-400">{stats.total_games}</p>
+              <p className="text-[11px] text-[#8a6baa]">Total games</p>
+            </div>
+          </div>
+        )}
 
         {/* Recent Library */}
         {recentGames.length > 0 && (
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Your Library</h2>
-              <button onClick={() => navigate("/library")} className="text-fuchsia-400 hover:text-fuchsia-300 text-sm transition">
-                View all →
-              </button>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[15px] font-medium text-white">Your library</h2>
+              <button onClick={() => navigate("/library")} className="text-fuchsia-400 hover:text-fuchsia-300 text-[12px] transition">View all →</button>
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
               {recentGames.map((game) => (
-                <div
-                  key={game.game_id}
-                  onClick={() => navigate(`/game/${game.game_id}`)}
-                  className="cursor-pointer group"
-                >
+                <div key={game.game_id} onClick={() => navigate(`/game/${game.game_id}`)} className="cursor-pointer group">
                   {getCoverUrl(game.game_cover_url) ? (
-                    <img
-                      src={getCoverUrl(game.game_cover_url)!}
-                      alt={game.game_name}
-                      className="w-full aspect-[3/4] object-cover rounded-lg group-hover:ring-2 group-hover:ring-fuchsia-500 transition"
-                    />
+                    <img src={getCoverUrl(game.game_cover_url)!} alt={game.game_name} className="w-full aspect-[3/4] object-cover rounded-lg group-hover:ring-2 group-hover:ring-fuchsia-500 transition" />
                   ) : (
-                    <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-lg flex items-center justify-center text-[#8a6baa] text-xs text-center p-1">
-                      {game.game_name}
-                    </div>
+                    <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-lg flex items-center justify-center text-[#8a6baa] text-[10px] text-center p-1">{game.game_name}</div>
                   )}
-                  <p className="text-white text-xs mt-1 truncate">{game.game_name}</p>
                 </div>
               ))}
             </div>
@@ -152,33 +177,27 @@ export default function Home() {
 
         {/* Recent Diary */}
         {recentDiary.length > 0 && (
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Recent Diary</h2>
-              <button onClick={() => navigate("/diary")} className="text-fuchsia-400 hover:text-fuchsia-300 text-sm transition">
-                View all →
-              </button>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[15px] font-medium text-white">Recent diary</h2>
+              <button onClick={() => navigate("/diary")} className="text-fuchsia-400 hover:text-fuchsia-300 text-[12px] transition">View all →</button>
             </div>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {recentDiary.map((entry) => (
-                <div
-                  key={entry.id}
-                  onClick={() => navigate(`/game/${entry.game_id}`)}
-                  className="bg-[#1a0a2e] rounded-lg p-3 flex items-center gap-3 border border-[#2d1b4e] cursor-pointer hover:border-fuchsia-500/30 transition"
-                >
+                <div key={entry.id} onClick={() => navigate(`/game/${entry.game_id}`)} className="bg-[#1a0a2e] rounded-xl p-3 flex items-center gap-3 border border-[#2d1b4e]/50 cursor-pointer hover:border-fuchsia-500/30 transition">
                   {getCoverUrl(entry.game_cover_url) ? (
-                    <img src={getCoverUrl(entry.game_cover_url)!} alt={entry.game_name} className="w-10 h-14 object-cover rounded" />
+                    <img src={getCoverUrl(entry.game_cover_url)!} alt={entry.game_name} className="w-10 h-14 object-cover rounded-lg" />
                   ) : (
-                    <div className="w-10 h-14 bg-[#2d1b4e] rounded" />
+                    <div className="w-10 h-14 bg-[#2d1b4e] rounded-lg" />
                   )}
-                  <div className="flex-1">
-                    <p className="text-white text-sm font-medium">{entry.game_name}</p>
-                    <p className="text-[#8a6baa] text-xs">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{entry.game_name}</p>
+                    <p className="text-[#8a6baa] text-[11px]">
                       {formatDate(entry.played_at)} · {entry.status}
                       {entry.rating && ` · ★ ${entry.rating}`}
                     </p>
+                    {entry.note && <p className="text-[#8a6baa] text-[11px] truncate mt-0.5">{entry.note}</p>}
                   </div>
-                  {entry.note && <p className="text-[#8a6baa] text-xs hidden md:block max-w-[200px] truncate">{entry.note}</p>}
                 </div>
               ))}
             </div>
@@ -186,32 +205,21 @@ export default function Home() {
         )}
 
         {/* Quick Links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button
-            onClick={() => navigate("/search")}
-            className="bg-[#1a0a2e] rounded-lg p-4 border border-[#2d1b4e] text-center hover:border-fuchsia-500/30 transition"
-          >
+        <h2 className="text-[15px] font-medium text-white mb-3">Quick links</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <button onClick={() => navigate("/search")} className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center hover:border-fuchsia-500/30 transition">
             <div className="text-2xl mb-2">🔍</div>
-            <p className="text-white text-sm font-medium">Search Games</p>
+            <p className="text-white text-sm font-medium">Search</p>
           </button>
-          <button
-            onClick={() => navigate("/profile")}
-            className="bg-[#1a0a2e] rounded-lg p-4 border border-[#2d1b4e] text-center hover:border-fuchsia-500/30 transition"
-          >
+          <button onClick={() => navigate("/profile")} className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center hover:border-fuchsia-500/30 transition">
             <div className="text-2xl mb-2">👤</div>
             <p className="text-white text-sm font-medium">Profile</p>
           </button>
-          <button
-            onClick={() => navigate("/diary")}
-            className="bg-[#1a0a2e] rounded-lg p-4 border border-[#2d1b4e] text-center hover:border-fuchsia-500/30 transition"
-          >
+          <button onClick={() => navigate("/diary")} className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center hover:border-fuchsia-500/30 transition">
             <div className="text-2xl mb-2">📖</div>
             <p className="text-white text-sm font-medium">Diary</p>
           </button>
-          <button
-            onClick={() => navigate("/lists")}
-            className="bg-[#1a0a2e] rounded-lg p-4 border border-[#2d1b4e] text-center hover:border-fuchsia-500/30 transition"
-          >
+          <button onClick={() => navigate("/lists")} className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center hover:border-fuchsia-500/30 transition">
             <div className="text-2xl mb-2">📋</div>
             <p className="text-white text-sm font-medium">Lists</p>
           </button>

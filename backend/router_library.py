@@ -37,11 +37,16 @@ async def add_game(
         # IGDB returns thumbnail URLs (t_thumb); upgrade to full cover size (t_cover_big)
         cover_url = game_info["cover"]["url"].replace("t_thumb", "t_cover_big")
 
+    genres_str = None
+    if game_info.get("genres"):
+        genres_str = ", ".join(g["name"] for g in game_info["genres"])
+
     new_entry = UserGame(
         user_id=current_user.id,
         game_id=game_data.game_id,
         game_name=game_info["name"],
         game_cover_url=cover_url,
+        game_genres=genres_str,
         status=game_data.status.value,
         rating=game_data.rating,
         review=game_data.review,
@@ -70,7 +75,7 @@ def get_stats(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Returns aggregate stats for the user's library: totals, status breakdown, ratings, and reviews."""
+    """Returns aggregate stats for the user's library."""
     entries = db.query(UserGame).filter(UserGame.user_id == current_user.id).all()
 
     if not entries:
@@ -80,6 +85,8 @@ def get_stats(
             "average_rating": None,
             "rated_count": 0,
             "reviewed_count": 0,
+            "completion_ratio": 0,
+            "top_genres": [],
         }
 
     total = len(entries)
@@ -90,9 +97,24 @@ def get_stats(
         by_status[status] = by_status.get(status, 0) + 1
 
     rated = [e for e in entries if e.rating is not None]
-    avg_rating = round(sum(float(e.rating) for e in rated) / len(rated), 1) if rated else None #type: ignore
+    avg_rating = round(sum(float(e.rating) for e in rated) / len(rated), 1) if rated else None  # type: ignore
 
-    reviewed = [e for e in entries if e.review] #type: ignore
+    reviewed = [e for e in entries if e.review]  # type: ignore
+
+    completed = by_status.get("Completed", 0)
+    completion_ratio = round(completed / total * 100) if total > 0 else 0
+
+    # Top genres
+    genre_count: dict[str, int] = {}
+    for entry in entries:
+        genres = str(entry.game_genres) if entry.game_genres is not None else ""
+        for genre in genres.split(", "):
+            genre = genre.strip()
+            if genre:
+                genre_count[genre] = genre_count.get(genre, 0) + 1
+
+    top_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_genres_list = [{"name": name, "count": count} for name, count in top_genres]
 
     return {
         "total_games": total,
@@ -100,6 +122,8 @@ def get_stats(
         "average_rating": avg_rating,
         "rated_count": len(rated),
         "reviewed_count": len(reviewed),
+        "completion_ratio": completion_ratio,
+        "top_genres": top_genres_list,
     }
 
 @router.get("/favorites", response_model=list[UserGameResponse])

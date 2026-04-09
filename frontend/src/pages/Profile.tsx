@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import api from "../api"
 import { useAuth } from "../AuthContext"
 import type { LibraryEntry } from "../types"
@@ -20,11 +19,19 @@ interface StatsData {
   average_rating: number | null
   rated_count: number
   reviewed_count: number
+  completion_ratio: number
+  top_genres: { name: string; count: number }[]
+}
+
+interface MonthlyData {
+  month: string
+  label: string
+  count: number
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  "Playing": "#3b82f6",
   "Completed": "#22c55e",
+  "Playing": "#3b82f6",
   "Want to Play": "#eab308",
   "Dropped": "#ef4444",
 }
@@ -36,6 +43,7 @@ export default function Profile() {
   const [library, setLibrary] = useState<LibraryEntryWithGame[]>([])
   const [favorites, setFavorites] = useState<LibraryEntryWithGame[]>([])
   const [stats, setStats] = useState<StatsData | null>(null)
+  const [monthly, setMonthly] = useState<MonthlyData[]>([])
   const [loading, setLoading] = useState(true)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [success, setSuccess] = useState("")
@@ -46,11 +54,13 @@ export default function Profile() {
       api.get("/library"),
       api.get("/library/favorites"),
       api.get("/library/stats"),
+      api.get("/diary/monthly"),
     ])
-      .then(([libRes, favRes, statsRes]) => {
+      .then(([libRes, favRes, statsRes, monthlyRes]) => {
         setLibrary(libRes.data)
         setFavorites(favRes.data)
         setStats(statsRes.data)
+        setMonthly(monthlyRes.data)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -88,8 +98,8 @@ export default function Profile() {
   if (loading) return <div className="min-h-screen bg-[#0d0015] text-[#a78bba] p-8">Loading...</div>
 
   const slots = [0, 1, 2, 3]
-  const pieData = stats ? Object.entries(stats.by_status).map(([name, value]) => ({ name, value })) : []
-  const barData = stats ? Object.entries(stats.by_status).map(([name, value]) => ({ name, count: value })) : []
+  const maxMonthly = Math.max(...monthly.map((m) => m.count), 1)
+  const completionDash = stats ? 163.36 - (163.36 * stats.completion_ratio / 100) : 163.36
 
   return (
     <div className="min-h-screen bg-[#0d0015] p-8">
@@ -97,128 +107,156 @@ export default function Profile() {
       {error && <Toast message={error} type="error" onClose={() => setError("")} />}
 
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-2">{user?.username}</h1>
-        <p className="text-[#a78bba] mb-8">{stats?.total_games || 0} games in library</p>
 
-        {/* Favorite Games */}
-        <div className="mb-10">
-          <h2 className="text-lg font-semibold text-white mb-4">Favorite Games</h2>
-          <div className="grid grid-cols-4 gap-4">
-            {slots.map((i) => {
-              const fav = favorites[i]
-              if (fav) {
-                return (
-                  <div key={fav.game_id} className="relative group">
-                    <div
-                      onClick={() => navigate(`/game/${fav.game_id}`)}
-                      className="cursor-pointer"
-                    >
-                      {getCoverUrl(fav.game_cover_url) ? (
-                        <img
-                          src={getCoverUrl(fav.game_cover_url)!}
-                          alt={fav.game_name}
-                          className="w-full aspect-[3/4] object-cover rounded-lg"
-                        />
-                      ) : (
-                        <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-lg flex items-center justify-center text-[#8a6baa] text-sm">
-                          {fav.game_name}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleRemoveFavorite(fav.game_id)}
-                      className="absolute top-2 right-2 bg-black/60 text-fuchsia-400 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-sm"
-                    >
-                      ✕
-                    </button>
-                    <p className="text-white text-sm mt-2 truncate">{fav.game_name}</p>
-                  </div>
-                )
-              }
-              return (
-                <button
-                  key={`empty-${i}`}
-                  onClick={() => setPickerOpen(true)}
-                  className="w-full aspect-[3/4] bg-[#1a0a2e] rounded-lg border-2 border-dashed border-[#2d1b4e] flex items-center justify-center text-[#8a6baa] hover:border-fuchsia-500 hover:text-fuchsia-400 transition cursor-pointer"
-                >
-                  <span className="text-3xl">+</span>
-                </button>
-              )
-            })}
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-full bg-[#2d1b4e] flex items-center justify-center text-2xl font-medium text-fuchsia-400">
+            {user?.username?.[0]?.toUpperCase()}
+          </div>
+          <div>
+            <h1 className="text-2xl font-medium text-white">{user?.username}</h1>
+            <p className="text-[#8a6baa] text-sm">{stats?.total_games || 0} games in library</p>
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Favorites */}
+        <h2 className="text-[15px] font-medium text-white mb-3">Favorite games</h2>
+        <div className="grid grid-cols-4 gap-3 mb-8">
+          {slots.map((i) => {
+            const fav = favorites[i]
+            if (fav) {
+              return (
+                <div key={fav.game_id}>
+                  <div className="relative group">
+                    <div onClick={() => navigate(`/game/${fav.game_id}`)} className="cursor-pointer">
+                      {getCoverUrl(fav.game_cover_url) ? (
+                        <img src={getCoverUrl(fav.game_cover_url)!} alt={fav.game_name} className="w-full aspect-[3/4] object-cover rounded-[10px]" />
+                      ) : (
+                        <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-[10px] flex items-center justify-center text-[#8a6baa] text-sm">{fav.game_name}</div>
+                      )}
+                    </div>
+                    <button onClick={() => handleRemoveFavorite(fav.game_id)} className="absolute top-2 right-2 bg-black/60 text-fuchsia-400 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-sm">✕</button>
+                  </div>
+                  <p className="text-[11px] text-[#c4a8d8] mt-1.5 truncate">{fav.game_name}</p>
+                </div>
+              )
+            }
+            return (
+              <div key={`empty-${i}`}>
+                <button onClick={() => setPickerOpen(true)} className="w-full aspect-[3/4] bg-[#1a0a2e] rounded-[10px] border-2 border-dashed border-[#2d1b4e] flex items-center justify-center text-[#8a6baa] hover:border-fuchsia-500 hover:text-fuchsia-400 transition cursor-pointer text-2xl">+</button>
+              </div>
+            )
+          })}
+        </div>
+
         {stats && stats.total_games > 0 && (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
-                <p className="text-3xl font-bold text-white">{stats.total_games}</p>
-                <p className="text-[#a78bba] text-sm">Total Games</p>
+            {/* Completion + Avg Rating */}
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="col-span-2 bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-16 h-16 shrink-0">
+                    <svg viewBox="0 0 64 64" className="w-16 h-16 -rotate-90">
+                      <circle cx="32" cy="32" r="26" fill="none" stroke="#2d1b4e" strokeWidth="6" />
+                      <circle cx="32" cy="32" r="26" fill="none" stroke="#22c55e" strokeWidth="6" strokeDasharray="163.36" strokeDashoffset={completionDash} strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center text-white font-medium">{stats.completion_ratio}%</div>
+                  </div>
+                  <div>
+                    <p className="text-[12px] text-[#8a6baa]">Completion rate</p>
+                    <p className="text-[13px] text-[#a78bba] mt-1">{stats.by_status["Completed"] || 0} of {stats.total_games} games completed</p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
-                <p className="text-3xl font-bold text-green-400">{stats.by_status["Completed"] || 0}</p>
-                <p className="text-[#a78bba] text-sm">Completed</p>
-              </div>
-              <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
-                <p className="text-3xl font-bold text-yellow-400">{stats.average_rating || "—"}</p>
-                <p className="text-[#a78bba] text-sm">Avg Rating</p>
-              </div>
-              <div className="bg-[#1a0a2e] rounded-lg p-4 text-center border border-[#2d1b4e]">
-                <p className="text-3xl font-bold text-fuchsia-400">{stats.rated_count}</p>
-                <p className="text-[#a78bba] text-sm">Rated</p>
+              <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 flex flex-col items-center justify-center">
+                <p className="text-3xl font-medium text-yellow-400">{stats.average_rating || "—"}</p>
+                <p className="text-[12px] text-[#8a6baa]">Avg rating</p>
               </div>
             </div>
 
-            {/* Charts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-[#1a0a2e] rounded-lg p-6 border border-[#2d1b4e]">
-                <h2 className="text-lg font-semibold text-white mb-4">Status Distribution</h2>
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
-                    >
-                      {pieData.map((entry) => (
-                        <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || "#6b7280"} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+            {/* Small stat cards */}
+            <div className="grid grid-cols-4 gap-3 mb-8">
+              <div className="bg-[#1a0a2e] rounded-xl p-3 border border-[#2d1b4e]/50 text-center">
+                <p className="text-xl font-medium text-white">{stats.total_games}</p>
+                <p className="text-[11px] text-[#8a6baa]">Total</p>
               </div>
-
-              <div className="bg-[#1a0a2e] rounded-lg p-6 border border-[#2d1b4e]">
-                <h2 className="text-lg font-semibold text-white mb-4">Games by Status</h2>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={barData}>
-                    <XAxis dataKey="name" tick={{ fill: "#a78bba", fontSize: 12 }} />
-                    <YAxis tick={{ fill: "#a78bba" }} allowDecimals={false} />
-                    <Tooltip />
-                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                      {barData.map((entry) => (
-                        <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || "#6b7280"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="bg-[#1a0a2e] rounded-xl p-3 border border-[#2d1b4e]/50 text-center">
+                <p className="text-xl font-medium text-green-400">{stats.by_status["Completed"] || 0}</p>
+                <p className="text-[11px] text-[#8a6baa]">Completed</p>
+              </div>
+              <div className="bg-[#1a0a2e] rounded-xl p-3 border border-[#2d1b4e]/50 text-center">
+                <p className="text-xl font-medium text-blue-400">{stats.by_status["Playing"] || 0}</p>
+                <p className="text-[11px] text-[#8a6baa]">Playing</p>
+              </div>
+              <div className="bg-[#1a0a2e] rounded-xl p-3 border border-[#2d1b4e]/50 text-center">
+                <p className="text-xl font-medium text-red-400">{stats.by_status["Dropped"] || 0}</p>
+                <p className="text-[11px] text-[#8a6baa]">Dropped</p>
               </div>
             </div>
+
+            {/* Top Genres */}
+            {stats.top_genres.length > 0 && (
+              <>
+                <h2 className="text-[15px] font-medium text-white mb-3">Top genres</h2>
+                <div className="flex gap-2 flex-wrap mb-8">
+                  {stats.top_genres.map((genre) => (
+                    <span key={genre.name} className="px-3 py-1.5 rounded-full bg-[#1a0a2e] border border-[#2d1b4e]/50 text-[12px] text-[#c4a8d8]">
+                      {genre.name} <span className="text-fuchsia-400 font-medium">{genre.count}</span>
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Status Breakdown */}
+            <h2 className="text-[15px] font-medium text-white mb-3">Status breakdown</h2>
+            <div className="bg-[#1a0a2e] rounded-xl p-5 border border-[#2d1b4e]/50 mb-8">
+              {Object.entries(stats.by_status).map(([status, count]) => (
+                <div key={status} className="flex items-center gap-3 mb-2 last:mb-0">
+                  <span className="text-[12px] text-[#a78bba] w-24 text-right shrink-0">{status}</span>
+                  <div className="flex-1 h-2 bg-[#0d0015] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${(count / stats.total_games) * 100}%`,
+                        backgroundColor: STATUS_COLORS[status] || "#6b7280",
+                      }}
+                    />
+                  </div>
+                  <span className="text-[12px] text-[#8a6baa] w-6">{count}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Monthly Activity */}
+            {monthly.some((m) => m.count > 0) && (
+              <>
+                <h2 className="text-[15px] font-medium text-white mb-3">Monthly activity</h2>
+                <div className="bg-[#1a0a2e] rounded-xl p-5 border border-[#2d1b4e]/50 mb-8">
+                  <div className="flex items-end gap-2 h-24">
+                    {monthly.map((m) => (
+                      <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                        <div
+                          className="w-full rounded-t bg-fuchsia-500"
+                          style={{
+                            height: m.count > 0 ? `${(m.count / maxMonthly) * 80}px` : "4px",
+                            opacity: m.count > 0 ? 1 : 0.2,
+                          }}
+                        />
+                        <span className="text-[11px] text-[#8a6baa]">{m.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </>
         )}
 
         {stats && stats.total_games === 0 && (
           <p className="text-[#a78bba] text-center">
             No games in library yet.
-            <span onClick={() => navigate("/search")} className="text-fuchsia-400 hover:underline cursor-pointer ml-1">
-              Search for games
-            </span>
+            <span onClick={() => navigate("/search")} className="text-fuchsia-400 hover:underline cursor-pointer ml-1">Search for games</span>
           </p>
         )}
       </div>

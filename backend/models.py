@@ -25,6 +25,7 @@ class UserGame(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     is_favorite = Column(Boolean, default=False)
+    game_genres = Column(String(500), nullable=True)
 
     __table_args__ = (
         UniqueConstraint("user_id", "game_id", name="unique_user_game"),
