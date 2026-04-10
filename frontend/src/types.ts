@@ -3,6 +3,8 @@ export interface User {
   username: string
   email: string
   created_at: string
+  bio?: string | null
+  avatar_url?: string | null
 }
 
 export interface Game {

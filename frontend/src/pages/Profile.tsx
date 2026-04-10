@@ -48,6 +48,9 @@ export default function Profile() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editBio, setEditBio] = useState("");
+  const [editAvatar, setEditAvatar] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -126,27 +129,50 @@ export default function Profile() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-full bg-[#2d1b4e] flex items-center justify-center text-2xl font-medium text-fuchsia-400">
-            {user?.username?.[0]?.toUpperCase()}
-          </div>
+          {user?.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt={user.username}
+              className="w-14 h-14 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-[#2d1b4e] flex items-center justify-center text-2xl font-medium text-fuchsia-400">
+              {user?.username?.[0]?.toUpperCase()}
+            </div>
+          )}
           <div className="flex-1">
             <h1 className="text-2xl font-medium text-white">
               {user?.username}
             </h1>
-            <p className="text-[#8a6baa] text-sm">
+            {user?.bio && (
+              <p className="text-[#a78bba] text-sm mt-0.5">{user.bio}</p>
+            )}
+            <p className="text-[#8a6baa] text-xs mt-1">
               {stats?.total_games || 0} games in library
             </p>
           </div>
-          <button
-            onClick={() => {
-              const url = `${window.location.origin}/u/${user?.username}`;
-              navigator.clipboard.writeText(url);
-              setSuccess("Profile link copied!");
-            }}
-            className="px-4 py-2 rounded-lg border border-[#2d1b4e] text-[#a78bba] text-sm hover:border-fuchsia-500/50 hover:text-fuchsia-400 transition"
-          >
-            Share Profile
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setEditBio(user?.bio || "");
+                setEditAvatar(user?.avatar_url || "");
+                setEditing(true);
+              }}
+              className="px-4 py-2 rounded-lg border border-[#2d1b4e] text-[#a78bba] text-sm hover:border-fuchsia-500/50 hover:text-fuchsia-400 transition"
+            >
+              Edit Profile
+            </button>
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}/u/${user?.username}`;
+                navigator.clipboard.writeText(url);
+                setSuccess("Profile link copied!");
+              }}
+              className="px-4 py-2 rounded-lg border border-[#2d1b4e] text-[#a78bba] text-sm hover:border-fuchsia-500/50 hover:text-fuchsia-400 transition"
+            >
+              Share
+            </button>
+          </div>
         </div>
 
         {/* Favorites */}
@@ -379,6 +405,78 @@ export default function Profile() {
           </p>
         )}
       </div>
+
+      {editing && (
+        <div
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+          onClick={() => setEditing(false)}
+        >
+          <div
+            className="bg-[#1a0a2e] rounded-xl border border-[#2d1b4e] p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-medium text-white mb-4">
+              Edit Profile
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-[#8a6baa] text-xs uppercase tracking-wider mb-2">
+                  Avatar URL
+                </p>
+                <input
+                  type="url"
+                  placeholder="https://example.com/avatar.jpg"
+                  value={editAvatar}
+                  onChange={(e) => setEditAvatar(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-[#0d0015] text-white placeholder-[#8a6baa]/50 outline-none focus:ring-2 focus:ring-fuchsia-500/50 border border-[#2d1b4e] text-sm"
+                />
+              </div>
+              <div>
+                <p className="text-[#8a6baa] text-xs uppercase tracking-wider mb-2">
+                  Bio
+                </p>
+                <textarea
+                  placeholder="Tell us about yourself..."
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  rows={3}
+                  maxLength={300}
+                  className="w-full p-3 rounded-lg bg-[#0d0015] text-white placeholder-[#8a6baa]/50 outline-none focus:ring-2 focus:ring-fuchsia-500/50 resize-none border border-[#2d1b4e] text-sm"
+                />
+                <p className="text-[#8a6baa] text-xs text-right mt-1">
+                  {editBio.length}/300
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setEditing(false)}
+                  className="px-4 py-2 rounded-lg text-[#a78bba] text-sm hover:text-white transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      await api.put("/auth/me", {
+                        bio: editBio || null,
+                        avatar_url: editAvatar || null,
+                      });
+                      setSuccess("Profile updated!");
+                      setEditing(false);
+                      window.location.reload();
+                    } catch {
+                      setError("Failed to update profile");
+                    }
+                  }}
+                  className="px-6 py-2 rounded-lg bg-fuchsia-500 text-white text-sm font-semibold hover:bg-fuchsia-600 transition"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {pickerOpen && (
         <FavoritePicker
