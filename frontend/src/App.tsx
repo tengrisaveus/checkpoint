@@ -13,6 +13,7 @@ import Diary from "./pages/Diary";
 import Profile from "./pages/Profile";
 import Lists from "./pages/Lists";
 import ListDetail from "./pages/ListDetail";
+import PublicProfile from "./pages/PublicProfile";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/game/:id" element={<GameDetail />} />
+          <Route path="/u/:username" element={<PublicProfile />} />
           <Route
             path="/library"
             element={

@@ -19,6 +19,36 @@ function getBackdropUrl(game: Game): string | null {
   return `https:${source.url.replace("t_thumb", "t_1080p")}`;
 }
 
+function ActionButton({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: string;
+  label: string;
+  active?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-lg transition-all duration-200 ${
+        active
+          ? "bg-fuchsia-500/15 text-fuchsia-400"
+          : "text-[#8a6baa] hover:bg-white/5 hover:text-[#c4a8d8]"
+      }`}
+    >
+      <span className="text-xl">{icon}</span>
+      <span className="text-[10px] uppercase tracking-widest font-medium">
+        {label}
+      </span>
+    </button>
+  );
+}
+
+type ActivePanel = null | "library" | "diary" | "list";
+
 export default function GameDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -35,6 +65,8 @@ export default function GameDetail() {
     new Date().toISOString().split("T")[0],
   );
   const [diaryNote, setDiaryNote] = useState("");
+  const [expandSummary, setExpandSummary] = useState(false);
+  const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
   useTitle(game?.name || "Loading...");
 
@@ -99,15 +131,40 @@ export default function GameDetail() {
         existingEntry ? "Updated & logged!" : "Added to library & diary!",
       );
       setDiaryNote("");
+      setActivePanel(null);
     } catch {
       setError("Something went wrong");
     }
   };
 
+  const handleDiaryOnly = async () => {
+    if (!diaryDate) return;
+    setSuccess("");
+    setError("");
+    try {
+      await api.post("/diary", {
+        game_id: Number(id),
+        played_at: diaryDate,
+        status: status || null,
+        rating: rating,
+        note: diaryNote || null,
+      });
+      setSuccess("Diary entry added!");
+      setDiaryNote("");
+      setActivePanel(null);
+    } catch {
+      setError("Something went wrong");
+    }
+  };
+
+  const togglePanel = (panel: ActivePanel) => {
+    setActivePanel(activePanel === panel ? null : panel);
+  };
+
   if (loading)
     return (
       <div className="min-h-screen bg-[#0d0015] p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <DetailSkeleton />
         </div>
       </div>
@@ -117,6 +174,10 @@ export default function GameDetail() {
   const backdrop = getBackdropUrl(game);
   const storeLinks =
     game.websites?.filter((w) => [1, 13, 16, 17].includes(w.category)) || [];
+  const summaryLong = (game.summary?.length || 0) > 300;
+  const developer = game.involved_companies?.find(
+    (c) => c.company,
+  )?.company.name;
 
   return (
     <div className="min-h-screen bg-[#0d0015]">
@@ -131,53 +192,83 @@ export default function GameDetail() {
         <Toast message={error} type="error" onClose={() => setError("")} />
       )}
 
-      {/* Backdrop */}
-      {backdrop && (
-        <div className="relative h-48 md:h-96 overflow-hidden">
-          <img src={backdrop} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0d0015] via-[#0d0015]/60 to-transparent" />
-        </div>
-      )}
+      {/* === BACKDROP === */}
+      <div className="relative h-[280px] md:h-[420px] overflow-hidden">
+        {backdrop ? (
+          <img
+            src={backdrop}
+            alt=""
+            className="w-full h-full object-cover scale-105 blur-[2px]"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#1a0a2e] to-[#0d0015]" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0d0015] via-[#0d0015]/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0d0015]/50 to-transparent" />
+        <div className="absolute inset-0 bg-[#0d0015]/20" />
+      </div>
 
-      <div
-        className={`max-w-4xl mx-auto px-4 ${backdrop ? "-mt-32 relative z-10" : "pt-8"}`}
-      >
+      {/* === MAIN CONTENT === */}
+      <div className="max-w-5xl mx-auto px-4 -mt-48 md:-mt-64 relative z-10">
         <button
           onClick={() => navigate(-1)}
-          className="text-[#a78bba] hover:text-white mb-6 inline-block"
+          className="text-white/50 hover:text-white text-sm mb-6 inline-flex items-center gap-1.5 transition"
         >
-          ← Back
+          <span className="text-lg">←</span> Back
         </button>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          {getCoverUrl(game) ? (
-            <img
-              src={getCoverUrl(game)!}
-              alt={game.name}
-              className="w-64 h-80 object-cover rounded-lg shadow-2xl"
-            />
-          ) : (
-            <div className="w-64 h-80 bg-[#2d1b4e] rounded-lg flex items-center justify-center text-[#8a6baa]">
-              No Cover
+        {/* === HERO: Cover + Info === */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+          {/* Cover */}
+          <div className="shrink-0 self-start">
+            {getCoverUrl(game) ? (
+              <img
+                src={getCoverUrl(game)!}
+                alt={game.name}
+                className="w-44 md:w-56 rounded-lg shadow-[0_8px_40px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
+              />
+            ) : (
+              <div className="w-44 md:w-56 aspect-[3/4] bg-[#1a0a2e] rounded-lg flex items-center justify-center text-[#8a6baa] ring-1 ring-white/10">
+                No Cover
+              </div>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0 pt-2">
+            <h1 className="text-3xl md:text-[2.5rem] font-bold text-white leading-tight tracking-tight">
+              {game.name}
+            </h1>
+
+            <div className="flex items-center gap-2 mt-2.5 text-sm flex-wrap">
+              {getYear(game.first_release_date) && (
+                <span className="text-white/70 font-medium">
+                  {getYear(game.first_release_date)}
+                </span>
+              )}
+              {developer && (
+                <>
+                  <span className="text-[#3d2b5e]">•</span>
+                  <span className="text-[#a78bba]">{developer}</span>
+                </>
+              )}
+              {game.involved_companies && game.involved_companies.length > 1 && (
+                <>
+                  <span className="text-[#3d2b5e]">•</span>
+                  <span className="text-[#8a6baa] text-xs">
+                    +{game.involved_companies.length - 1} more
+                  </span>
+                </>
+              )}
             </div>
-          )}
-
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-white">{game.name}</h1>
-
-            <p className="text-[#a78bba] mt-2">
-              {getYear(game.first_release_date)}
-              {game.involved_companies &&
-                ` · ${game.involved_companies.map((c) => c.company.name).join(", ")}`}
-            </p>
 
             {/* Genres */}
             {game.genres && (
-              <div className="flex gap-2 mt-3 flex-wrap">
+              <div className="flex gap-1.5 mt-4 flex-wrap">
                 {game.genres.map((g) => (
                   <span
                     key={g.name}
-                    className="px-2 py-1 rounded text-xs font-medium bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/30"
+                    className="px-2.5 py-1 rounded-full text-xs font-medium text-fuchsia-300/90 bg-fuchsia-500/10 border border-fuchsia-500/20"
                   >
                     {g.name}
                   </span>
@@ -187,7 +278,7 @@ export default function GameDetail() {
 
             {/* Platforms */}
             {game.platforms && (
-              <div className="flex gap-2 mt-3 flex-wrap">
+              <div className="flex gap-1.5 mt-3 flex-wrap">
                 {game.platforms.map((p) => (
                   <PlatformIcon
                     key={p.name}
@@ -198,126 +289,215 @@ export default function GameDetail() {
               </div>
             )}
 
-            {/* Scores */}
-            {game.aggregated_rating && (
-              <div className="flex items-center gap-3 mt-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                    <span className="text-green-400 font-bold text-sm">
-                      {game.aggregated_rating.toFixed(0)}
-                    </span>
+            {/* Score + Store Links */}
+            <div className="flex items-center gap-4 mt-5 flex-wrap">
+              {game.aggregated_rating && (
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm ring-2 ${
+                      game.aggregated_rating >= 75
+                        ? "bg-green-500/15 text-green-400 ring-green-500/30"
+                        : game.aggregated_rating >= 50
+                          ? "bg-yellow-500/15 text-yellow-400 ring-yellow-500/30"
+                          : "bg-red-500/15 text-red-400 ring-red-500/30"
+                    }`}
+                  >
+                    {game.aggregated_rating.toFixed(0)}
                   </div>
-                  <span className="text-[#8a6baa] text-sm">Critic Score</span>
+                  <span className="text-[#8a6baa] text-xs uppercase tracking-wider">
+                    Critic
+                  </span>
                 </div>
-              </div>
-            )}
+              )}
 
+              {storeLinks.length > 0 && (
+                <>
+                  {game.aggregated_rating && (
+                    <div className="w-px h-6 bg-[#2d1b4e]" />
+                  )}
+                  <div className="flex gap-1.5 flex-wrap">
+                    {storeLinks.map((w, i) => (
+                      <StoreLink key={i} url={w.url} category={w.category} />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Summary */}
             {game.summary && (
-              <p className="text-[#c4a8d8] mt-4 leading-relaxed">
-                {game.summary}
-              </p>
-            )}
-
-            {/* Store Links */}
-            {storeLinks.length > 0 && (
-              <div className="flex gap-2 mt-4 flex-wrap">
-                {storeLinks.map((w, i) => (
-                  <StoreLink key={i} url={w.url} category={w.category} />
-                ))}
+              <div className="mt-5">
+                <p
+                  className={`text-[#c4a8d8]/85 text-sm leading-relaxed ${
+                    !expandSummary && summaryLong ? "line-clamp-4" : ""
+                  }`}
+                >
+                  {game.summary}
+                </p>
+                {summaryLong && (
+                  <button
+                    onClick={() => setExpandSummary(!expandSummary)}
+                    className="text-fuchsia-400 text-xs mt-1.5 hover:text-fuchsia-300 transition font-medium"
+                  >
+                    {expandSummary ? "Show less" : "Read more..."}
+                  </button>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        {/* Add to Library Form */}
+        {/* === ACTION BAR === */}
         {user && (
-          <div className="bg-[#1a0a2e] rounded-lg p-6 mt-8 border border-[#2d1b4e]">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              {existingEntry ? "In Your Library" : "Add to Library"}
-            </h2>
-
-            <div className="space-y-4">
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full p-3 rounded bg-[#2d1b4e] text-white outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
-                required
-              >
-                <option value="">Select status</option>
-                {GAME_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-
-              <div className="space-y-1">
-                <p className="text-[#a78bba] text-sm">
-                  Rating {rating ? `(${rating}/10)` : "(optional)"}
-                </p>
-                <RatingSelector value={rating} onChange={setRating} />
+          <div className="mt-10 border border-[#2d1b4e] rounded-xl bg-[#1a0a2e]/50 backdrop-blur-sm overflow-hidden">
+            {/* Library status badge */}
+            {existingEntry && (
+              <div className="flex items-center gap-2 px-5 pt-4">
+                <div className="w-1.5 h-1.5 rounded-full bg-fuchsia-400 animate-pulse" />
+                <span className="text-fuchsia-400 text-xs font-medium uppercase tracking-widest">
+                  {existingEntry.status}
+                </span>
+                {existingEntry.rating && (
+                  <span className="text-yellow-400/80 text-xs ml-auto">
+                    ★ {existingEntry.rating}/10
+                  </span>
+                )}
               </div>
+            )}
 
-              <textarea
-                placeholder="Write a review (optional)"
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-                rows={3}
-                maxLength={2000}
-                className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 resize-none border border-[#3d2b5e]"
+            {/* Action buttons */}
+            <div className="flex items-center justify-center gap-1 p-3">
+              <ActionButton
+                icon={existingEntry ? "✏️" : "🎮"}
+                label={existingEntry ? "Edit" : "Library"}
+                active={activePanel === "library"}
+                onClick={() => togglePanel("library")}
               />
+              <ActionButton
+                icon="📖"
+                label="Diary"
+                active={activePanel === "diary"}
+                onClick={() => togglePanel("diary")}
+              />
+              <ActionButton
+                icon="📋"
+                label="List"
+                active={activePanel === "list"}
+                onClick={() => togglePanel("list")}
+              />
+            </div>
 
-              <div className="border-t border-[#3d2b5e] pt-4 mt-4">
-                <p className="text-[#a78bba] text-sm mb-3">
-                  Diary Entry (optional)
-                </p>
-                <div className="space-y-3">
-                  <input
-                    type="date"
-                    value={diaryDate}
-                    onChange={(e) => setDiaryDate(e.target.value)}
-                    className="w-full p-3 rounded bg-[#2d1b4e] text-white outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
-                  />
-                  <textarea
-                    placeholder="Quick note (optional)"
-                    value={diaryNote}
-                    onChange={(e) => setDiaryNote(e.target.value)}
-                    rows={2}
-                    maxLength={500}
-                    className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 resize-none border border-[#3d2b5e]"
-                  />
+            {/* Library Panel */}
+            {activePanel === "library" && (
+              <div className="border-t border-[#2d1b4e] p-5 space-y-4">
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-[#0d0015] text-white outline-none focus:ring-2 focus:ring-fuchsia-500/50 border border-[#2d1b4e] text-sm"
+                  required
+                >
+                  <option value="">Select status</option>
+                  {GAME_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+
+                <div>
+                  <p className="text-[#8a6baa] text-xs uppercase tracking-wider mb-2">
+                    Rating {rating ? `— ${rating}/10` : ""}
+                  </p>
+                  <RatingSelector value={rating} onChange={setRating} />
+                </div>
+
+                <textarea
+                  placeholder="Write a review..."
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  rows={3}
+                  maxLength={2000}
+                  className="w-full p-3 rounded-lg bg-[#0d0015] text-white placeholder-[#8a6baa]/50 outline-none focus:ring-2 focus:ring-fuchsia-500/50 resize-none border border-[#2d1b4e] text-sm"
+                />
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAddToLibrary}
+                    disabled={!status}
+                    className="px-6 py-2.5 rounded-lg bg-fuchsia-500 text-white text-sm font-semibold hover:bg-fuchsia-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {existingEntry ? "Update" : "Add to Library"}
+                  </button>
                 </div>
               </div>
+            )}
 
-              <button
-                onClick={handleAddToLibrary}
-                className="px-6 py-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition"
-              >
-                {existingEntry ? "Update" : "Add to Library"}
-              </button>
-            </div>
+            {/* Diary Panel */}
+            {activePanel === "diary" && (
+              <div className="border-t border-[#2d1b4e] p-5 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[#8a6baa] text-xs uppercase tracking-wider mb-2">
+                      Date Played
+                    </p>
+                    <input
+                      type="date"
+                      value={diaryDate}
+                      onChange={(e) => setDiaryDate(e.target.value)}
+                      className="w-full p-3 rounded-lg bg-[#0d0015] text-white outline-none focus:ring-2 focus:ring-fuchsia-500/50 border border-[#2d1b4e] text-sm"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-[#8a6baa] text-xs uppercase tracking-wider mb-2">
+                      Note
+                    </p>
+                    <input
+                      type="text"
+                      placeholder="Quick thoughts..."
+                      value={diaryNote}
+                      onChange={(e) => setDiaryNote(e.target.value)}
+                      maxLength={500}
+                      className="w-full p-3 rounded-lg bg-[#0d0015] text-white placeholder-[#8a6baa]/50 outline-none focus:ring-2 focus:ring-fuchsia-500/50 border border-[#2d1b4e] text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleDiaryOnly}
+                    disabled={!diaryDate}
+                    className="px-6 py-2.5 rounded-lg bg-fuchsia-500 text-white text-sm font-semibold hover:bg-fuchsia-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Log Entry
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* List Panel */}
+            {activePanel === "list" && (
+              <div className="border-t border-[#2d1b4e] p-5">
+                <AddToList gameId={Number(id)} />
+              </div>
+            )}
           </div>
         )}
-        {user && (
-          <div className="bg-[#1a0a2e] rounded-lg p-6 mt-4 border border-[#2d1b4e]">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Add to List
-            </h2>
-            <AddToList gameId={Number(id)} />
-          </div>
-        )}
 
+        {/* Not logged in */}
         {!user && (
-          <p className="text-[#a78bba] mt-8 text-center pb-8">
-            <span
-              onClick={() => navigate("/login")}
-              className="text-fuchsia-400 hover:underline cursor-pointer"
-            >
-              Login
-            </span>{" "}
-            to add this game to your library
-          </p>
+          <div className="mt-10 border border-[#2d1b4e] rounded-xl bg-[#1a0a2e]/50 p-8 text-center">
+            <p className="text-[#8a6baa] text-sm">
+              <span
+                onClick={() => navigate("/login")}
+                className="text-fuchsia-400 hover:text-fuchsia-300 cursor-pointer font-medium transition"
+              >
+                Sign in
+              </span>{" "}
+              to track this game
+            </p>
+          </div>
         )}
+
+        <div className="h-16" />
       </div>
     </div>
   );

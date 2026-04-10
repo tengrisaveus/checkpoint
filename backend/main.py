@@ -5,6 +5,7 @@ from router_games import router as games_router
 from router_library import router as library_router
 from router_diary import router as diary_router
 from router_lists import router as lists_router
+from router_profile import router as profile_router
 
 app = FastAPI()
 
@@ -24,6 +25,7 @@ app.include_router(games_router, prefix="/games", tags=["Games"])
 app.include_router(library_router, prefix="/library", tags=["Library"])
 app.include_router(diary_router, prefix="/diary", tags=["Diary"])
 app.include_router(lists_router, prefix="/lists", tags=["Lists"])
+app.include_router(profile_router, prefix="/profile", tags=["Profile"])
 
 @app.get("/")
 def root():
