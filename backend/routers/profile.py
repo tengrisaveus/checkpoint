@@ -116,8 +116,6 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
     return {
         "user": {
             "username": user.username,
-            "bio": user.bio,
-            "avatar_url": user.avatar_url,
             "created_at": str(user.created_at),
         },
         "stats": {

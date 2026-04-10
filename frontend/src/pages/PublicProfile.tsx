@@ -7,8 +7,6 @@ interface PublicProfileData {
   user: {
     username: string;
     created_at: string;
-    bio?: string | null
-    avatar_url?: string | null
   };
   stats: {
     total_games: number;
@@ -112,22 +110,11 @@ export default function PublicProfile() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          {user.avatar_url ? (
-            <img
-              src={user.avatar_url}
-              alt={user.username}
-              className="w-14 h-14 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-14 h-14 rounded-full bg-[#2d1b4e] flex items-center justify-center text-2xl font-medium text-fuchsia-400">
-              {user.username[0]?.toUpperCase()}
-            </div>
-          )}
+          <div className="w-14 h-14 rounded-full bg-[#2d1b4e] flex items-center justify-center text-2xl font-medium text-fuchsia-400">
+            {user.username[0]?.toUpperCase()}
+          </div>
           <div>
             <h1 className="text-2xl font-medium text-white">{user.username}</h1>
-            {user.bio && (
-              <p className="text-[#a78bba] text-sm mt-0.5">{user.bio}</p>
-            )}
             <p className="text-[#8a6baa] text-xs mt-1">
               {stats.total_games} games · Member since {memberSince}
             </p>
