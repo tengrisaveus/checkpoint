@@ -5,7 +5,7 @@ from core.database import get_db
 from core.auth import hash_password, verify_password, create_access_token, get_current_user
 from core.limiter import limiter
 from models import User
-from schemas import UserCreate, UserResponse, LoginRequest
+from schemas.auth import UserCreate, UserResponse, LoginRequest, UserProfileUpdate
 
 router = APIRouter()
 
@@ -60,4 +60,18 @@ def login(request: Request, user_data: LoginRequest, db: Session = Depends(get_d
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     """Returns the currently authenticated user. Token validation is handled by get_current_user."""
+    return current_user
+
+@router.put("/me", response_model=UserResponse)
+def update_profile(
+    profile_data: UserProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if profile_data.bio is not None:
+        current_user.bio = profile_data.bio # type: ignore
+    if profile_data.avatar_url is not None:
+        current_user.avatar_url = profile_data.avatar_url # type: ignore
+    db.commit()
+    db.refresh(current_user)
     return current_user

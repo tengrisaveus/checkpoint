@@ -19,6 +19,12 @@ class UserResponse(BaseModel):
     username: str
     email: str
     created_at: datetime
+    bio: str | None = None
+    avatar_url: str | None = None 
 
     # from_attributes allows Pydantic to read values from SQLAlchemy model instances
     model_config = ConfigDict(from_attributes=True)
+
+class UserProfileUpdate(BaseModel):
+    bio: str | None = Field(default=None, max_length=300)
+    avatar_url: str | None = Field(default=None, max_length=500)

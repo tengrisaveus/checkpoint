@@ -109,13 +109,15 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
             "description": lst.description,
             "item_count": db.query(GameListItem).filter(GameListItem.list_id == lst.id).count(),
             "preview_covers": [
-                item.game_cover_url for item in items if item.game_cover_url
+                item.game_cover_url for item in items if item.game_cover_url is not None
             ],
         })
 
     return {
         "user": {
             "username": user.username,
+            "bio": user.bio,
+            "avatar_url": user.avatar_url,
             "created_at": str(user.created_at),
         },
         "stats": {
