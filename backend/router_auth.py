@@ -4,12 +4,15 @@ from database import get_db
 from models import User
 from schemas import UserCreate, UserResponse, LoginRequest
 from auth import hash_password,verify_password, create_access_token, get_current_user
+from starlette.requests import Request
+from limiter import limiter
 
 router = APIRouter()
 
 
 @router.post("/register", response_model=UserResponse)
-def register(user_data: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)):
     """Registers a new user after checking for duplicate email and username."""
     # Check if email is already in use
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -34,7 +37,8 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 @router.post("/login")
-def login(user_data: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, user_data: LoginRequest, db: Session = Depends(get_db)):
     """
     Authenticates a user and returns a JWT access token.
     Both 'user not found' and 'wrong password' return the same 401 to prevent user enumeration.
