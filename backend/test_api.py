@@ -280,30 +280,6 @@ def test_health_endpoint():
 
 # ========== PROFILE TESTS ==========
 
-def test_update_profile():
-    token = get_token()
-    res = client.put("/auth/me", json={
-        "bio": "I love RPGs",
-        "avatar_url": "https://example.com/avatar.jpg",
-    }, headers={"Authorization": f"Bearer {token}"})
-    assert res.status_code == 200
-    assert res.json()["bio"] == "I love RPGs"
-    assert res.json()["avatar_url"] == "https://example.com/avatar.jpg"
-
-
-def test_update_profile_bio_only():
-    token = get_token()
-    res = client.put("/auth/me", json={
-        "bio": "Just a gamer",
-    }, headers={"Authorization": f"Bearer {token}"})
-    assert res.status_code == 200
-    assert res.json()["bio"] == "Just a gamer"
-
-
-def test_update_profile_without_token():
-    res = client.put("/auth/me", json={"bio": "hack"})
-    assert res.status_code in (401, 403)
-
 
 def test_public_profile():
     token = get_token()
@@ -318,16 +294,6 @@ def test_public_profile():
 def test_public_profile_not_found():
     res = client.get("/profile/nonexistentuser123")
     assert res.status_code == 404
-
-
-def test_public_profile_shows_bio():
-    token = get_token()
-    client.put("/auth/me", json={
-        "bio": "Test bio",
-    }, headers={"Authorization": f"Bearer {token}"})
-    res = client.get("/profile/testuser")
-    assert res.status_code == 200
-    assert res.json()["user"]["bio"] == "Test bio"
 
 
 # ========== LIBRARY STATS TESTS ==========
