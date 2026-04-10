@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
+from starlette.requests import Request
+from core.database import get_db
+from core.auth import hash_password, verify_password, create_access_token, get_current_user
+from core.limiter import limiter
 from models import User
 from schemas import UserCreate, UserResponse, LoginRequest
-from auth import hash_password,verify_password, create_access_token, get_current_user
-from starlette.requests import Request
-from limiter import limiter
 
 router = APIRouter()
 
@@ -36,6 +36,7 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
 
     return new_user
 
+
 @router.post("/login")
 @limiter.limit("10/minute")
 def login(request: Request, user_data: LoginRequest, db: Session = Depends(get_db)):
@@ -55,8 +56,8 @@ def login(request: Request, user_data: LoginRequest, db: Session = Depends(get_d
 
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     """Returns the currently authenticated user. Token validation is handled by get_current_user."""
     return current_user
-    

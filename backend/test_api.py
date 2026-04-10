@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
 from main import app
-from database import Base, get_db
+from core.database import Base, get_db
 
 # Load .env so TEST_DATABASE_URL is available
 load_dotenv()

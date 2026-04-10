@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
+from core.database import get_db
+from core.auth import get_current_user
 from models import User, UserGame
 from schemas import UserGameCreate, UserGameUpdate, UserGameResponse
-from auth import get_current_user
-from igdb_service import get_game_detail
+from services.igdb import get_game_detail
 
 router = APIRouter()
 
@@ -126,6 +126,7 @@ def get_stats(
         "top_genres": top_genres_list,
     }
 
+
 @router.get("/favorites", response_model=list[UserGameResponse])
 def get_favorites(
     db: Session = Depends(get_db),
@@ -217,4 +218,3 @@ def remove_game(
     db.commit()
 
     return {"detail": "Game removed from library"}
-

@@ -4,9 +4,8 @@ from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from database import get_db
-from models import User
-from config import get_settings
+from core.database import get_db
+from core.config import get_settings
 
 settings = get_settings()
 
@@ -50,6 +49,8 @@ def get_current_user(
     FastAPI dependency: resolves and returns the authenticated user for protected endpoints.
     Raises 401 if the token is invalid or the user no longer exists.
     """
+    from models import User  # late import to avoid circular dependency
+
     token = credentials.credentials
     try:
         # Verifies token signature and expiry; raises JWTError if invalid

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
-from models import User, UserGame, DiaryEntry, GameList, GameListItem
 from datetime import date, timedelta
+from core.database import get_db
+from models import User, UserGame, DiaryEntry, GameList, GameListItem
 
 router = APIRouter()
 

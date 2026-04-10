@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
+from core.database import get_db
+from core.auth import get_current_user
 from models import User, DiaryEntry
 from schemas import DiaryEntryCreate, DiaryEntryResponse
-from auth import get_current_user
-from igdb_service import get_game_detail
+from services.igdb import get_game_detail
 
 router = APIRouter()
 
@@ -54,6 +54,7 @@ def get_diary(
         .order_by(DiaryEntry.played_at.desc())
         .all()
     )
+
 
 @router.get("/monthly")
 def get_monthly_activity(

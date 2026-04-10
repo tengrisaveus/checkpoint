@@ -1,15 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
+from core.database import get_db
+from core.auth import get_current_user
 from models import User, GameList, GameListItem
 from schemas import (
-    GameListCreate, GameListUpdate, GameListResponse,
-    GameListDetailResponse, GameListItemAdd, GameListItemResponse,
+    GameListCreate,
+    GameListUpdate,
+    GameListResponse,
+    GameListDetailResponse,
+    GameListItemAdd,
+    GameListItemResponse,
 )
-from auth import get_current_user
-from igdb_service import get_game_detail
+from services.igdb import get_game_detail
 
 router = APIRouter()
+
 
 @router.post("/", response_model=GameListResponse)
 def create_list(
@@ -27,6 +32,7 @@ def create_list(
     db.commit()
     db.refresh(new_list)
     return new_list
+
 
 @router.get("/", response_model=list[GameListResponse])
 def get_lists(
@@ -191,4 +197,4 @@ def remove_item_from_list(
 
     db.delete(item)
     db.commit()
-    return {"detail": "Game removed from list"}    
+    return {"detail": "Game removed from list"}

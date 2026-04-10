@@ -3,14 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi.middleware import SlowAPIMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from database import get_db
-from limiter import limiter
-from router_auth import router as auth_router
-from router_games import router as games_router
-from router_library import router as library_router
-from router_diary import router as diary_router
-from router_lists import router as lists_router
-from router_profile import router as profile_router
+from core.database import get_db
+from core.limiter import limiter
+from routers.auth import router as auth_router
+from routers.games import router as games_router
+from routers.library import router as library_router
+from routers.diary import router as diary_router
+from routers.lists import router as lists_router
+from routers.profile import router as profile_router
 
 app = FastAPI()
 app.state.limiter = limiter

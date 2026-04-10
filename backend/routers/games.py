@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException
-
-from igdb_service import search_games, get_game_detail, get_popular_games
+from services.igdb import search_games, get_game_detail, get_popular_games
 
 router = APIRouter()
+
 
 @router.get("/popular")
 async def popular():
     """Returns popular highly-rated games for the discovery section."""
     return await get_popular_games()
+
 
 @router.get("/search")
 async def search(query: str):

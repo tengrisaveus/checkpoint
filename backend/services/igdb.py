@@ -1,6 +1,6 @@
 import httpx
 from fastapi import HTTPException
-from config import get_settings
+from core.config import get_settings
 
 settings = get_settings()
 
@@ -92,6 +92,7 @@ async def get_game_detail(game_id: int):
         "games",
         f"fields name, cover.url, first_release_date, summary, storyline, genres.name, platforms.abbreviation, platforms.name, involved_companies.company.name, rating, aggregated_rating, screenshots.url, artworks.url, websites.url, websites.category; where id = {game_id};",
     )
+
 
 async def get_popular_games():
     """Returns top 20 highly rated games with enough votes."""

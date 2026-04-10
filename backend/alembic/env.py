@@ -5,9 +5,10 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from models import Base
+from models import Base  # noqa: F401 – imports all models so Base.metadata is populated
+import models  # ensure all model submodules are registered
 
-from config import get_settings
+from core.config import get_settings
 from sqlalchemy import create_engine
 
 settings = get_settings()
