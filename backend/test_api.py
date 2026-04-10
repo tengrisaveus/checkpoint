@@ -268,3 +268,191 @@ def test_invalid_rating():
         "rating": 99,
     }, headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 422
+
+# ========== HEALTH TESTS ==========
+
+def test_health_endpoint():
+    res = client.get("/health")
+    assert res.status_code == 200
+    assert res.json()["status"] == "healthy"
+    assert res.json()["database"] == "connected"
+
+
+# ========== PROFILE TESTS ==========
+
+def test_update_profile():
+    token = get_token()
+    res = client.put("/auth/me", json={
+        "bio": "I love RPGs",
+        "avatar_url": "https://example.com/avatar.jpg",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json()["bio"] == "I love RPGs"
+    assert res.json()["avatar_url"] == "https://example.com/avatar.jpg"
+
+
+def test_update_profile_bio_only():
+    token = get_token()
+    res = client.put("/auth/me", json={
+        "bio": "Just a gamer",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json()["bio"] == "Just a gamer"
+
+
+def test_update_profile_without_token():
+    res = client.put("/auth/me", json={"bio": "hack"})
+    assert res.status_code in (401, 403)
+
+
+def test_public_profile():
+    token = get_token()
+    res = client.get("/profile/testuser")
+    assert res.status_code == 200
+    assert res.json()["user"]["username"] == "testuser"
+    assert res.json()["stats"]["total_games"] == 0
+    assert res.json()["favorites"] == []
+    assert res.json()["lists"] == []
+
+
+def test_public_profile_not_found():
+    res = client.get("/profile/nonexistentuser123")
+    assert res.status_code == 404
+
+
+def test_public_profile_shows_bio():
+    token = get_token()
+    client.put("/auth/me", json={
+        "bio": "Test bio",
+    }, headers={"Authorization": f"Bearer {token}"})
+    res = client.get("/profile/testuser")
+    assert res.status_code == 200
+    assert res.json()["user"]["bio"] == "Test bio"
+
+
+# ========== LIBRARY STATS TESTS ==========
+
+def test_library_stats_empty():
+    token = get_token()
+    res = client.get("/library/stats", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json()["total_games"] == 0
+    assert res.json()["average_rating"] is None
+    assert res.json()["completion_ratio"] == 0
+
+
+def test_library_stats_without_token():
+    res = client.get("/library/stats")
+    assert res.status_code == 401
+
+
+# ========== FAVORITES TESTS ==========
+
+def test_favorites_empty():
+    token = get_token()
+    res = client.get("/library/favorites", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_favorites_max_four():
+    token = get_token()
+    res = client.put("/library/favorites", json=[1, 2, 3, 4, 5],
+                     headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 400
+    assert "4" in res.json()["detail"]
+
+
+# ========== LISTS TESTS ==========
+
+def test_create_list():
+    token = get_token()
+    res = client.post("/lists/", json={
+        "name": "Best RPGs",
+        "description": "My favorite RPGs",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json()["name"] == "Best RPGs"
+
+
+def test_create_list_no_name():
+    token = get_token()
+    res = client.post("/lists/", json={
+        "description": "No name list",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 422
+
+
+def test_get_lists_empty():
+    token = get_token()
+    res = client.get("/lists/", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_get_lists():
+    token = get_token()
+    client.post("/lists/", json={"name": "List 1"},
+                headers={"Authorization": f"Bearer {token}"})
+    client.post("/lists/", json={"name": "List 2"},
+                headers={"Authorization": f"Bearer {token}"})
+    res = client.get("/lists/", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert len(res.json()) == 2
+
+
+def test_update_list():
+    token = get_token()
+    create = client.post("/lists/", json={"name": "Old Name"},
+                         headers={"Authorization": f"Bearer {token}"})
+    list_id = create.json()["id"]
+    res = client.put(f"/lists/{list_id}", json={"name": "New Name"},
+                     headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json()["name"] == "New Name"
+
+
+def test_delete_list():
+    token = get_token()
+    create = client.post("/lists/", json={"name": "To Delete"},
+                         headers={"Authorization": f"Bearer {token}"})
+    list_id = create.json()["id"]
+    res = client.delete(f"/lists/{list_id}",
+                        headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    lists = client.get("/lists/", headers={"Authorization": f"Bearer {token}"})
+    assert len(lists.json()) == 0
+
+
+def test_delete_nonexistent_list():
+    token = get_token()
+    res = client.delete("/lists/9999",
+                        headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 404
+
+
+def test_lists_without_token():
+    res = client.get("/lists/")
+    assert res.status_code == 401
+
+
+# ========== DIARY TESTS ==========
+
+def test_diary_empty():
+    token = get_token()
+    res = client.get("/diary/", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_diary_without_token():
+    res = client.get("/diary/")
+    assert res.status_code == 401
+
+
+def test_diary_monthly():
+    token = get_token()
+    res = client.get("/diary/monthly", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert len(res.json()) == 6  # last 6 months
+    assert all("month" in m and "label" in m and "count" in m for m in res.json())

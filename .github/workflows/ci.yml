@@ -44,6 +44,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r backend/requirements.txt
 
-      - name: Run auth tests
+      - name: Run tests
         working-directory: backend
-        run: pytest test_api.py -v -k "register or login or test_me or test_invalid_status or test_invalid_rating or nonexistent"
+        run: pytest test_api.py -v -k "not (test_add_game_to_library or test_add_duplicate_game or test_get_library or test_update_game_status or test_delete_game)"
