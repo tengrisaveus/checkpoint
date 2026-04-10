@@ -20,6 +20,7 @@ export interface Game {
   screenshots?: { url: string }[]
   artworks?: { url: string }[]
   websites?: { url: string; category: number }[]
+  category?: number
 }
 
 export interface LibraryEntry {

@@ -77,13 +77,12 @@ async def igdb_request(endpoint: str, query: str):
 
 
 async def search_games(query: str):
-    """Searches IGDB by game name and returns up to 10 results."""
     clean_query = query.replace('"', "").replace(";", "").strip()
     if not clean_query:
         return []
     return await igdb_request(
         "games",
-        f'search "{clean_query}"; fields name, cover.url, first_release_date, summary, genres.name, platforms.name; limit 10;',
+        f'search "{clean_query}"; fields name, cover.url, first_release_date, summary, genres.name, platforms.name, category; limit 20;',
     )
 
 
@@ -92,4 +91,11 @@ async def get_game_detail(game_id: int):
     return await igdb_request(
         "games",
         f"fields name, cover.url, first_release_date, summary, storyline, genres.name, platforms.abbreviation, platforms.name, involved_companies.company.name, rating, aggregated_rating, screenshots.url, artworks.url, websites.url, websites.category; where id = {game_id};",
+    )
+
+async def get_popular_games():
+    """Returns top 20 highly rated games with enough votes."""
+    return await igdb_request(
+        "games",
+        "fields name, cover.url, first_release_date, genres.name, platforms.name, aggregated_rating; where aggregated_rating > 75 & aggregated_rating_count > 10 & cover != null; sort aggregated_rating desc; limit 20;",
     )
