@@ -21,6 +21,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://checkpoint-delta.vercel.app",
+        "https://*.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
