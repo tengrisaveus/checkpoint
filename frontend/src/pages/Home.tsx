@@ -4,7 +4,7 @@ import useTitle from "../hooks/useTitle";
 import { useEffect, useState } from "react";
 import api from "../api";
 import type { DiaryEntry, Game } from "../types";
-import { getCoverUrl } from "../utils";
+
 
 interface LibraryEntryWithGame {
   game_id: number;
