@@ -37,12 +37,12 @@ export default function Search() {
 
   // Fetch popular games on mount
   useEffect(() => {
-    api
-      .get("/games/popular")
-      .then((res) => setPopular(res.data))
-      .catch(() => {})
-      .finally(() => setLoadingPopular(false))
-  }, [])
+  api
+    .get("/games/new-releases")
+    .then((res) => setPopular(res.data))
+    .catch(() => {})
+    .finally(() => setLoadingPopular(false))
+}, [])
 
   const handleSearch = async (searchQuery?: string) => {
     const q = searchQuery || query
@@ -219,7 +219,7 @@ const filteredResults = (activeGenre
         {/* Popular Games — shown when no search yet */}
         {!hasSearched && !loading && (
           <div>
-            <h2 className="text-[15px] font-medium text-white mb-3">Popular games</h2>
+            <h2 className="text-[15px] font-medium text-white mb-3">New releases</h2>
             {loadingPopular ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {Array.from({ length: 8 }).map((_, i) => (

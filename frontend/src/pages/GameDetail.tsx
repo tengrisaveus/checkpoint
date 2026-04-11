@@ -67,6 +67,7 @@ export default function GameDetail() {
   const [diaryNote, setDiaryNote] = useState("");
   const [expandSummary, setExpandSummary] = useState(false);
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+  const [similarGames, setSimilarGames] = useState<Game[]>([]);
 
   useTitle(game?.name || "Loading...");
 
@@ -95,6 +96,14 @@ export default function GameDetail() {
       })
       .catch(() => {});
   }, [user, id]);
+
+  useEffect(() => {
+    if (!id) return;
+    api
+      .get(`/games/${id}/similar`)
+      .then((res) => setSimilarGames(res.data))
+      .catch(() => {});
+  }, [id]);
 
   const handleAddToLibrary = async () => {
     if (!status) return;
@@ -175,9 +184,8 @@ export default function GameDetail() {
   const storeLinks =
     game.websites?.filter((w) => [1, 13, 16, 17].includes(w.category)) || [];
   const summaryLong = (game.summary?.length || 0) > 300;
-  const developer = game.involved_companies?.find(
-    (c) => c.company,
-  )?.company.name;
+  const developer = game.involved_companies?.find((c) => c.company)?.company
+    .name;
 
   return (
     <div className="min-h-screen bg-[#0d0015]">
@@ -252,14 +260,15 @@ export default function GameDetail() {
                   <span className="text-[#a78bba]">{developer}</span>
                 </>
               )}
-              {game.involved_companies && game.involved_companies.length > 1 && (
-                <>
-                  <span className="text-[#3d2b5e]">•</span>
-                  <span className="text-[#8a6baa] text-xs">
-                    +{game.involved_companies.length - 1} more
-                  </span>
-                </>
-              )}
+              {game.involved_companies &&
+                game.involved_companies.length > 1 && (
+                  <>
+                    <span className="text-[#3d2b5e]">•</span>
+                    <span className="text-[#8a6baa] text-xs">
+                      +{game.involved_companies.length - 1} more
+                    </span>
+                  </>
+                )}
             </div>
 
             {/* Genres */}
@@ -494,6 +503,33 @@ export default function GameDetail() {
               </span>{" "}
               to track this game
             </p>
+          </div>
+        )}
+        {similarGames.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-[15px] font-medium text-white mb-3">Similar games</h2>
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+              {similarGames.slice(0, 5).map((g) => (
+                <div
+                  key={g.id}
+                  onClick={() => navigate(`/game/${g.id}`)}
+                  className="cursor-pointer group"
+                >
+                  {getCoverUrl(g) ? (
+                    <img
+                      src={getCoverUrl(g)!}
+                      alt={g.name}
+                      className="w-full aspect-[3/4] object-cover rounded-lg group-hover:ring-2 group-hover:ring-fuchsia-500 transition"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[3/4] bg-[#1a0a2e] rounded-lg flex items-center justify-center text-[#8a6baa] text-xs">
+                      {g.name}
+                    </div>
+                  )}
+                  <p className="text-[11px] text-[#c4a8d8] mt-1.5 truncate">{g.name}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

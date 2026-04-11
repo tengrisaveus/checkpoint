@@ -95,8 +95,75 @@ async def get_game_detail(game_id: int):
 
 
 async def get_popular_games():
-    """Returns top 20 highly rated games with enough votes."""
+    """Most visited games on IGDB — popularity_type 1 = Visits"""
+    popular = await igdb_request(
+        "popularity_primitives",
+        "fields game_id, value, popularity_type; where popularity_type = 1; sort value desc; limit 20;",
+    )
+    if not popular:
+        return []
+    ids = [str(p["game_id"]) for p in popular]
     return await igdb_request(
         "games",
-        "fields name, cover.url, first_release_date, genres.name, platforms.name, aggregated_rating; where aggregated_rating > 75 & aggregated_rating_count > 10 & cover != null; sort aggregated_rating desc; limit 20;",
+        f"fields name, cover.url, first_release_date, genres.name, platforms.name, aggregated_rating; where id = ({','.join(ids)}) & cover != null; limit 20;",
     )
+
+
+async def get_new_releases():
+    """Recently released popular games"""
+    playing = await igdb_request(
+        "popularity_primitives",
+        "fields game_id, value, popularity_type; where popularity_type = 3; sort value desc; limit 100;",
+    )
+    if not playing:
+        return []
+    ids = [str(p["game_id"]) for p in playing]
+    import time
+    two_years_ago = int(time.time()) - (730 * 24 * 60 * 60)
+    return await igdb_request(
+        "games",
+        f"fields name, cover.url, first_release_date, genres.name, platforms.name, aggregated_rating; where id = ({','.join(ids)}) & cover != null & first_release_date > {two_years_ago}; limit 20;",
+    )
+
+
+async def get_upcoming_games():
+    """Upcoming games: release_dates'ten ID al, games'ten cover'lı olanları çek."""
+    import time
+    now = int(time.time())
+    six_months = now + (180 * 24 * 60 * 60)
+    releases = await igdb_request(
+        "release_dates",
+        f"fields game; where date > {now} & date < {six_months}; sort date asc; limit 100;",
+    )
+    if not releases:
+        return []
+    seen: set = set()
+    ids = []
+    for r in releases:
+        gid = r.get("game")
+        if isinstance(gid, int) and gid not in seen:
+            seen.add(gid)
+            ids.append(str(gid))
+    if not ids:
+        return []
+    return await igdb_request(
+        "games",
+        f"fields name, cover.url, first_release_date, genres.name, platforms.name; where id = ({','.join(ids)}) & cover != null; limit 20;",
+    )
+
+
+async def get_games_by_genre(genre_id: int):
+    return await igdb_request(
+        "games",
+        f"fields name, cover.url, first_release_date, genres.name, platforms.name, aggregated_rating; where genres = ({genre_id}) & cover != null & category = (0,4,8,9,10) & aggregated_rating_count > 5; sort aggregated_rating desc; limit 20;",
+    )
+
+
+async def get_similar_games(game_id: int):
+    result = await igdb_request(
+        "games",
+        f"fields similar_games.name, similar_games.cover.url, similar_games.first_release_date, similar_games.genres.name; where id = {game_id};",
+    )
+    if result and result[0].get("similar_games"):
+        return result[0]["similar_games"]
+    return []
