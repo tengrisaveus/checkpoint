@@ -99,7 +99,7 @@ export default function Profile() {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-[#0d0015] text-[#a78bba] p-8">
+      <div className="min-h-screen bg-[var(--cp-bg)] text-[var(--cp-text-dim)] p-8">
         Loading...
       </div>
     );
@@ -111,7 +111,7 @@ export default function Profile() {
     : 163.36;
 
   return (
-    <div className="min-h-screen bg-[#0d0015] p-8">
+    <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
       {success && (
         <Toast
           message={success}
@@ -123,38 +123,40 @@ export default function Profile() {
         <Toast message={error} type="error" onClose={() => setError("")} />
       )}
 
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-full bg-[#2d1b4e] flex items-center justify-center text-2xl font-medium text-fuchsia-400">
+      <div className="max-w-5xl mx-auto">
+        {/* Header — The Vitrine */}
+        <div className="flex items-center gap-4 mb-3">
+          <div className="w-14 h-14 rounded-full bg-[var(--cp-surf-2)] flex items-center justify-center text-2xl font-medium text-[var(--cp-accent)]">
             {user?.username?.[0]?.toUpperCase()}
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-medium text-white">
+            <h1 className="font-display text-2xl text-[var(--cp-text)]">
               {user?.username}
             </h1>
-            <p className="text-[#8a6baa] text-xs mt-1">
-              {stats?.total_games || 0} games in library
-            </p>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                const url = `${window.location.origin}/u/${user?.username}`;
-                navigator.clipboard.writeText(url);
-                setSuccess("Profile link copied!");
-              }}
-              className="px-4 py-2 rounded-lg border border-[#2d1b4e] text-[#a78bba] text-sm hover:border-fuchsia-500/50 hover:text-fuchsia-400 transition"
-            >
-              Share
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/u/${user?.username}`;
+              navigator.clipboard.writeText(url);
+              setSuccess("Profile link copied!");
+            }}
+            className="px-4 py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dim)] text-sm hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-accent)] transition"
+          >
+            Share
+          </button>
         </div>
 
+        {/* Stats line */}
+        {stats && stats.total_games > 0 && (
+          <p className="font-mono text-[var(--cp-text-dim)] text-[11px] mb-8 tracking-wide">
+            {stats.total_games} games · {stats.by_status["Completed"] || 0} completed · avg ★ {stats.average_rating || "—"} · joined {new Date(user?.created_at || "").toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+          </p>
+        )}
+
         {/* Favorites */}
-        <h2 className="text-[15px] font-medium text-white mb-3">
-          Favorite games
-        </h2>
+        <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">
+          FAVORITE GAMES
+        </p>
         <div className="grid grid-cols-4 gap-3 mb-8">
           {slots.map((i) => {
             const fav = favorites[i];
@@ -170,22 +172,22 @@ export default function Profile() {
                         <img
                           src={getCoverUrl(fav.game_cover_url)!}
                           alt={fav.game_name}
-                          className="w-full aspect-[3/4] object-cover rounded-[10px]"
+                          className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
                         />
                       ) : (
-                        <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-[10px] flex items-center justify-center text-[#8a6baa] text-sm">
+                        <div className="w-full aspect-[3/4] bg-[var(--cp-surf-2)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-sm cover-placeholder italic">
                           {fav.game_name}
                         </div>
                       )}
                     </div>
                     <button
                       onClick={() => handleRemoveFavorite(fav.game_id)}
-                      className="absolute top-2 right-2 bg-black/60 text-fuchsia-400 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-sm"
+                      className="absolute top-2 right-2 bg-black/60 text-[var(--cp-accent)] rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-sm"
                     >
                       ✕
                     </button>
                   </div>
-                  <p className="text-[11px] text-[#c4a8d8] mt-1.5 truncate">
+                  <p className="text-[11px] text-[var(--cp-text-dim)] mt-1.5 truncate">
                     {fav.game_name}
                   </p>
                 </div>
@@ -195,7 +197,7 @@ export default function Profile() {
               <div key={`empty-${i}`}>
                 <button
                   onClick={() => setPickerOpen(true)}
-                  className="w-full aspect-[3/4] bg-[#1a0a2e] rounded-[10px] border-2 border-dashed border-[#2d1b4e] flex items-center justify-center text-[#8a6baa] hover:border-fuchsia-500 hover:text-fuchsia-400 transition cursor-pointer text-2xl"
+                  className="w-full aspect-[3/4] bg-[var(--cp-surf)] rounded-md border-2 border-dashed border-[var(--cp-border)] flex items-center justify-center text-[var(--cp-text-dimmer)] hover:border-[var(--cp-accent)] hover:text-[var(--cp-accent)] transition cursor-pointer text-2xl"
                 >
                   +
                 </button>
@@ -206,160 +208,114 @@ export default function Profile() {
 
         {stats && stats.total_games > 0 && (
           <>
-            {/* Completion + Avg Rating */}
-            <div className="grid grid-cols-3 gap-3 mb-3">
-              <div className="col-span-2 bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50">
+            {/* Completion + Avg Rating — The Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)]">
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 shrink-0">
                     <svg viewBox="0 0 64 64" className="w-16 h-16 -rotate-90">
-                      <circle
-                        cx="32"
-                        cy="32"
-                        r="26"
-                        fill="none"
-                        stroke="#2d1b4e"
-                        strokeWidth="6"
-                      />
-                      <circle
-                        cx="32"
-                        cy="32"
-                        r="26"
-                        fill="none"
-                        stroke="#22c55e"
-                        strokeWidth="6"
-                        strokeDasharray="163.36"
-                        strokeDashoffset={completionDash}
-                        strokeLinecap="round"
-                      />
+                      <circle cx="32" cy="32" r="26" fill="none" stroke="var(--cp-surf-2)" strokeWidth="6" />
+                      <circle cx="32" cy="32" r="26" fill="none" stroke="#22c55e" strokeWidth="6"
+                        strokeDasharray="163.36" strokeDashoffset={completionDash} strokeLinecap="round" />
                     </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-white font-medium">
+                    <div className="absolute inset-0 flex items-center justify-center text-[var(--cp-text)] font-mono font-medium text-sm">
                       {stats.completion_ratio}%
                     </div>
                   </div>
                   <div>
-                    <p className="text-[12px] text-[#8a6baa]">
+                    <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider">
                       Completion rate
                     </p>
-                    <p className="text-[13px] text-[#a78bba] mt-1">
-                      {stats.by_status["Completed"] || 0} of {stats.total_games}{" "}
-                      games completed
+                    <p className="text-[var(--cp-text-dim)] text-sm mt-1">
+                      {stats.by_status["Completed"] || 0} of {stats.total_games} games completed
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 flex flex-col items-center justify-center">
-                <p className="text-3xl font-medium text-yellow-400">
-                  {stats.average_rating || "—"}
-                </p>
-                <p className="text-[12px] text-[#8a6baa]">Avg rating</p>
+
+              {/* Status breakdown mini */}
+              <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)]">
+                <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider mb-3">STATUS</p>
+                {Object.entries(stats.by_status).map(([status, count]) => (
+                  <div key={status} className="flex items-center gap-3 mb-2 last:mb-0">
+                    <span className="status-dot" style={{ backgroundColor: STATUS_COLORS[status] || "#6b7280" }} />
+                    <span className="text-[12px] text-[var(--cp-text-dim)] w-24">{status}</span>
+                    <div className="flex-1 h-1.5 bg-[var(--cp-bg)] rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${(count / stats.total_games) * 100}%`,
+                          backgroundColor: STATUS_COLORS[status] || "#6b7280",
+                        }}
+                      />
+                    </div>
+                    <span className="font-mono text-[11px] text-[var(--cp-text-dimmer)] w-6 text-right">{count}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Small stat cards */}
             <div className="grid grid-cols-4 gap-3 mb-8">
-              <div className="bg-[#1a0a2e] rounded-xl p-3 border border-[#2d1b4e]/50 text-center">
-                <p className="text-xl font-medium text-white">
-                  {stats.total_games}
-                </p>
-                <p className="text-[11px] text-[#8a6baa]">Total</p>
+              <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
+                <p className="text-xl font-medium text-[var(--cp-text)] font-mono">{stats.total_games}</p>
+                <p className="font-mono text-[10px] text-[var(--cp-text-dimmer)] uppercase tracking-wider mt-1">Total</p>
               </div>
-              <div className="bg-[#1a0a2e] rounded-xl p-3 border border-[#2d1b4e]/50 text-center">
-                <p className="text-xl font-medium text-green-400">
-                  {stats.by_status["Completed"] || 0}
-                </p>
-                <p className="text-[11px] text-[#8a6baa]">Completed</p>
+              <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
+                <p className="text-xl font-medium text-green-400 font-mono">{stats.by_status["Completed"] || 0}</p>
+                <p className="font-mono text-[10px] text-[var(--cp-text-dimmer)] uppercase tracking-wider mt-1">Completed</p>
               </div>
-              <div className="bg-[#1a0a2e] rounded-xl p-3 border border-[#2d1b4e]/50 text-center">
-                <p className="text-xl font-medium text-blue-400">
-                  {stats.by_status["Playing"] || 0}
-                </p>
-                <p className="text-[11px] text-[#8a6baa]">Playing</p>
+              <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
+                <p className="text-xl font-medium text-blue-400 font-mono">{stats.by_status["Playing"] || 0}</p>
+                <p className="font-mono text-[10px] text-[var(--cp-text-dimmer)] uppercase tracking-wider mt-1">Playing</p>
               </div>
-              <div className="bg-[#1a0a2e] rounded-xl p-3 border border-[#2d1b4e]/50 text-center">
-                <p className="text-xl font-medium text-red-400">
-                  {stats.by_status["Dropped"] || 0}
-                </p>
-                <p className="text-[11px] text-[#8a6baa]">Dropped</p>
+              <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
+                <p className="text-xl font-medium text-[var(--cp-star)] font-mono">{stats.average_rating || "—"}</p>
+                <p className="font-mono text-[10px] text-[var(--cp-text-dimmer)] uppercase tracking-wider mt-1">Avg Rating</p>
               </div>
             </div>
 
             {/* Top Genres */}
             {stats.top_genres.length > 0 && (
               <>
-                <h2 className="text-[15px] font-medium text-white mb-3">
-                  Top genres
-                </h2>
-                <div className="flex gap-2 flex-wrap mb-8">
-                  {stats.top_genres.map((genre) => (
-                    <span
-                      key={genre.name}
-                      className="px-3 py-1.5 rounded-full bg-[#1a0a2e] border border-[#2d1b4e]/50 text-[12px] text-[#c4a8d8]"
-                    >
-                      {genre.name}{" "}
-                      <span className="text-fuchsia-400 font-medium">
-                        {genre.count}
-                      </span>
-                    </span>
-                  ))}
+                <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">TOP GENRES</p>
+                <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)] mb-8">
+                  {stats.top_genres.slice(0, 6).map((genre) => {
+                    const maxCount = stats.top_genres[0]?.count || 1
+                    return (
+                      <div key={genre.name} className="flex items-center gap-3 mb-2 last:mb-0">
+                        <span className="text-[12px] text-[var(--cp-text-dim)] w-28 truncate">{genre.name}</span>
+                        <div className="flex-1 h-1.5 bg-[var(--cp-bg)] rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[var(--cp-accent-2)]"
+                            style={{ width: `${(genre.count / maxCount) * 100}%` }}
+                          />
+                        </div>
+                        <span className="font-mono text-[11px] text-[var(--cp-text-dimmer)] w-6 text-right">{genre.count}</span>
+                      </div>
+                    )
+                  })}
                 </div>
               </>
             )}
 
-            {/* Status Breakdown */}
-            <h2 className="text-[15px] font-medium text-white mb-3">
-              Status breakdown
-            </h2>
-            <div className="bg-[#1a0a2e] rounded-xl p-5 border border-[#2d1b4e]/50 mb-8">
-              {Object.entries(stats.by_status).map(([status, count]) => (
-                <div
-                  key={status}
-                  className="flex items-center gap-3 mb-2 last:mb-0"
-                >
-                  <span className="text-[12px] text-[#a78bba] w-24 text-right shrink-0">
-                    {status}
-                  </span>
-                  <div className="flex-1 h-2 bg-[#0d0015] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${(count / stats.total_games) * 100}%`,
-                        backgroundColor: STATUS_COLORS[status] || "#6b7280",
-                      }}
-                    />
-                  </div>
-                  <span className="text-[12px] text-[#8a6baa] w-6">
-                    {count}
-                  </span>
-                </div>
-              ))}
-            </div>
-
             {/* Monthly Activity */}
             {monthly.some((m) => m.count > 0) && (
               <>
-                <h2 className="text-[15px] font-medium text-white mb-3">
-                  Monthly activity
-                </h2>
-                <div className="bg-[#1a0a2e] rounded-xl p-5 border border-[#2d1b4e]/50 mb-8">
+                <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">MONTHLY ACTIVITY</p>
+                <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)] mb-8">
                   <div className="flex items-end gap-2 h-24">
                     {monthly.map((m) => (
-                      <div
-                        key={m.month}
-                        className="flex-1 flex flex-col items-center gap-1"
-                      >
+                      <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
                         <div
-                          className="w-full rounded-t bg-fuchsia-500"
+                          className="w-full rounded-t"
                           style={{
-                            height:
-                              m.count > 0
-                                ? `${(m.count / maxMonthly) * 80}px`
-                                : "4px",
+                            height: m.count > 0 ? `${(m.count / maxMonthly) * 80}px` : "4px",
                             opacity: m.count > 0 ? 1 : 0.2,
+                            backgroundColor: "var(--cp-accent-2)",
                           }}
                         />
-                        <span className="text-[11px] text-[#8a6baa]">
-                          {m.label}
-                        </span>
+                        <span className="font-mono text-[10px] text-[var(--cp-text-dimmer)]">{m.label}</span>
                       </div>
                     ))}
                   </div>
@@ -370,13 +326,13 @@ export default function Profile() {
         )}
 
         {stats && stats.total_games === 0 && (
-          <p className="text-[#a78bba] text-center">
+          <p className="text-[var(--cp-text-dim)] text-center font-display text-xl italic mt-12">
             No games in library yet.
             <span
               onClick={() => navigate("/search")}
-              className="text-fuchsia-400 hover:underline cursor-pointer ml-1"
+              className="text-[var(--cp-accent)] cursor-pointer hover:brightness-110 transition not-italic text-base ml-2"
             >
-              Search for games
+              Search for games →
             </span>
           </p>
         )}

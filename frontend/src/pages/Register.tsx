@@ -24,47 +24,56 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0015] flex items-center justify-center">
-      <div className="bg-[#1a0a2e] p-8 rounded-lg w-full max-w-md border border-[#2d1b4e]">
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">Register</h1>
+    <div className="min-h-screen bg-[var(--cp-bg)] flex items-center justify-center">
+      <div className="bg-[var(--cp-surf)] p-8 rounded-lg w-full max-w-md border border-[var(--cp-border)]">
+        <h1 className="font-display text-2xl text-[var(--cp-text)] mb-6 text-center">Register</h1>
 
         {error && (
-          <p className="bg-fuchsia-500/20 text-fuchsia-400 p-3 rounded mb-4">{error}</p>
+          <p className="bg-[var(--cp-accent)]/20 text-[var(--cp-accent)] p-3 rounded-sm mb-4 text-sm">{error}</p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
-          />
-          <input
-            type="password"
-            placeholder="Password (min 6 characters)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
-          />
+          <div>
+            <label className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider block mb-1.5">USERNAME</label>
+            <input
+              type="text"
+              placeholder="Your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)]"
+            />
+          </div>
+          <div>
+            <label className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider block mb-1.5">EMAIL</label>
+            <input
+              type="email"
+              placeholder="you@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)]"
+            />
+          </div>
+          <div>
+            <label className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider block mb-1.5">PASSWORD</label>
+            <input
+              type="password"
+              placeholder="Min 6 characters"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)]"
+            />
+          </div>
           <button
             type="submit"
-            className="w-full p-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition"
+            className="w-full p-3 rounded-sm bg-[var(--cp-accent)] text-white font-semibold hover:brightness-110 transition"
           >
             Register
           </button>
         </form>
 
-        <p className="text-[#a78bba] text-center mt-4">
+        <p className="text-[var(--cp-text-dim)] text-center mt-4 text-sm">
           Already have an account?{" "}
-          <Link to="/login" className="text-fuchsia-400 hover:underline">Login</Link>
+          <Link to="/login" className="text-[var(--cp-accent)] hover:brightness-110 transition">Login</Link>
         </p>
       </div>
     </div>

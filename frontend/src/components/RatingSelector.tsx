@@ -18,10 +18,10 @@ export default function RatingSelector({ value, onChange, readonly }: RatingSele
           type="button"
           onClick={() => handleClick(n)}
           disabled={readonly}
-          className={`w-8 h-8 rounded text-sm font-medium transition ${
+          className={`w-8 h-8 rounded-sm text-sm font-mono font-medium transition ${
             value !== null && n <= value
-              ? "bg-yellow-400 text-[#0d0015]"
-              : "bg-[#2d1b4e] text-[#a78bba] hover:bg-[#3d2b5e] hover:text-white"
+              ? "bg-[var(--cp-star)] text-[var(--cp-bg)]"
+              : "bg-transparent text-[var(--cp-text-dimmer)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
           } ${readonly ? "cursor-default" : "cursor-pointer"}`}
         >
           {n}

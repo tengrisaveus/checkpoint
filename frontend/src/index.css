@@ -1,5 +1,59 @@
 @import "tailwindcss";
 
+:root {
+  /* Refined palette */
+  --cp-bg: #0a0610;
+  --cp-surf: #140b1f;
+  --cp-surf-2: #1e1430;
+  --cp-border: #2a1f42;
+  --cp-text: #ece6f5;
+  --cp-text-dim: #9a8eb0;
+  --cp-text-dimmer: #6b617d;
+  --cp-accent: #e94ec2;
+  --cp-accent-2: #8b5cf6;
+  --cp-success: #4ade80;
+  --cp-star: #fbbf24;
+}
+
 html, body, #root {
   overflow-x: hidden;
+}
+
+body {
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: 'Instrument Serif', serif;
+}
+
+.font-mono {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+}
+
+/* Cover art hover: scale + glow instead of ring */
+.cover-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.group:hover .cover-hover,
+.cover-hover:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(233, 78, 194, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Cover placeholder styling */
+.cover-placeholder {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+}
+
+/* Status dot */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
 }

@@ -35,14 +35,13 @@ export default function Search() {
   const [hasSearched, setHasSearched] = useState(false)
   const navigate = useNavigate()
 
-  // Fetch popular games on mount
   useEffect(() => {
-  api
-    .get("/games/new-releases")
-    .then((res) => setPopular(res.data))
-    .catch(() => {})
-    .finally(() => setLoadingPopular(false))
-}, [])
+    api
+      .get("/games/new-releases")
+      .then((res) => setPopular(res.data))
+      .catch(() => {})
+      .finally(() => setLoadingPopular(false))
+  }, [])
 
   const handleSearch = async (searchQuery?: string) => {
     const q = searchQuery || query
@@ -72,41 +71,37 @@ export default function Search() {
     setRecentSearches([])
   }
 
-  // Get unique genres from results for filter chips
   const allGenres = Array.from(
     new Set(results.flatMap((g) => g.genres?.map((genre) => genre.name) || []))
   ).sort()
 
-  // Apply genre filter
   const EDITION_KEYWORDS = ["edition", "bundle", "pack", "set", "collection", "limited", "steelbook", "deluxe", "ultimate", "launch ed", "gold", "premium", "goty"]
 
-const filteredResults = (activeGenre
-  ? results.filter((g) => g.genres?.some((genre) => genre.name === activeGenre))
-  : results
-).filter((g) => {
-  // Category filter
-  if (g.category && ![0, 4, 8, 9, 10].includes(g.category)) return false
-  // Edition/bundle name filter
-  const lower = g.name.toLowerCase()
-  return !EDITION_KEYWORDS.some((kw) => lower.includes(kw))
-})
+  const filteredResults = (activeGenre
+    ? results.filter((g) => g.genres?.some((genre) => genre.name === activeGenre))
+    : results
+  ).filter((g) => {
+    if (g.category && ![0, 4, 8, 9, 10].includes(g.category)) return false
+    const lower = g.name.toLowerCase()
+    return !EDITION_KEYWORDS.some((kw) => lower.includes(kw))
+  })
 
   const renderGameCard = (game: Game) => (
     <div
       key={game.id}
       onClick={() => navigate(`/game/${game.id}`)}
-      className="bg-[#1a0a2e] rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-fuchsia-500 transition border border-[#2d1b4e]"
+      className="bg-[var(--cp-surf)] rounded-md overflow-hidden cursor-pointer border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/30 transition group"
     >
       {getCoverUrl(game) ? (
-        <img src={getCoverUrl(game)!} alt={game.name} className="w-full h-64 object-cover" />
+        <img src={getCoverUrl(game)!} alt={game.name} className="w-full h-64 object-cover cover-hover" />
       ) : (
-        <div className="w-full h-64 bg-[#2d1b4e] flex items-center justify-center text-[#8a6baa]">
-          No Cover
+        <div className="w-full h-64 bg-[var(--cp-surf-2)] flex items-center justify-center text-[var(--cp-text-dimmer)] cover-placeholder italic">
+          {game.name}
         </div>
       )}
       <div className="p-3">
-        <h3 className="text-white font-semibold text-sm truncate">{game.name}</h3>
-        <p className="text-[#a78bba] text-xs mt-1">
+        <h3 className="text-[var(--cp-text)] font-semibold text-sm truncate">{game.name}</h3>
+        <p className="font-mono text-[var(--cp-text-dim)] text-xs mt-1">
           {getYear(game.first_release_date)}
           {game.genres && ` · ${game.genres.map((g) => g.name).join(", ")}`}
         </p>
@@ -115,9 +110,9 @@ const filteredResults = (activeGenre
   )
 
   return (
-    <div className="min-h-screen bg-[#0d0015] p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-6">Search Games</h1>
+    <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
+      <div className="max-w-[1440px] mx-auto">
+        <h1 className="font-display text-3xl md:text-4xl text-[var(--cp-text)] mb-6">Search Games</h1>
 
         <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
           <input
@@ -125,12 +120,12 @@ const filteredResults = (activeGenre
             placeholder="Search for a game..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
+            className="flex-1 p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)]"
             required
           />
           <button
             type="submit"
-            className="px-6 py-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition"
+            className="px-6 py-3 rounded-sm bg-[var(--cp-accent)] text-white font-semibold hover:brightness-110 transition"
           >
             Search
           </button>
@@ -140,8 +135,8 @@ const filteredResults = (activeGenre
         {!hasSearched && recentSearches.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[#8a6baa] text-xs uppercase tracking-wider">Recent searches</p>
-              <button onClick={clearRecent} className="text-[#8a6baa] text-xs hover:text-fuchsia-400 transition">
+              <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider">Recent searches</p>
+              <button onClick={clearRecent} className="text-[var(--cp-text-dimmer)] text-xs hover:text-[var(--cp-accent)] transition">
                 Clear
               </button>
             </div>
@@ -153,7 +148,7 @@ const filteredResults = (activeGenre
                     setQuery(q)
                     handleSearch(q)
                   }}
-                  className="px-3 py-1.5 rounded-full bg-[#1a0a2e] border border-[#2d1b4e] text-sm text-[#c4a8d8] hover:border-fuchsia-500/50 hover:text-fuchsia-400 transition"
+                  className="px-3 py-1.5 rounded-sm bg-[var(--cp-surf)] border border-[var(--cp-border)] text-sm text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-accent)] transition"
                 >
                   {q}
                 </button>
@@ -164,8 +159,8 @@ const filteredResults = (activeGenre
 
         {/* Loading */}
         {loading && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
               <CardSkeleton key={i} />
             ))}
           </div>
@@ -176,10 +171,10 @@ const filteredResults = (activeGenre
           <div className="flex gap-2 flex-wrap mb-4">
             <button
               onClick={() => setActiveGenre(null)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+              className={`px-3 py-1 rounded-sm text-xs font-medium transition ${
                 activeGenre === null
-                  ? "bg-fuchsia-500 text-white"
-                  : "bg-[#1a0a2e] text-[#a78bba] border border-[#2d1b4e] hover:border-fuchsia-500/50"
+                  ? "bg-[var(--cp-accent)] text-white"
+                  : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50"
               }`}
             >
               All ({results.length})
@@ -192,10 +187,10 @@ const filteredResults = (activeGenre
                 <button
                   key={genre}
                   onClick={() => setActiveGenre(activeGenre === genre ? null : genre)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                  className={`px-3 py-1 rounded-sm text-xs font-medium transition ${
                     activeGenre === genre
-                      ? "bg-fuchsia-500 text-white"
-                      : "bg-[#1a0a2e] text-[#a78bba] border border-[#2d1b4e] hover:border-fuchsia-500/50"
+                      ? "bg-[var(--cp-accent)] text-white"
+                      : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50"
                   }`}
                 >
                   {genre} ({count})
@@ -207,31 +202,31 @@ const filteredResults = (activeGenre
 
         {/* Search Results */}
         {!loading && results.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {filteredResults.map(renderGameCard)}
           </div>
         )}
 
         {!loading && results.length === 0 && hasSearched && (
-          <p className="text-[#a78bba] text-center">No games found</p>
+          <p className="text-[var(--cp-text-dim)] text-center font-display text-xl italic mt-12">No games found</p>
         )}
 
-        {/* Popular Games — shown when no search yet */}
+        {/* New Releases — shown when no search yet */}
         {!hasSearched && !loading && (
           <div>
-            <h2 className="text-[15px] font-medium text-white mb-3">New releases</h2>
+            <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">NEW RELEASES</p>
             {loadingPopular ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {Array.from({ length: 10 }).map((_, i) => (
                   <CardSkeleton key={i} />
                 ))}
               </div>
             ) : popular.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {popular.map(renderGameCard)}
               </div>
             ) : (
-              <p className="text-[#8a6baa] text-sm">Could not load popular games</p>
+              <p className="text-[var(--cp-text-dimmer)] text-sm">Could not load new releases</p>
             )}
           </div>
         )}

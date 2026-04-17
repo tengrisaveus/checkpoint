@@ -5,6 +5,12 @@ import { useEffect, useState } from "react";
 import api from "../api";
 import type { DiaryEntry, Game } from "../types";
 
+const STATUS_COLORS: Record<string, string> = {
+  Completed: "#22c55e",
+  Playing: "#3b82f6",
+  "Want to Play": "#eab308",
+  Dropped: "#ef4444",
+};
 
 interface LibraryEntryWithGame {
   game_id: number;
@@ -21,6 +27,25 @@ interface StatsData {
   completion_ratio: number;
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function getWeekDay(): string {
+  return new Date().toLocaleDateString("en-US", { weekday: "long" });
+}
+
+function getDateLabel(): string {
+  const now = new Date();
+  const month = now.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+  const day = now.getDate();
+  const weekNum = Math.ceil(((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7);
+  return `${month} ${day} · WK ${weekNum}`;
+}
+
 export default function Home() {
   const { user, loading, login } = useAuth();
   const navigate = useNavigate();
@@ -30,23 +55,15 @@ export default function Home() {
   const [demoLoading, setDemoLoading] = useState(false);
   const [popularGames, setPopularGames] = useState<Game[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
+  const [communityTab, setCommunityTab] = useState<"popular" | "upcoming">("popular");
 
   useTitle(user ? "Home" : "Checkpoint — Track Your Games");
 
   useEffect(() => {
     if (!user) return;
-    api
-      .get("/library")
-      .then((res) => setRecentGames(res.data.slice(0, 8)))
-      .catch(() => {});
-    api
-      .get("/diary")
-      .then((res) => setRecentDiary(res.data.slice(0, 4)))
-      .catch(() => {});
-    api
-      .get("/library/stats")
-      .then((res) => setStats(res.data))
-      .catch(() => {});
+    api.get("/library").then((res) => setRecentGames(res.data)).catch(() => {});
+    api.get("/diary").then((res) => setRecentDiary(res.data.slice(0, 6))).catch(() => {});
+    api.get("/library/stats").then((res) => setStats(res.data)).catch(() => {});
   }, [user]);
 
   const handleDemo = async () => {
@@ -63,6 +80,11 @@ export default function Home() {
     return url.startsWith("http") ? url : `https:${url}`;
   };
 
+  const getGameCoverUrl = (game: Game) => {
+    if (!game.cover?.url) return null;
+    return `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`;
+  };
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
@@ -72,80 +94,113 @@ export default function Home() {
 
   useEffect(() => {
     if (!user) return;
-    api
-      .get("/games/popular")
-      .then((res) => setPopularGames(res.data))
-      .catch(() => {});
-    api
-      .get("/games/upcoming")
-      .then((res) => setUpcomingGames(res.data))
-      .catch(() => {});
+    api.get("/games/popular").then((res) => setPopularGames(res.data)).catch(() => {});
+    api.get("/games/upcoming").then((res) => setUpcomingGames(res.data)).catch(() => {});
+  }, [user]);
+
+  // Also fetch popular for landing
+  useEffect(() => {
+    if (user) return;
+    api.get("/games/popular").then((res) => setPopularGames(res.data)).catch(() => {});
   }, [user]);
 
   if (loading) return null;
 
-  // Logged out — landing page
+  // ====== LOGGED OUT — EDITORIAL LANDING ======
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#0d0015]">
-        <div className="max-w-4xl mx-auto px-4 pt-24 pb-16 text-center">
-          <img
-            src="/checkpoint-logo.png"
-            alt="Checkpoint"
-            className="h-16 mx-auto mb-8"
-          />
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Track Your <span className="text-fuchsia-500">Gaming</span> Journey
-          </h1>
-          <p className="text-[#a78bba] text-lg md:text-xl max-w-2xl mx-auto mb-10">
-            Keep a record of every game you play. Rate, review, and see your
-            stats — all in one place.
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <button
-              onClick={() => navigate("/register")}
-              className="px-8 py-3 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition text-lg"
-            >
-              Get Started
-            </button>
-            <button
-              onClick={() => navigate("/search")}
-              className="px-8 py-3 rounded bg-[#2d1b4e] text-[#c4a8d8] font-semibold hover:bg-[#3d2b5e] transition text-lg border border-[#3d2b5e]"
-            >
-              Browse Games
-            </button>
-            <button
-              onClick={handleDemo}
-              disabled={demoLoading}
-              className="px-8 py-3 rounded bg-[#1a0a2e] text-fuchsia-400 font-semibold hover:text-fuchsia-300 transition text-lg border border-fuchsia-500/50"
-            >
-              {demoLoading ? "Logging in..." : "Try Demo"}
-            </button>
-          </div>
-        </div>
+      <div className="min-h-screen bg-[var(--cp-bg)]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-20 pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-12 items-start">
+            <div>
+              <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--cp-text-dimmer)]">
+                YOUR GAMING JOURNAL
+              </p>
+              <h1 className="font-display text-5xl md:text-7xl text-[var(--cp-text)] leading-[0.95] mt-3 tracking-tight">
+                Your games, <em className="text-[var(--cp-accent)] italic">remembered</em>.
+              </h1>
+              <p className="text-[var(--cp-text-dim)] text-base md:text-lg leading-relaxed mt-5 max-w-[52ch]">
+                A log, a rating, a review, a list. Checkpoint is where you keep
+                track of what you've played, what you're playing, and what's next.
+              </p>
+              <div className="flex gap-3 mt-8">
+                <button
+                  onClick={() => navigate("/register")}
+                  className="px-6 py-3 rounded-sm bg-[var(--cp-accent)] text-white font-semibold hover:brightness-110 transition text-sm"
+                >
+                  Start tracking
+                </button>
+                <button
+                  onClick={handleDemo}
+                  disabled={demoLoading}
+                  className="px-6 py-3 rounded-sm text-[var(--cp-text)] text-sm border border-[var(--cp-border)] hover:border-[var(--cp-accent)] transition"
+                >
+                  {demoLoading ? "Logging in..." : "Peek as demo →"}
+                </button>
+              </div>
+            </div>
 
-        <div className="max-w-4xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#1a0a2e] rounded-xl p-6 border border-[#2d1b4e]/50 text-center">
-              <div className="text-3xl mb-3">🔍</div>
-              <h3 className="text-white font-medium text-base mb-2">Search</h3>
-              <p className="text-[#8a6baa] text-sm">
-                Browse thousands of games from the IGDB database
+            {/* Right — game covers */}
+            <div>
+              <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[var(--cp-text-dimmer)] mb-3">
+                WHAT'S BEING PLAYED NOW
               </p>
+              <div className="grid grid-cols-2 gap-2">
+                {popularGames.slice(0, 4).map((game) => {
+                  const cover = getGameCoverUrl(game);
+                  return (
+                    <div
+                      key={game.id}
+                      onClick={() => navigate(`/game/${game.id}`)}
+                      className="cursor-pointer group"
+                    >
+                      {cover ? (
+                        <img
+                          src={cover}
+                          alt={game.name}
+                          className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
+                        />
+                      ) : (
+                        <div className="w-full aspect-[3/4] bg-[var(--cp-surf)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-sm cover-placeholder p-2 text-center">
+                          {game.name}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="bg-[#1a0a2e] rounded-xl p-6 border border-[#2d1b4e]/50 text-center">
-              <div className="text-3xl mb-3">📚</div>
-              <h3 className="text-white font-medium text-base mb-2">Track</h3>
-              <p className="text-[#8a6baa] text-sm">
-                Mark games as Playing, Completed, Want to Play, or Dropped
-              </p>
-            </div>
-            <div className="bg-[#1a0a2e] rounded-xl p-6 border border-[#2d1b4e]/50 text-center">
-              <div className="text-3xl mb-3">📊</div>
-              <h3 className="text-white font-medium text-base mb-2">Stats</h3>
-              <p className="text-[#8a6baa] text-sm">
-                See your gaming statistics with charts and insights
-              </p>
+          </div>
+
+          {/* Browse button for non-logged-in */}
+          <div className="mt-12 border-t border-[var(--cp-border)] pt-8">
+            <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[var(--cp-text-dimmer)] mb-4">
+              BROWSE THE CATALOG
+            </p>
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+              {popularGames.slice(4, 10).map((game) => {
+                const cover = getGameCoverUrl(game);
+                return (
+                  <div
+                    key={game.id}
+                    onClick={() => navigate(`/game/${game.id}`)}
+                    className="cursor-pointer group"
+                  >
+                    {cover ? (
+                      <img
+                        src={cover}
+                        alt={game.name}
+                        className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
+                      />
+                    ) : (
+                      <div className="w-full aspect-[3/4] bg-[var(--cp-surf)] rounded-md" />
+                    )}
+                    <p className="text-[11px] text-[var(--cp-text-dim)] mt-1.5 truncate">
+                      {game.name}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -153,166 +208,72 @@ export default function Home() {
     );
   }
 
-  // Logged in — dashboard
-  const completionDash = stats
-    ? 163.36 - (163.36 * stats.completion_ratio) / 100
-    : 163.36;
+  // ====== LOGGED IN — DASHBOARD ======
+  const playingGames = recentGames.filter((g) => g.status === "Playing");
+  const queueGames = recentGames.filter((g) => g.status === "Want to Play");
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const thisWeekDiary = recentDiary.filter(
+    (e) => new Date(e.played_at) >= weekAgo,
+  );
+
+  const communityGames = communityTab === "popular" ? popularGames : upcomingGames;
 
   return (
-    <div className="min-h-screen bg-[#0d0015] p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-full bg-[#2d1b4e] flex items-center justify-center text-2xl font-medium text-fuchsia-400">
-            {user.username?.[0]?.toUpperCase()}
-          </div>
+        <div className="flex items-baseline justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-medium text-white">
-              Welcome back, {user.username}
+            <h1 className="font-display text-2xl md:text-3xl text-[var(--cp-text)] leading-none">
+              {getGreeting()}, <em className="italic">{user.username}</em>.
             </h1>
-            <p className="text-[#8a6baa] text-sm">
-              Here's your gaming activity
+            <p className="text-[var(--cp-text-dim)] text-sm mt-2">
+              {stats ? `${stats.by_status["Playing"] || 0} playing · ${stats.by_status["Completed"] || 0} completed · ${recentDiary.length} diary entries` : "Loading stats..."}
             </p>
           </div>
+          <span className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] hidden md:block">
+            {getDateLabel()}
+          </span>
         </div>
 
-        {/* Quick Stats */}
-        {stats && stats.total_games > 0 && (
-          <div className="grid grid-cols-4 gap-3 mb-8">
-            <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 flex items-center gap-3">
-              <div className="relative w-12 h-12 shrink-0">
-                <svg viewBox="0 0 64 64" className="w-12 h-12 -rotate-90">
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="26"
-                    fill="none"
-                    stroke="#2d1b4e"
-                    strokeWidth="5"
-                  />
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="26"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="5"
-                    strokeDasharray="163.36"
-                    strokeDashoffset={completionDash}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-medium">
-                  {stats.completion_ratio}%
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">
-                  {stats.by_status["Completed"] || 0}/{stats.total_games}
-                </p>
-                <p className="text-[11px] text-[#8a6baa]">Completed</p>
-              </div>
-            </div>
-            <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center flex flex-col justify-center">
-              <p className="text-2xl font-medium text-yellow-400">
-                {stats.average_rating || "—"}
-              </p>
-              <p className="text-[11px] text-[#8a6baa]">Avg rating</p>
-            </div>
-            <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center flex flex-col justify-center">
-              <p className="text-2xl font-medium text-blue-400">
-                {stats.by_status["Playing"] || 0}
-              </p>
-              <p className="text-[11px] text-[#8a6baa]">Playing</p>
-            </div>
-            <div className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center flex flex-col justify-center">
-              <p className="text-2xl font-medium text-fuchsia-400">
-                {stats.total_games}
-              </p>
-              <p className="text-[11px] text-[#8a6baa]">Total games</p>
-            </div>
-          </div>
-        )}
-
-        {/* Recent Library */}
-        {recentGames.length > 0 && (
+        {/* Continue Playing */}
+        {playingGames.length > 0 && (
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[15px] font-medium text-white">
-                Your library
-              </h2>
-              <button
-                onClick={() => navigate("/library")}
-                className="text-fuchsia-400 hover:text-fuchsia-300 text-[12px] transition"
-              >
-                View all →
-              </button>
-            </div>
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-              {recentGames.map((game) => (
+            <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">
+              ▸ CONTINUE PLAYING · {playingGames.length} ACTIVE
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {playingGames.slice(0, 3).map((game) => (
                 <div
                   key={game.game_id}
                   onClick={() => navigate(`/game/${game.game_id}`)}
-                  className="cursor-pointer group"
+                  className="flex gap-3 bg-[var(--cp-surf)] border border-[var(--cp-border)] rounded-lg p-3 cursor-pointer hover:border-[var(--cp-accent)]/30 transition"
                 >
                   {getCoverUrl(game.game_cover_url) ? (
                     <img
                       src={getCoverUrl(game.game_cover_url)!}
                       alt={game.game_name}
-                      className="w-full aspect-[3/4] object-cover rounded-lg group-hover:ring-2 group-hover:ring-fuchsia-500 transition"
+                      className="w-14 aspect-[3/4] object-cover rounded-md shrink-0"
                     />
                   ) : (
-                    <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-lg flex items-center justify-center text-[#8a6baa] text-[10px] text-center p-1">
+                    <div className="w-14 aspect-[3/4] bg-[var(--cp-surf-2)] rounded-md shrink-0 flex items-center justify-center text-[var(--cp-text-dimmer)] text-[9px] cover-placeholder text-center p-1">
                       {game.game_name}
                     </div>
                   )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Recent Diary */}
-        {recentDiary.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[15px] font-medium text-white">
-                Recent diary
-              </h2>
-              <button
-                onClick={() => navigate("/diary")}
-                className="text-fuchsia-400 hover:text-fuchsia-300 text-[12px] transition"
-              >
-                View all →
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {recentDiary.map((entry) => (
-                <div
-                  key={entry.id}
-                  onClick={() => navigate(`/game/${entry.game_id}`)}
-                  className="bg-[#1a0a2e] rounded-xl p-3 flex items-center gap-3 border border-[#2d1b4e]/50 cursor-pointer hover:border-fuchsia-500/30 transition"
-                >
-                  {getCoverUrl(entry.game_cover_url) ? (
-                    <img
-                      src={getCoverUrl(entry.game_cover_url)!}
-                      alt={entry.game_name}
-                      className="w-10 h-14 object-cover rounded-lg"
-                    />
-                  ) : (
-                    <div className="w-10 h-14 bg-[#2d1b4e] rounded-lg" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">
-                      {entry.game_name}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[var(--cp-text)] text-sm font-medium truncate">
+                      {game.game_name}
                     </p>
-                    <p className="text-[#8a6baa] text-[11px]">
-                      {formatDate(entry.played_at)} · {entry.status}
-                      {entry.rating && ` · ★ ${entry.rating}`}
-                    </p>
-                    {entry.note && (
-                      <p className="text-[#8a6baa] text-[11px] truncate mt-0.5">
-                        {entry.note}
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="status-dot" style={{ backgroundColor: STATUS_COLORS["Playing"] }} />
+                      <span className="font-mono text-[10px] text-[var(--cp-text-dimmer)] tracking-wide">
+                        PLAYING
+                      </span>
+                    </div>
+                    {game.rating && (
+                      <p className="font-mono text-[10px] text-[var(--cp-star)] mt-1.5">
+                        {"★".repeat(Math.floor(game.rating / 2))}{game.rating % 2 ? "½" : ""} · {game.rating}/10
                       </p>
                     )}
                   </div>
@@ -322,74 +283,160 @@ export default function Home() {
           </div>
         )}
 
-        {/* Quick Links */}
-        <h2 className="text-[15px] font-medium text-white mb-3">Quick links</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          <button
-            onClick={() => navigate("/search")}
-            className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center hover:border-fuchsia-500/30 transition"
-          >
-            <div className="text-2xl mb-2">🔍</div>
-            <p className="text-white text-sm font-medium">Search</p>
-          </button>
-          <button
-            onClick={() => navigate("/profile")}
-            className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center hover:border-fuchsia-500/30 transition"
-          >
-            <div className="text-2xl mb-2">👤</div>
-            <p className="text-white text-sm font-medium">Profile</p>
-          </button>
-          <button
-            onClick={() => navigate("/diary")}
-            className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center hover:border-fuchsia-500/30 transition"
-          >
-            <div className="text-2xl mb-2">📖</div>
-            <p className="text-white text-sm font-medium">Diary</p>
-          </button>
-          <button
-            onClick={() => navigate("/lists")}
-            className="bg-[#1a0a2e] rounded-xl p-4 border border-[#2d1b4e]/50 text-center hover:border-fuchsia-500/30 transition"
-          >
-            <div className="text-2xl mb-2">📋</div>
-            <p className="text-white text-sm font-medium">Lists</p>
-          </button>
-        </div>
-
-        {/* Popular Games */}
-        {popularGames.length > 0 && (
-          <div className="mb-8">
+        {/* Two columns: This Week Diary + Your Queue */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* This Week Diary */}
+          <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[15px] font-medium text-white">
-                Popular games
-              </h2>
+              <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)]">
+                ▸ DIARY · THIS WEEK
+              </p>
               <button
-                onClick={() => navigate("/search")}
-                className="text-fuchsia-400 hover:text-fuchsia-300 text-[12px] transition"
+                onClick={() => navigate("/diary")}
+                className="text-[var(--cp-accent)] hover:brightness-110 text-[11px] transition"
               >
-                Browse all →
+                View all →
               </button>
             </div>
-            <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
-              {popularGames.slice(0, 10).map((game) => {
-                const cover = game.cover?.url
-                  ? `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`
-                  : null;
+            {thisWeekDiary.length > 0 ? (
+              <div className="space-y-0">
+                {thisWeekDiary.slice(0, 4).map((entry) => (
+                  <div
+                    key={entry.id}
+                    onClick={() => navigate(`/game/${entry.game_id}`)}
+                    className="grid grid-cols-[44px_1fr_auto] gap-3 py-2.5 border-b border-dashed border-[var(--cp-border)] cursor-pointer items-center hover:bg-[var(--cp-surf)]/50 transition"
+                  >
+                    <span className="font-mono text-[11px] text-[var(--cp-text-dimmer)] text-right">
+                      {formatDate(entry.played_at).toUpperCase().replace(",", "")}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[var(--cp-text)] text-[13px] truncate">
+                        {entry.game_name}
+                      </p>
+                      <p className="text-[var(--cp-text-dim)] text-[11px] truncate">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="status-dot" style={{ backgroundColor: STATUS_COLORS[entry.status] || "#6b7280" }} />
+                          {entry.status}
+                        </span>
+                        {entry.note && ` · "${entry.note}"`}
+                      </p>
+                    </div>
+                    <span className="font-mono text-[11px] text-[var(--cp-star)]">
+                      {entry.rating ? "★".repeat(Math.min(Math.floor(entry.rating / 2), 5)) + (entry.rating % 2 ? "½" : "") : "—"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[var(--cp-text-dimmer)] text-sm">No entries this week.</p>
+            )}
+          </div>
+
+          {/* Your Queue */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)]">
+                ▸ YOUR QUEUE · {queueGames.length} GAMES
+              </p>
+              <button
+                onClick={() => navigate("/library")}
+                className="text-[var(--cp-accent)] hover:brightness-110 text-[11px] transition"
+              >
+                View all →
+              </button>
+            </div>
+            {queueGames.length > 0 ? (
+              <>
+                <div className="grid grid-cols-4 gap-2">
+                  {queueGames.slice(0, 4).map((game) => (
+                    <div
+                      key={game.game_id}
+                      onClick={() => navigate(`/game/${game.game_id}`)}
+                      className="cursor-pointer group"
+                    >
+                      {getCoverUrl(game.game_cover_url) ? (
+                        <img
+                          src={getCoverUrl(game.game_cover_url)!}
+                          alt={game.game_name}
+                          className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
+                        />
+                      ) : (
+                        <div className="w-full aspect-[3/4] bg-[var(--cp-surf-2)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-[9px] cover-placeholder p-1 text-center">
+                          {game.game_name}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {queueGames.length > 1 && (
+                  <div className="flex items-center justify-between mt-3 px-3 py-2.5 bg-[var(--cp-surf)] border border-dashed border-[var(--cp-border)] rounded-lg">
+                    <span className="text-[var(--cp-text-dim)] text-[12px]">Can't decide?</span>
+                    <button
+                      onClick={() => {
+                        const random = queueGames[Math.floor(Math.random() * queueGames.length)];
+                        navigate(`/game/${random.game_id}`);
+                      }}
+                      className="font-mono text-[10px] text-[var(--cp-accent)] tracking-wide hover:brightness-110 transition"
+                    >
+                      PICK ONE FOR ME →
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-[var(--cp-text-dimmer)] text-sm">
+                No games in your queue.{" "}
+                <span onClick={() => navigate("/search")} className="text-[var(--cp-accent)] cursor-pointer hover:brightness-110 transition">
+                  Search for games
+                </span>
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* From the Community */}
+        {(popularGames.length > 0 || upcomingGames.length > 0) && (
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-3">
+              <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)]">
+                ▸ FROM THE COMMUNITY
+              </p>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setCommunityTab("popular")}
+                  className={`font-mono text-[10px] tracking-wide px-2.5 py-1 rounded-sm transition ${communityTab === "popular" ? "bg-[var(--cp-accent)]/15 text-[var(--cp-accent)]" : "text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)]"}`}
+                >
+                  HOT
+                </button>
+                <button
+                  onClick={() => setCommunityTab("upcoming")}
+                  className={`font-mono text-[10px] tracking-wide px-2.5 py-1 rounded-sm transition ${communityTab === "upcoming" ? "bg-[var(--cp-accent)]/15 text-[var(--cp-accent)]" : "text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)]"}`}
+                >
+                  UPCOMING
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: "thin" }}>
+              {communityGames.slice(0, 10).map((game) => {
+                const cover = getGameCoverUrl(game);
                 return (
                   <div
                     key={game.id}
                     onClick={() => navigate(`/game/${game.id}`)}
-                    className="cursor-pointer group"
+                    className="cursor-pointer group shrink-0 w-[132px]"
                   >
                     {cover ? (
                       <img
                         src={cover}
                         alt={game.name}
-                        className="w-full aspect-[3/4] object-cover rounded-lg group-hover:ring-2 group-hover:ring-fuchsia-500 transition"
+                        className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
                       />
                     ) : (
-                      <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-lg" />
+                      <div className="w-full aspect-[3/4] bg-[var(--cp-surf)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-xs cover-placeholder p-2 text-center">
+                        {game.name}
+                      </div>
                     )}
-                    <p className="text-[11px] text-[#c4a8d8] mt-1.5 truncate">
+                    <p className="text-[11px] text-[var(--cp-text-dim)] mt-1.5 truncate">
                       {game.name}
                     </p>
                   </div>
@@ -399,38 +446,40 @@ export default function Home() {
           </div>
         )}
 
-        {/* Upcoming Games */}
-        {upcomingGames.length > 0 && (
+        {/* Library overview (if no playing games, show recent library) */}
+        {playingGames.length === 0 && recentGames.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-[15px] font-medium text-white mb-3">
-              Coming soon
-            </h2>
-            <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
-              {upcomingGames.slice(0, 10).map((game) => {
-                const cover = game.cover?.url
-                  ? `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`
-                  : null;
-                return (
-                  <div
-                    key={game.id}
-                    onClick={() => navigate(`/game/${game.id}`)}
-                    className="cursor-pointer group"
-                  >
-                    {cover ? (
-                      <img
-                        src={cover}
-                        alt={game.name}
-                        className="w-full aspect-[3/4] object-cover rounded-lg group-hover:ring-2 group-hover:ring-fuchsia-500 transition"
-                      />
-                    ) : (
-                      <div className="w-full aspect-[3/4] bg-[#2d1b4e] rounded-lg" />
-                    )}
-                    <p className="text-[11px] text-[#c4a8d8] mt-1.5 truncate">
-                      {game.name}
-                    </p>
-                  </div>
-                );
-              })}
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)]">
+                ▸ YOUR LIBRARY
+              </p>
+              <button
+                onClick={() => navigate("/library")}
+                className="text-[var(--cp-accent)] hover:brightness-110 text-[11px] transition"
+              >
+                View all →
+              </button>
+            </div>
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+              {recentGames.slice(0, 8).map((game) => (
+                <div
+                  key={game.game_id}
+                  onClick={() => navigate(`/game/${game.game_id}`)}
+                  className="cursor-pointer group"
+                >
+                  {getCoverUrl(game.game_cover_url) ? (
+                    <img
+                      src={getCoverUrl(game.game_cover_url)!}
+                      alt={game.game_name}
+                      className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[3/4] bg-[var(--cp-surf-2)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-[9px] cover-placeholder p-1 text-center">
+                      {game.game_name}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}

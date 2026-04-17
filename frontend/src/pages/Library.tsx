@@ -7,6 +7,13 @@ import RatingSelector from "../components/RatingSelector"
 import { ListSkeleton } from "../components/Skeleton"
 import useTitle from "../hooks/useTitle"
 
+const STATUS_COLORS: Record<string, string> = {
+  Completed: "#22c55e",
+  Playing: "#3b82f6",
+  "Want to Play": "#eab308",
+  Dropped: "#ef4444",
+}
+
 interface LibraryEntryWithGame extends LibraryEntry {
   game_name: string
   game_cover_url: string | null
@@ -67,84 +74,89 @@ export default function Library() {
   const filtered = filter ? entries.filter((e) => e.status === filter) : entries
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0d0015] p-8">
-      <div className="max-w-4xl mx-auto space-y-4">
+    <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
+      <div className="max-w-[1440px] mx-auto space-y-4">
         {Array.from({ length: 5 }).map((_, i) => <ListSkeleton key={i} />)}
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#0d0015] p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-6">My Library</h1>
+    <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
+      <div className="max-w-[1440px] mx-auto">
+        <h1 className="font-display text-3xl md:text-4xl text-[var(--cp-text)] mb-6">My Library</h1>
 
+        {/* Filter chips */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {["", ...GAME_STATUSES].map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`px-4 py-2 rounded text-sm font-medium transition ${
+              className={`px-4 py-2 rounded-sm text-sm font-medium transition flex items-center gap-2 ${
                 filter === s
-                  ? "bg-fuchsia-500 text-white"
-                  : "bg-[#2d1b4e] text-[#c4a8d8] hover:bg-[#3d2b5e] border border-[#3d2b5e]"
+                  ? "bg-[var(--cp-accent)] text-white"
+                  : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50"
               }`}
             >
+              {s && <span className="status-dot" style={{ backgroundColor: STATUS_COLORS[s] || "#6b7280" }} />}
               {s || "All"}
             </button>
           ))}
         </div>
 
         {filtered.length === 0 && (
-          <p className="text-[#a78bba] text-center">
+          <p className="text-[var(--cp-text-dim)] text-center font-display text-xl italic mt-12">
             {filter ? `No ${filter} games` : "Your library is empty."}
             {!filter && (
-              <span onClick={() => navigate("/")} className="text-fuchsia-400 hover:underline cursor-pointer ml-1">
-                Search for games
+              <span onClick={() => navigate("/search")} className="text-[var(--cp-accent)] hover:brightness-110 cursor-pointer ml-2 not-italic text-base">
+                Search for games →
               </span>
             )}
           </p>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {filtered.map((entry) => (
-            <div key={entry.id} className="bg-[#1a0a2e] rounded-lg p-4 flex gap-4 items-center border border-[#2d1b4e]">
+            <div key={entry.id} className="bg-[var(--cp-surf)] rounded-lg p-4 flex gap-4 items-center border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/20 transition">
               <div onClick={() => navigate(`/game/${entry.game_id}`)} className="cursor-pointer">
                 {getCoverUrl(entry.game_cover_url) ? (
-                  <img src={getCoverUrl(entry.game_cover_url)!} alt={entry.game_name} className="w-16 h-20 object-cover rounded" />
+                  <img src={getCoverUrl(entry.game_cover_url)!} alt={entry.game_name} className="w-16 h-20 object-cover rounded-md cover-hover" />
                 ) : (
-                  <div className="w-16 h-20 bg-[#2d1b4e] rounded flex items-center justify-center text-[#8a6baa] text-xs">No Cover</div>
+                  <div className="w-16 h-20 bg-[var(--cp-surf-2)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-xs cover-placeholder">N/A</div>
                 )}
               </div>
 
               <div className="flex-1">
                 <h3
                   onClick={() => navigate(`/game/${entry.game_id}`)}
-                  className="text-white font-semibold cursor-pointer hover:text-fuchsia-400 transition"
+                  className="text-[var(--cp-text)] font-semibold cursor-pointer hover:text-[var(--cp-accent)] transition"
                 >
                   {entry.game_name}
                 </h3>
 
                 <div className="flex items-center gap-3 mt-2">
-                  <select
-                    value={entry.status}
-                    onChange={(e) => handleStatusChange(entry.game_id, e.target.value)}
-                    className="p-1 rounded bg-[#2d1b4e] text-[#c4a8d8] text-sm outline-none border border-[#3d2b5e]"
-                  >
-                    {GAME_STATUSES.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
+                  <div className="flex items-center gap-1.5">
+                    <span className="status-dot" style={{ backgroundColor: STATUS_COLORS[entry.status] || "#6b7280" }} />
+                    <select
+                      value={entry.status}
+                      onChange={(e) => handleStatusChange(entry.game_id, e.target.value)}
+                      className="p-1 rounded-sm bg-transparent text-[var(--cp-text-dim)] text-sm outline-none border border-[var(--cp-border)] focus:border-[var(--cp-accent)]/50"
+                    >
+                      {GAME_STATUSES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
 
                   <button
                     onClick={() => setExpandedRatingId(expandedRatingId === entry.game_id ? null : entry.game_id)}
-                    className="text-yellow-400 text-sm hover:text-yellow-300 transition"
+                    className="font-mono text-sm text-[var(--cp-star)] hover:brightness-110 transition"
                   >
-                    {entry.rating ? `★ ${entry.rating}` : "Rate"}
+                    {entry.rating ? `★ ${entry.rating}` : "—"}
                   </button>
                 </div>
 
-                {entry.review && <p className="text-[#a78bba] text-sm mt-2">{entry.review}</p>}
+                {entry.review && <p className="text-[var(--cp-text-dim)] text-sm mt-2">{entry.review}</p>}
 
                 {expandedRatingId === entry.game_id && (
                   <div className="mt-2">
@@ -156,7 +168,7 @@ export default function Library() {
                 )}
               </div>
 
-              <button onClick={() => handleDelete(entry.game_id)} className="text-fuchsia-400 hover:text-fuchsia-300 text-sm">
+              <button onClick={() => handleDelete(entry.game_id)} className="text-[var(--cp-accent)] hover:brightness-110 text-sm transition">
                 Remove
               </button>
             </div>

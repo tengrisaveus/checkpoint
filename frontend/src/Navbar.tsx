@@ -7,21 +7,21 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <nav className="bg-[#1a0a2e] border-b border-[#2d1b4e]">
-      <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+    <nav className="bg-[var(--cp-surf)] border-b border-[var(--cp-border)]">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center shrink-0">
-          <img src="/checkpoint-logo-navbar.png" alt="Checkpoint" className="h-8" />
+          <span className="font-display text-xl text-[var(--cp-text)] tracking-wide">Checkpoint<span className="text-[var(--cp-accent)]">.</span></span>
         </Link>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/search" className="text-[#a78bba] hover:text-white transition">Search</Link>
+          <Link to="/search" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Search</Link>
           {user && (
             <>
-              <Link to="/library" className="text-[#a78bba] hover:text-white transition">Library</Link>
-              <Link to="/profile" className="text-[#a78bba] hover:text-white transition">Profile</Link>
-              <Link to="/diary" className="text-[#a78bba] hover:text-white transition">Diary</Link>
-              <Link to="/lists" className="text-[#a78bba] hover:text-white transition">Lists</Link>
+              <Link to="/library" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Library</Link>
+              <Link to="/profile" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Profile</Link>
+              <Link to="/diary" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Diary</Link>
+              <Link to="/lists" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Lists</Link>
             </>
           )}
         </div>
@@ -29,18 +29,18 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-4">
           {user ? (
             <>
-              <span className="text-[#a78bba]">{user.username}</span>
-              <button onClick={logout} className="text-[#a78bba] hover:text-white transition">Logout</button>
+              <span className="text-[var(--cp-text-dim)] text-sm">{user.username}</span>
+              <button onClick={logout} className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Logout</button>
             </>
           ) : (
-            <Link to="/login" className="text-[#a78bba] hover:text-white transition">Login</Link>
+            <Link to="/login" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Login</Link>
           )}
         </div>
 
         {/* Mobile hamburger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-[#a78bba] hover:text-white"
+          className="md:hidden text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"
         >
           <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2">
             {menuOpen ? (
@@ -54,23 +54,23 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-[#2d1b4e] px-4 py-4 space-y-3">
-          <Link to="/search" onClick={() => setMenuOpen(false)} className="block text-[#a78bba] hover:text-white transition">Search</Link>
+        <div className="md:hidden border-t border-[var(--cp-border)] px-6 py-4 space-y-3">
+          <Link to="/search" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Search</Link>
           {user && (
             <>
-              <Link to="/library" onClick={() => setMenuOpen(false)} className="block text-[#a78bba] hover:text-white transition">Library</Link>
-              <Link to="/profile" onClick={() => setMenuOpen(false)} className="block text-[#a78bba] hover:text-white transition">Profile</Link>
-              <Link to="/diary" onClick={() => setMenuOpen(false)} className="block text-[#a78bba] hover:text-white transition">Diary</Link>
-              <Link to="/lists" onClick={() => setMenuOpen(false)} className="block text-[#a78bba] hover:text-white transition">Lists</Link>
+              <Link to="/library" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Library</Link>
+              <Link to="/profile" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Profile</Link>
+              <Link to="/diary" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Diary</Link>
+              <Link to="/lists" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Lists</Link>
             </>
           )}
-          <div className="border-t border-[#2d1b4e] pt-3">
+          <div className="border-t border-[var(--cp-border)] pt-3">
             {user ? (
-              <button onClick={() => { logout(); setMenuOpen(false) }} className="text-[#a78bba] hover:text-white transition">
+              <button onClick={() => { logout(); setMenuOpen(false) }} className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">
                 Logout ({user.username})
               </button>
             ) : (
-              <Link to="/login" onClick={() => setMenuOpen(false)} className="text-[#a78bba] hover:text-white transition">Login</Link>
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Login</Link>
             )}
           </div>
         </div>

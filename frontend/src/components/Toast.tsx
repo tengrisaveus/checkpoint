@@ -20,13 +20,21 @@ export default function Toast({ message, type, onClose }: ToastProps) {
 
   return (
     <div
-      className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 ${
+      className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-sm shadow-lg text-sm border transition-all duration-300 ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
       } ${
-        type === "success" ? "bg-green-600 text-white" : "bg-fuchsia-500 text-white"
+        type === "success"
+          ? "bg-[var(--cp-surf)] text-[var(--cp-success)] border-[var(--cp-success)]/40"
+          : "bg-[var(--cp-surf)] text-[var(--cp-accent)] border-[var(--cp-accent)]/40"
       }`}
     >
-      {message}
+      <span className="inline-flex items-center gap-2">
+        <span
+          className="status-dot"
+          style={{ background: type === "success" ? "var(--cp-success)" : "var(--cp-accent)" }}
+        />
+        {message}
+      </span>
     </div>
   )
 }

@@ -50,44 +50,50 @@ export default function Lists() {
     }
   }
 
-  if (loading) return <div className="min-h-screen bg-[#0d0015] text-[#a78bba] p-8">Loading...</div>
+  if (loading) return <div className="min-h-screen bg-[var(--cp-bg)] text-[var(--cp-text-dim)] p-8">Loading...</div>
 
   return (
-    <div className="min-h-screen bg-[#0d0015] p-8">
+    <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
       {success && <Toast message={success} type="success" onClose={() => setSuccess("")} />}
       {error && <Toast message={error} type="error" onClose={() => setError("")} />}
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-white">My Lists</h1>
+          <h1 className="font-display text-3xl md:text-4xl text-[var(--cp-text)]">My Lists</h1>
           <button
             onClick={() => setShowCreate(!showCreate)}
-            className="px-4 py-2 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition"
+            className="px-4 py-2 rounded-sm bg-[var(--cp-accent)] text-white font-semibold hover:brightness-110 transition"
           >
             {showCreate ? "Cancel" : "New List"}
           </button>
         </div>
 
         {showCreate && (
-          <div className="bg-[#1a0a2e] rounded-lg p-6 mb-6 border border-[#2d1b4e]">
+          <div className="bg-[var(--cp-surf)] rounded-lg p-6 mb-6 border border-[var(--cp-border)]">
             <div className="space-y-3">
-              <input
-                type="text"
-                placeholder="List name"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 border border-[#3d2b5e]"
-              />
-              <textarea
-                placeholder="Description (optional)"
-                value={newDesc}
-                onChange={(e) => setNewDesc(e.target.value)}
-                rows={2}
-                className="w-full p-3 rounded bg-[#2d1b4e] text-white placeholder-[#8a6baa] outline-none focus:ring-2 focus:ring-fuchsia-500 resize-none border border-[#3d2b5e]"
-              />
+              <div>
+                <label className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider block mb-1.5">LIST NAME</label>
+                <input
+                  type="text"
+                  placeholder="My awesome list"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)]"
+                />
+              </div>
+              <div>
+                <label className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider block mb-1.5">DESCRIPTION</label>
+                <textarea
+                  placeholder="Optional description"
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                  rows={2}
+                  className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 resize-none border border-[var(--cp-border)]"
+                />
+              </div>
               <button
                 onClick={handleCreate}
-                className="px-6 py-2 rounded bg-fuchsia-500 text-white font-semibold hover:bg-fuchsia-600 transition"
+                className="px-6 py-2 rounded-sm bg-[var(--cp-accent)] text-white font-semibold hover:brightness-110 transition"
               >
                 Create
               </button>
@@ -96,29 +102,29 @@ export default function Lists() {
         )}
 
         {lists.length === 0 && !showCreate && (
-          <p className="text-[#a78bba] text-center">No lists yet. Create one!</p>
+          <p className="text-[var(--cp-text-dim)] text-center font-display text-xl italic mt-12">No lists yet. Create one!</p>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {lists.map((list) => (
             <div
               key={list.id}
-              className="bg-[#1a0a2e] rounded-lg p-4 border border-[#2d1b4e] flex items-center justify-between"
+              className="bg-[var(--cp-surf)] rounded-lg p-4 border border-[var(--cp-border)] flex items-center justify-between hover:border-[var(--cp-accent)]/20 transition"
             >
               <div
                 onClick={() => navigate(`/lists/${list.id}`)}
                 className="cursor-pointer flex-1"
               >
-                <h3 className="text-white font-semibold hover:text-fuchsia-400 transition">
+                <h3 className="text-[var(--cp-text)] font-semibold hover:text-[var(--cp-accent)] transition">
                   {list.name}
                 </h3>
                 {list.description && (
-                  <p className="text-[#8a6baa] text-sm mt-1">{list.description}</p>
+                  <p className="text-[var(--cp-text-dimmer)] text-sm mt-1">{list.description}</p>
                 )}
               </div>
               <button
                 onClick={() => handleDelete(list.id)}
-                className="text-fuchsia-400 hover:text-fuchsia-300 text-sm ml-4"
+                className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-accent)] text-sm ml-4 transition"
               >
                 Delete
               </button>

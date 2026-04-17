@@ -38,10 +38,10 @@ function PlatformSVG({ name }: { name: string }) {
 const PLATFORM_COLORS: Record<string, string> = {
   "PlayStation": "#006FCD",
   "Xbox": "#107C10",
-  "PC": "#a78bba",
-  "Windows": "#a78bba",
-  "Mac": "#a78bba",
-  "Linux": "#a78bba",
+  "PC": "#9a8eb0",
+  "Windows": "#9a8eb0",
+  "Mac": "#9a8eb0",
+  "Linux": "#9a8eb0",
   "Nintendo": "#E60012",
   "Switch": "#E60012",
   "iOS": "#999",
@@ -52,7 +52,7 @@ function getColor(name: string): string {
   for (const [key, color] of Object.entries(PLATFORM_COLORS)) {
     if (name.includes(key)) return color
   }
-  return "#a78bba"
+  return "#9a8eb0"
 }
 
 export default function PlatformIcon({ name, abbreviation }: PlatformIconProps) {
@@ -61,11 +61,11 @@ export default function PlatformIcon({ name, abbreviation }: PlatformIconProps) 
 
   return (
     <span
-      className="px-2 py-1 rounded text-xs font-medium border inline-flex items-center gap-1.5"
+      className="px-2 py-1 rounded-sm font-mono text-[10px] uppercase tracking-wider border inline-flex items-center gap-1.5"
       style={{
         color: color,
         borderColor: color + "40",
-        backgroundColor: color + "15",
+        backgroundColor: color + "12",
       }}
     >
       <PlatformSVG name={name} />

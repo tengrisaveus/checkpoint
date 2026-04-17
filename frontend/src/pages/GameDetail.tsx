@@ -13,6 +13,13 @@ import StoreLink from "../components/StoreLink";
 import useTitle from "../hooks/useTitle";
 import AddToList from "../components/AddToList";
 
+const STATUS_COLORS: Record<string, string> = {
+  Completed: "#22c55e",
+  Playing: "#3b82f6",
+  "Want to Play": "#eab308",
+  Dropped: "#ef4444",
+};
+
 function getBackdropUrl(game: Game): string | null {
   const source = game.artworks?.[0] || game.screenshots?.[0];
   if (!source?.url) return null;
@@ -33,14 +40,14 @@ function ActionButton({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-lg transition-all duration-200 ${
+      className={`flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-sm transition-all duration-200 ${
         active
-          ? "bg-fuchsia-500/15 text-fuchsia-400"
-          : "text-[#8a6baa] hover:bg-white/5 hover:text-[#c4a8d8]"
+          ? "bg-[var(--cp-accent)]/15 text-[var(--cp-accent)]"
+          : "text-[var(--cp-text-dimmer)] hover:bg-white/5 hover:text-[var(--cp-text-dim)]"
       }`}
     >
       <span className="text-xl">{icon}</span>
-      <span className="text-[10px] uppercase tracking-widest font-medium">
+      <span className="font-mono text-[10px] uppercase tracking-widest font-medium">
         {label}
       </span>
     </button>
@@ -172,7 +179,7 @@ export default function GameDetail() {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-[#0d0015] p-8">
+      <div className="min-h-screen bg-[var(--cp-bg)] p-8">
         <div className="max-w-5xl mx-auto">
           <DetailSkeleton />
         </div>
@@ -188,7 +195,7 @@ export default function GameDetail() {
     .name;
 
   return (
-    <div className="min-h-screen bg-[#0d0015]">
+    <div className="min-h-screen bg-[var(--cp-bg)]">
       {success && (
         <Toast
           message={success}
@@ -209,11 +216,11 @@ export default function GameDetail() {
             className="w-full h-full object-cover scale-105 blur-[2px]"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#1a0a2e] to-[#0d0015]" />
+          <div className="w-full h-full bg-gradient-to-br from-[var(--cp-surf)] to-[var(--cp-bg)]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0d0015] via-[#0d0015]/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0d0015]/50 to-transparent" />
-        <div className="absolute inset-0 bg-[#0d0015]/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--cp-bg)] via-[var(--cp-bg)]/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--cp-bg)]/50 to-transparent" />
+        <div className="absolute inset-0 bg-[var(--cp-bg)]/20" />
       </div>
 
       {/* === MAIN CONTENT === */}
@@ -236,35 +243,35 @@ export default function GameDetail() {
                 className="w-44 md:w-56 rounded-lg shadow-[0_8px_40px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
               />
             ) : (
-              <div className="w-44 md:w-56 aspect-[3/4] bg-[#1a0a2e] rounded-lg flex items-center justify-center text-[#8a6baa] ring-1 ring-white/10">
-                No Cover
+              <div className="w-44 md:w-56 aspect-[3/4] bg-[var(--cp-surf)] rounded-lg flex items-center justify-center text-[var(--cp-text-dimmer)] ring-1 ring-white/10 cover-placeholder text-lg italic">
+                {game.name}
               </div>
             )}
           </div>
 
           {/* Info */}
           <div className="flex-1 min-w-0 pt-2">
-            <h1 className="text-3xl md:text-[2.5rem] font-bold text-white leading-tight tracking-tight">
+            <h1 className="font-display text-3xl md:text-[2.5rem] text-[var(--cp-text)] leading-tight tracking-tight">
               {game.name}
             </h1>
 
-            <div className="flex items-center gap-2 mt-2.5 text-sm flex-wrap">
+            <div className="flex items-center gap-2 mt-2.5 text-sm flex-wrap font-mono">
               {getYear(game.first_release_date) && (
-                <span className="text-white/70 font-medium">
+                <span className="text-white/70 text-xs tracking-wide">
                   {getYear(game.first_release_date)}
                 </span>
               )}
               {developer && (
                 <>
-                  <span className="text-[#3d2b5e]">•</span>
-                  <span className="text-[#a78bba]">{developer}</span>
+                  <span className="text-[var(--cp-border)]">·</span>
+                  <span className="text-[var(--cp-text-dim)] text-xs">{developer}</span>
                 </>
               )}
               {game.involved_companies &&
                 game.involved_companies.length > 1 && (
                   <>
-                    <span className="text-[#3d2b5e]">•</span>
-                    <span className="text-[#8a6baa] text-xs">
+                    <span className="text-[var(--cp-border)]">·</span>
+                    <span className="text-[var(--cp-text-dimmer)] text-xs">
                       +{game.involved_companies.length - 1} more
                     </span>
                   </>
@@ -277,7 +284,7 @@ export default function GameDetail() {
                 {game.genres.map((g) => (
                   <span
                     key={g.name}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium text-fuchsia-300/90 bg-fuchsia-500/10 border border-fuchsia-500/20"
+                    className="px-2.5 py-1 rounded-sm text-xs font-medium text-[var(--cp-accent)]/90 bg-[var(--cp-accent)]/10 border border-[var(--cp-accent)]/20"
                   >
                     {g.name}
                   </span>
@@ -303,7 +310,7 @@ export default function GameDetail() {
               {game.aggregated_rating && (
                 <div className="flex items-center gap-2.5">
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm ring-2 ${
+                    className={`w-11 h-11 rounded-lg flex items-center justify-center font-mono font-bold text-sm ring-2 ${
                       game.aggregated_rating >= 75
                         ? "bg-green-500/15 text-green-400 ring-green-500/30"
                         : game.aggregated_rating >= 50
@@ -313,7 +320,7 @@ export default function GameDetail() {
                   >
                     {game.aggregated_rating.toFixed(0)}
                   </div>
-                  <span className="text-[#8a6baa] text-xs uppercase tracking-wider">
+                  <span className="font-mono text-[var(--cp-text-dimmer)] text-xs uppercase tracking-wider">
                     Critic
                   </span>
                 </div>
@@ -322,7 +329,7 @@ export default function GameDetail() {
               {storeLinks.length > 0 && (
                 <>
                   {game.aggregated_rating && (
-                    <div className="w-px h-6 bg-[#2d1b4e]" />
+                    <div className="w-px h-6 bg-[var(--cp-border)]" />
                   )}
                   <div className="flex gap-1.5 flex-wrap">
                     {storeLinks.map((w, i) => (
@@ -337,7 +344,7 @@ export default function GameDetail() {
             {game.summary && (
               <div className="mt-5">
                 <p
-                  className={`text-[#c4a8d8]/85 text-sm leading-relaxed ${
+                  className={`text-[var(--cp-text-dim)] text-sm leading-relaxed ${
                     !expandSummary && summaryLong ? "line-clamp-4" : ""
                   }`}
                 >
@@ -346,7 +353,7 @@ export default function GameDetail() {
                 {summaryLong && (
                   <button
                     onClick={() => setExpandSummary(!expandSummary)}
-                    className="text-fuchsia-400 text-xs mt-1.5 hover:text-fuchsia-300 transition font-medium"
+                    className="text-[var(--cp-accent)] text-xs mt-1.5 hover:brightness-110 transition font-medium"
                   >
                     {expandSummary ? "Show less" : "Read more..."}
                   </button>
@@ -356,21 +363,19 @@ export default function GameDetail() {
           </div>
         </div>
 
-        {/* === ACTION BAR === */}
+        {/* === STICKY ACTION BAR === */}
         {user && (
-          <div className="mt-10 border border-[#2d1b4e] rounded-xl bg-[#1a0a2e]/50 backdrop-blur-sm overflow-hidden">
+          <div className="mt-10 border border-[var(--cp-border)] rounded-lg bg-[var(--cp-surf)]/50 backdrop-blur-sm overflow-hidden sticky top-0 z-20">
             {/* Library status badge */}
             {existingEntry && (
               <div className="flex items-center gap-2 px-5 pt-4">
-                <div className="w-1.5 h-1.5 rounded-full bg-fuchsia-400 animate-pulse" />
-                <span className="text-fuchsia-400 text-xs font-medium uppercase tracking-widest">
+                <span className="status-dot" style={{ backgroundColor: STATUS_COLORS[existingEntry.status] || "#6b7280" }} />
+                <span className="font-mono text-xs font-medium uppercase tracking-widest" style={{ color: STATUS_COLORS[existingEntry.status] || "var(--cp-text-dim)" }}>
                   {existingEntry.status}
                 </span>
-                {existingEntry.rating && (
-                  <span className="text-yellow-400/80 text-xs ml-auto">
-                    ★ {existingEntry.rating}/10
-                  </span>
-                )}
+                <span className="font-mono text-[var(--cp-star)] text-xs ml-auto">
+                  {existingEntry.rating ? `★ ${existingEntry.rating}/10` : "—"}
+                </span>
               </div>
             )}
 
@@ -398,42 +403,48 @@ export default function GameDetail() {
 
             {/* Library Panel */}
             {activePanel === "library" && (
-              <div className="border-t border-[#2d1b4e] p-5 space-y-4">
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-[#0d0015] text-white outline-none focus:ring-2 focus:ring-fuchsia-500/50 border border-[#2d1b4e] text-sm"
-                  required
-                >
-                  <option value="">Select status</option>
-                  {GAME_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+              <div className="border-t border-[var(--cp-border)] p-5 space-y-4">
+                <div>
+                  <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider mb-2">STATUS</p>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-sm"
+                    required
+                  >
+                    <option value="">Select status</option>
+                    {GAME_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <div>
-                  <p className="text-[#8a6baa] text-xs uppercase tracking-wider mb-2">
-                    Rating {rating ? `— ${rating}/10` : ""}
+                  <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider mb-2">
+                    RATING {rating ? `— ${rating}/10` : ""}
                   </p>
                   <RatingSelector value={rating} onChange={setRating} />
                 </div>
 
-                <textarea
-                  placeholder="Write a review..."
-                  value={review}
-                  onChange={(e) => setReview(e.target.value)}
-                  rows={3}
-                  maxLength={2000}
-                  className="w-full p-3 rounded-lg bg-[#0d0015] text-white placeholder-[#8a6baa]/50 outline-none focus:ring-2 focus:ring-fuchsia-500/50 resize-none border border-[#2d1b4e] text-sm"
-                />
+                <div>
+                  <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider mb-2">REVIEW</p>
+                  <textarea
+                    placeholder="Write a review..."
+                    value={review}
+                    onChange={(e) => setReview(e.target.value)}
+                    rows={3}
+                    maxLength={2000}
+                    className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)]/50 outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 resize-none border border-[var(--cp-border)] text-sm"
+                  />
+                </div>
 
                 <div className="flex justify-end">
                   <button
                     onClick={handleAddToLibrary}
                     disabled={!status}
-                    className="px-6 py-2.5 rounded-lg bg-fuchsia-500 text-white text-sm font-semibold hover:bg-fuchsia-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-6 py-2.5 rounded-sm bg-[var(--cp-accent)] text-white text-sm font-semibold hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {existingEntry ? "Update" : "Add to Library"}
                   </button>
@@ -443,22 +454,22 @@ export default function GameDetail() {
 
             {/* Diary Panel */}
             {activePanel === "diary" && (
-              <div className="border-t border-[#2d1b4e] p-5 space-y-4">
+              <div className="border-t border-[var(--cp-border)] p-5 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[#8a6baa] text-xs uppercase tracking-wider mb-2">
-                      Date Played
+                    <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider mb-2">
+                      DATE PLAYED
                     </p>
                     <input
                       type="date"
                       value={diaryDate}
                       onChange={(e) => setDiaryDate(e.target.value)}
-                      className="w-full p-3 rounded-lg bg-[#0d0015] text-white outline-none focus:ring-2 focus:ring-fuchsia-500/50 border border-[#2d1b4e] text-sm"
+                      className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-sm"
                     />
                   </div>
                   <div>
-                    <p className="text-[#8a6baa] text-xs uppercase tracking-wider mb-2">
-                      Note
+                    <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider mb-2">
+                      NOTE
                     </p>
                     <input
                       type="text"
@@ -466,7 +477,7 @@ export default function GameDetail() {
                       value={diaryNote}
                       onChange={(e) => setDiaryNote(e.target.value)}
                       maxLength={500}
-                      className="w-full p-3 rounded-lg bg-[#0d0015] text-white placeholder-[#8a6baa]/50 outline-none focus:ring-2 focus:ring-fuchsia-500/50 border border-[#2d1b4e] text-sm"
+                      className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)]/50 outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-sm"
                     />
                   </div>
                 </div>
@@ -474,7 +485,7 @@ export default function GameDetail() {
                   <button
                     onClick={handleDiaryOnly}
                     disabled={!diaryDate}
-                    className="px-6 py-2.5 rounded-lg bg-fuchsia-500 text-white text-sm font-semibold hover:bg-fuchsia-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-6 py-2.5 rounded-sm bg-[var(--cp-accent)] text-white text-sm font-semibold hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Log Entry
                   </button>
@@ -484,7 +495,7 @@ export default function GameDetail() {
 
             {/* List Panel */}
             {activePanel === "list" && (
-              <div className="border-t border-[#2d1b4e] p-5">
+              <div className="border-t border-[var(--cp-border)] p-5">
                 <AddToList gameId={Number(id)} />
               </div>
             )}
@@ -493,11 +504,11 @@ export default function GameDetail() {
 
         {/* Not logged in */}
         {!user && (
-          <div className="mt-10 border border-[#2d1b4e] rounded-xl bg-[#1a0a2e]/50 p-8 text-center">
-            <p className="text-[#8a6baa] text-sm">
+          <div className="mt-10 border border-[var(--cp-border)] rounded-lg bg-[var(--cp-surf)]/50 p-8 text-center">
+            <p className="text-[var(--cp-text-dimmer)] text-sm">
               <span
                 onClick={() => navigate("/login")}
-                className="text-fuchsia-400 hover:text-fuchsia-300 cursor-pointer font-medium transition"
+                className="text-[var(--cp-accent)] hover:brightness-110 cursor-pointer font-medium transition"
               >
                 Sign in
               </span>{" "}
@@ -505,9 +516,11 @@ export default function GameDetail() {
             </p>
           </div>
         )}
+
+        {/* Similar games */}
         {similarGames.length > 0 && (
           <div className="mt-10">
-            <h2 className="text-[15px] font-medium text-white mb-3">Similar games</h2>
+            <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">SIMILAR GAMES</p>
             <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
               {similarGames.slice(0, 5).map((g) => (
                 <div
@@ -519,14 +532,14 @@ export default function GameDetail() {
                     <img
                       src={getCoverUrl(g)!}
                       alt={g.name}
-                      className="w-full aspect-[3/4] object-cover rounded-lg group-hover:ring-2 group-hover:ring-fuchsia-500 transition"
+                      className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
                     />
                   ) : (
-                    <div className="w-full aspect-[3/4] bg-[#1a0a2e] rounded-lg flex items-center justify-center text-[#8a6baa] text-xs">
+                    <div className="w-full aspect-[3/4] bg-[var(--cp-surf)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-xs cover-placeholder italic">
                       {g.name}
                     </div>
                   )}
-                  <p className="text-[11px] text-[#c4a8d8] mt-1.5 truncate">{g.name}</p>
+                  <p className="text-[11px] text-[var(--cp-text-dim)] mt-1.5 truncate">{g.name}</p>
                 </div>
               ))}
             </div>
