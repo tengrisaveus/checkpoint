@@ -34,10 +34,6 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-function getWeekDay(): string {
-  return new Date().toLocaleDateString("en-US", { weekday: "long" });
-}
-
 function getDateLabel(): string {
   const now = new Date();
   const month = now.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
