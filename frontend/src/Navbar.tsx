@@ -10,7 +10,7 @@ export default function Navbar() {
     <nav className="bg-[var(--cp-surf)] border-b border-[var(--cp-border)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center shrink-0">
-          <span className="font-display text-xl text-[var(--cp-text)] tracking-wide">Checkpoint<span className="text-[var(--cp-accent)]">.</span></span>
+          <img src="/checkpoint-logo-navbar.png" alt="Checkpoint" className="h-8" />
         </Link>
 
         {/* Desktop links */}
