@@ -325,9 +325,6 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
           <div className="flex items-center gap-3 flex-wrap">
             <span className="flex items-center"><Kbd>↑</Kbd><Kbd>↓</Kbd> navigate</span>
             <span className="flex items-center"><Kbd>↵</Kbd> open</span>
-            <span className="flex items-center opacity-60" title="Coming soon">
-              <Kbd>⌘L</Kbd> add to library
-            </span>
           </div>
           <span className="flex items-center"><Kbd>esc</Kbd> close</span>
         </div>

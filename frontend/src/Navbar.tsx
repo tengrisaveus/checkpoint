@@ -23,7 +23,6 @@ export default function Navbar() {
           >
             <span>⌕</span>
             <span>Search</span>
-            <kbd className="hidden md:inline px-1.5 py-0.5 bg-[var(--cp-bg)] border border-[var(--cp-border)] rounded-[3px] text-[10px] font-mono text-[var(--cp-text-dimmer)]">⌘K</kbd>
           </button>
           {user && (
             <>
