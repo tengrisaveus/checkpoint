@@ -26,7 +26,10 @@ body {
 }
 
 .font-display {
-  font-family: 'Instrument Serif', serif;
+  font-family: 'Newsreader', ui-serif, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-optical-sizing: auto;
 }
 
 .font-mono {
@@ -45,7 +48,7 @@ body {
 
 /* Cover placeholder styling */
 .cover-placeholder {
-  font-family: 'Instrument Serif', serif;
+  font-family: 'Newsreader', ui-serif, Georgia, serif;
   font-style: italic;
 }
 
