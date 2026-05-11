@@ -5,6 +5,7 @@ import type { Game } from "../types"
 import { getCoverUrl, getYear } from "../utils"
 import { CardSkeleton } from "../components/Skeleton"
 import useTitle from "../hooks/useTitle"
+import { useCommandPalette } from "../CommandPaletteContext"
 
 const RECENT_KEY = "checkpoint_recent_searches"
 const MAX_RECENT = 5
@@ -25,6 +26,8 @@ function saveRecentSearch(query: string) {
 
 export default function Search() {
   useTitle("Search")
+  const { open: openPalette } = useCommandPalette()
+  useEffect(() => { openPalette() }, [openPalette])
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<Game[]>([])
   const [popular, setPopular] = useState<Game[]>([])

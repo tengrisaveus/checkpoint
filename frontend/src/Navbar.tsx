@@ -1,9 +1,11 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "./AuthContext"
+import { useCommandPalette } from "./CommandPaletteContext"
 
 export default function Navbar() {
   const { user, logout } = useAuth()
+  const { open: openPalette } = useCommandPalette()
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -15,7 +17,14 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/search" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Search</Link>
+          <button
+            onClick={openPalette}
+            className="flex items-center gap-2 text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm"
+          >
+            <span>⌕</span>
+            <span>Search</span>
+            <kbd className="hidden md:inline px-1.5 py-0.5 bg-[var(--cp-bg)] border border-[var(--cp-border)] rounded-[3px] text-[10px] font-mono text-[var(--cp-text-dimmer)]">⌘K</kbd>
+          </button>
           {user && (
             <>
               <Link to="/library" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Library</Link>
@@ -55,7 +64,12 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-[var(--cp-border)] px-6 py-4 space-y-3">
-          <Link to="/search" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Search</Link>
+          <button
+            onClick={() => { setMenuOpen(false); openPalette() }}
+            className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm"
+          >
+            ⌕ Search
+          </button>
           {user && (
             <>
               <Link to="/library" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Library</Link>

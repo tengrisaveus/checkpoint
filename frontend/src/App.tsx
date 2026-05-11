@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./AuthContext";
+import { CommandPaletteProvider } from "./CommandPaletteContext";
 import Navbar from "./Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -19,8 +20,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Navbar />
-        <Routes>
+        <CommandPaletteProvider>
+          <Navbar />
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<Search />} />
           <Route path="/login" element={<Login />} />
@@ -68,7 +70,8 @@ function App() {
             }
           />
           <Route path="*" element={<NotFound />} />
-        </Routes>
+          </Routes>
+        </CommandPaletteProvider>
       </AuthProvider>
     </BrowserRouter>
   );
