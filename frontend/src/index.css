@@ -17,10 +17,12 @@
 
 html, body, #root {
   overflow-x: hidden;
+  background: var(--cp-bg);
 }
 
 body {
   font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color: var(--cp-text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

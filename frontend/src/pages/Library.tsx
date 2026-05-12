@@ -294,7 +294,7 @@ export default function Library() {
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-8">
-          <div className="flex items-center gap-2 overflow-x-auto flex-nowrap pb-1 md:pb-0 md:flex-1 -mx-1 px-1">
+          <div className="flex items-center gap-2 overflow-x-auto flex-nowrap pb-1 md:pb-0 md:flex-1 min-w-0">
             <button
               onClick={() => setStatusFilter("")}
               className={`shrink-0 px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
