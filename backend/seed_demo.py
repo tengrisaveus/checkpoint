@@ -80,12 +80,26 @@ def _igdb(endpoint: str, body: str) -> list[dict]:
             timeout=15,
         )
 
-    r = _do(_access_token or "")
-    if r.status_code == 401:
-        _get_twitch_token()
+    # Retry on 401 (token expired) and 429 (rate limit).
+    for attempt in range(4):
         r = _do(_access_token or "")
+        if r.status_code == 401:
+            _get_twitch_token()
+            continue
+        if r.status_code == 429:
+            time.sleep(2.0 * (attempt + 1))
+            continue
+        r.raise_for_status()
+        return r.json()
     r.raise_for_status()
-    return r.json()
+    return []
+
+
+# IGDB game categories we accept for the seed (base game, standalone expansion,
+# remake, remaster, expanded edition). Filtering happens in Python because
+# combining `search` with a `where` clause intersects badly with relevance
+# ranking — many top hits get dropped before we see them.
+_ALLOWED_CATEGORIES = {0, 4, 8, 9, 10}
 
 
 def resolve_game(name: str) -> dict | None:
@@ -95,26 +109,26 @@ def resolve_game(name: str) -> dict | None:
         return None
     results = _igdb(
         "games",
-        (
-            f'search "{clean}";'
-            " fields name, cover.url, genres.name, category;"
-            " where category = (0,4,8,9,10);"
-            " limit 8;"
-        ),
+        f'search "{clean}"; fields name, cover.url, genres.name, category; limit 10;',
     )
     if not results:
         return None
 
+    with_cover = [r for r in results if r.get("cover")]
+    if not with_cover:
+        return None
+
+    # Prefer base games / remakes / remasters first.
+    base = [r for r in with_cover if r.get("category") in _ALLOWED_CATEGORIES]
+    pool = base or with_cover
+
     target = clean.lower()
-    # Exact name match first
-    for r in results:
+    # Exact name match wins.
+    for r in pool:
         if r.get("name", "").lower() == target:
             return r
-    # Then loose match — first result with a cover
-    for r in results:
-        if r.get("cover"):
-            return r
-    return results[0]
+    # Otherwise, top relevance result that survived filtering.
+    return pool[0]
 
 
 # -- Curated dataset -----------------------------------------------------------
@@ -301,8 +315,8 @@ def main() -> None:
                 "genres": genres or None,
             }
             print(f"  ✓ {name} → id={game['id']} ({game['name']})")
-            # Gentle pacing — IGDB free tier is 4 req/sec.
-            time.sleep(0.3)
+            # Gentle pacing — IGDB free tier is 4 req/sec; stay well under.
+            time.sleep(0.6)
 
         # 4. Insert library entries.
         inserted_lib = 0
