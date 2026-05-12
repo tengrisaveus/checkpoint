@@ -151,10 +151,19 @@ export default function Library() {
   const [query, setQuery] = useState("")
   const [sortMode, setSortMode] = useState<SortMode>("recent")
   const [view, setView] = useState<ViewMode>(readView)
+  const [isNarrow, setIsNarrow] = useState<boolean>(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  )
 
   useEffect(() => {
     localStorage.setItem(VIEW_KEY, view)
   }, [view])
+
+  useEffect(() => {
+    const handler = () => setIsNarrow(window.innerWidth < 768)
+    window.addEventListener("resize", handler)
+    return () => window.removeEventListener("resize", handler)
+  }, [])
 
   useEffect(() => {
     api.get("/library")
@@ -247,10 +256,7 @@ export default function Library() {
   }
 
   const showEmpty = filtered.length === 0
-  const effectiveView: ViewMode =
-    view === "table" && typeof window !== "undefined" && window.innerWidth < 768
-      ? "grid"
-      : view
+  const effectiveView: ViewMode = view === "table" && isNarrow ? "grid" : view
 
   return (
     <div className="min-h-screen bg-[var(--cp-bg)] py-8 md:py-10">
@@ -261,7 +267,7 @@ export default function Library() {
               YOUR LIBRARY · {total}
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {([
               { mode: "grid", icon: "⊞", label: "Grid" },
               { mode: "table", icon: "≡", label: "Table" },
@@ -287,59 +293,62 @@ export default function Library() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mb-8 overflow-x-auto flex-nowrap pb-1">
-          <button
-            onClick={() => setStatusFilter("")}
-            className={`shrink-0 px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
-              statusFilter === ""
-                ? "bg-[var(--cp-accent)] text-white"
-                : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
-            }`}
-          >
-            All · {total}
-          </button>
-          {GAME_STATUSES.map((s) => {
-            const active = statusFilter === s
-            const count = statusCounts[s] || 0
-            return (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={`shrink-0 px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
-                  active
-                    ? "bg-[var(--cp-accent)] text-white"
-                    : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
-                }`}
-              >
-                <span
-                  className="inline-block w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: STATUS_COLORS[s] }}
-                />
-                {STATUS_LABEL[s]} · {count}
-              </button>
-            )
-          })}
-          <div className="flex-1" />
-          <input
-            type="text"
-            placeholder="Filter…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="shrink-0 w-[160px] bg-transparent text-sm text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] border border-[var(--cp-border)] rounded-sm px-3 py-1.5 outline-none focus:border-[var(--cp-accent)]/50 transition"
-          />
-          {effectiveView !== "columns" && (
-            <select
-              value={sortMode}
-              onChange={(e) => setSortMode(e.target.value as SortMode)}
-              className="shrink-0 font-mono text-[11.5px] uppercase tracking-[.06em] bg-transparent text-[var(--cp-text-dim)] border border-[var(--cp-border)] rounded-sm px-3 py-1.5 outline-none hover:border-[var(--cp-accent)]/40 transition"
+        <div className="flex flex-col md:flex-row md:items-center gap-3 mb-8">
+          <div className="flex items-center gap-2 overflow-x-auto flex-nowrap pb-1 md:pb-0 md:flex-1 -mx-1 px-1">
+            <button
+              onClick={() => setStatusFilter("")}
+              className={`shrink-0 px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
+                statusFilter === ""
+                  ? "bg-[var(--cp-accent)] text-white"
+                  : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
+              }`}
             >
-              <option value="recent">Recent</option>
-              <option value="rating">Rating</option>
-              <option value="name">A–Z</option>
-              <option value="hours">Hours</option>
-              <option value="status">Status</option>
-            </select>
-          )}
+              All · {total}
+            </button>
+            {GAME_STATUSES.map((s) => {
+              const active = statusFilter === s
+              const count = statusCounts[s] || 0
+              return (
+                <button
+                  key={s}
+                  onClick={() => setStatusFilter(s)}
+                  className={`shrink-0 px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
+                    active
+                      ? "bg-[var(--cp-accent)] text-white"
+                      : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
+                  }`}
+                >
+                  <span
+                    className="inline-block w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: STATUS_COLORS[s] }}
+                  />
+                  {STATUS_LABEL[s]} · {count}
+                </button>
+              )
+            })}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Filter…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="flex-1 md:w-[160px] md:flex-none bg-transparent text-sm text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] border border-[var(--cp-border)] rounded-sm px-3 py-1.5 outline-none focus:border-[var(--cp-accent)]/50 transition"
+            />
+            {effectiveView !== "columns" && (
+              <select
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as SortMode)}
+                className="shrink-0 font-mono text-[11.5px] uppercase tracking-[.06em] bg-transparent text-[var(--cp-text-dim)] border border-[var(--cp-border)] rounded-sm px-3 py-1.5 outline-none hover:border-[var(--cp-accent)]/40 transition"
+              >
+                <option value="recent">Recent</option>
+                <option value="rating">Rating</option>
+                <option value="name">A–Z</option>
+                <option value="hours">Hours</option>
+                <option value="status">Status</option>
+              </select>
+            )}
+          </div>
         </div>
 
         {showEmpty ? (
@@ -620,7 +629,7 @@ function ColumnsView({
                 {all.length}
               </span>
             </div>
-            <div className="p-2.5 flex flex-col gap-2 min-h-[400px]">
+            <div className="p-2.5 flex flex-col gap-2 min-h-[200px] md:min-h-[400px]">
               {entries.length === 0 && (
                 <div className="font-display italic text-[var(--cp-text-dimmer)] text-sm py-4 text-center">
                   Nothing here.

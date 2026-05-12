@@ -175,7 +175,7 @@ export default function Diary() {
               <em className="italic text-[var(--cp-accent)]">playing</em>
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center border border-[var(--cp-border)] rounded-sm overflow-hidden">
               <button
                 onClick={prevMonth}
@@ -398,7 +398,7 @@ function EntryCard({
           e.stopPropagation()
           onDelete(entry.id)
         }}
-        className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[var(--cp-text-dimmer)] hover:text-[var(--cp-accent)] hover:bg-[var(--cp-bg)] opacity-0 group-hover:opacity-100 transition text-xs"
+        className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[var(--cp-text-dimmer)] hover:text-[var(--cp-accent)] hover:bg-[var(--cp-bg)] opacity-50 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 transition text-xs"
         aria-label="Delete entry"
       >
         ✕
