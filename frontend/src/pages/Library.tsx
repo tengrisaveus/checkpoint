@@ -51,11 +51,11 @@ function monthKey(iso: string): string {
 
 function monthLabel(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" }).toUpperCase()
+  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" })
 }
 
 function shortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "2-digit" }).toUpperCase()
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }
 
 function fallbackGradient(gameId: number): string {
@@ -83,7 +83,7 @@ function StatusChip({
   return (
     <div className="relative inline-flex">
       <div
-        className="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-[3px] border font-mono uppercase tracking-[.06em] text-[11.5px] font-medium"
+        className="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-[3px] border uppercase tracking-[.04em] text-[11px] font-semibold"
         style={{
           backgroundColor: `${color}1a`,
           borderColor: `${color}40`,
@@ -132,7 +132,7 @@ function SortHeader({
   return (
     <button
       onClick={() => onClick(field)}
-      className={`font-mono uppercase tracking-[.08em] text-[12px] transition flex items-center gap-1 ${
+      className={`uppercase tracking-[.04em] text-[12px] font-semibold transition flex items-center gap-1 ${
         align === "right" ? "justify-end" : "justify-start"
       } ${active ? "text-[var(--cp-text)]" : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"}`}
     >
@@ -263,8 +263,8 @@ export default function Library() {
       <div className="max-w-[1400px] mx-auto px-6 md:px-10">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
           <div>
-            <div className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] mb-3">
-              YOUR LIBRARY · {total}
+            <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+              Your library · <span className="font-mono">{total}</span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -279,7 +279,7 @@ export default function Library() {
                   key={v.mode}
                   onClick={() => setView(v.mode)}
                   title={v.label}
-                  className={`font-mono uppercase tracking-[.08em] text-[12px] px-3 py-2 rounded-sm border transition flex items-center gap-1.5 ${
+                  className={`uppercase tracking-[.04em] text-[12px] font-semibold px-3 py-2 rounded-sm border transition flex items-center gap-1.5 ${
                     active
                       ? "border-[var(--cp-accent)]/50 bg-[var(--cp-surf)] text-[var(--cp-text)]"
                       : "border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/40 hover:text-[var(--cp-text)]"
@@ -297,7 +297,7 @@ export default function Library() {
           <div className="flex items-center gap-2 overflow-x-auto flex-nowrap pb-1 md:pb-0 md:flex-1 min-w-0">
             <button
               onClick={() => setStatusFilter("")}
-              className={`shrink-0 px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
+              className={`shrink-0 px-3 py-1.5 rounded-sm text-[12px] font-semibold uppercase tracking-[.04em] transition flex items-center gap-2 ${
                 statusFilter === ""
                   ? "bg-[var(--cp-accent)] text-white"
                   : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
@@ -312,7 +312,7 @@ export default function Library() {
                 <button
                   key={s}
                   onClick={() => setStatusFilter(s)}
-                  className={`shrink-0 px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
+                  className={`shrink-0 px-3 py-1.5 rounded-sm text-[12px] font-semibold uppercase tracking-[.04em] transition flex items-center gap-2 ${
                     active
                       ? "bg-[var(--cp-accent)] text-white"
                       : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
@@ -339,7 +339,7 @@ export default function Library() {
               <select
                 value={sortMode}
                 onChange={(e) => setSortMode(e.target.value as SortMode)}
-                className="shrink-0 font-mono text-[11.5px] uppercase tracking-[.06em] bg-transparent text-[var(--cp-text-dim)] border border-[var(--cp-border)] rounded-sm px-3 py-1.5 outline-none hover:border-[var(--cp-accent)]/40 transition"
+                className="shrink-0 text-[12px] uppercase tracking-[.04em] font-semibold bg-transparent text-[var(--cp-text-dim)] border border-[var(--cp-border)] rounded-sm px-3 py-1.5 outline-none hover:border-[var(--cp-accent)]/40 transition"
               >
                 <option value="recent">Recent</option>
                 <option value="rating">Rating</option>
@@ -358,7 +358,7 @@ export default function Library() {
             </div>
             <Link
               to="/search"
-              className="mt-4 inline-block font-mono uppercase tracking-[.08em] text-[11.5px] text-[var(--cp-accent)] hover:brightness-110 transition"
+              className="mt-4 inline-block text-[13px] font-semibold text-[var(--cp-accent)] hover:brightness-110 transition"
             >
               Add your first game →
             </Link>
@@ -400,7 +400,7 @@ function GridView({
       {grouped.map((group) => (
         <div key={group.key}>
           {group.label && (
-            <div className="font-mono text-[12px] tracking-[.08em] uppercase text-[var(--cp-text-dim)] mb-3.5 mt-6 first:mt-0">
+            <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3.5 mt-6 first:mt-0">
               {group.label}
             </div>
           )}
@@ -437,7 +437,7 @@ function GridView({
                     )}
 
                     <div
-                      className="absolute top-1.5 left-1.5 px-1.5 py-[3px] rounded-[3px] backdrop-blur-md flex items-center gap-1 font-mono uppercase tracking-normal text-[10.5px] font-medium"
+                      className="absolute top-1.5 left-1.5 px-1.5 py-[3px] rounded-[3px] backdrop-blur-md flex items-center gap-1 uppercase tracking-[.04em] text-[10.5px] font-semibold"
                       style={{
                         backgroundColor: "rgba(10,6,16,0.7)",
                         color: STATUS_COLORS[entry.status] || "#9a8eb0",
@@ -452,7 +452,7 @@ function GridView({
 
                     {entry.rating != null && (
                       <div
-                        className="absolute bottom-1.5 right-1.5 px-1.5 py-[2px] rounded-[3px] backdrop-blur-md font-mono text-[11.5px] font-semibold"
+                        className="absolute bottom-1.5 right-1.5 px-1.5 py-[2px] rounded-[3px] backdrop-blur-md font-mono text-[12px] font-semibold"
                         style={{
                           backgroundColor: "rgba(10,6,16,0.8)",
                           color: "#fbbf24",
@@ -466,7 +466,7 @@ function GridView({
                   <div className="mt-1.5 text-[13.5px] font-medium leading-tight text-[var(--cp-text)] group-hover:text-[var(--cp-accent)] transition truncate">
                     {entry.game_name}
                   </div>
-                  <div className="mt-0.5 font-mono text-[11.5px] text-[var(--cp-text-dim)]">
+                  <div className="mt-0.5 font-mono text-[12px] text-[var(--cp-text-dim)]">
                     {meta}
                   </div>
                 </div>
@@ -532,7 +532,7 @@ function TableView({
                 {entry.game_name}
               </div>
               {sub && (
-                <div className="mt-0.5 font-mono text-[11px] tracking-[.06em] text-[var(--cp-text-dim)] truncate">
+                <div className="mt-0.5 text-[12px] text-[var(--cp-text-dim)] truncate">
                   {sub}
                 </div>
               )}
@@ -552,7 +552,7 @@ function TableView({
             <div className="font-mono text-[12.5px] text-[var(--cp-text-dim)]">
               {entry.hours_played && entry.hours_played > 0 ? `${entry.hours_played}h` : "—"}
             </div>
-            <div className="font-mono text-[11.5px] tracking-[.06em] text-[var(--cp-text-dim)]">
+            <div className="font-mono text-[12px] text-[var(--cp-text-dim)]">
               {shortDate(dateIso)}
             </div>
           </div>
@@ -619,7 +619,7 @@ function ColumnsView({
                   style={{ backgroundColor: color }}
                 />
                 <span
-                  className="font-mono text-[12px] uppercase tracking-[.08em] font-medium"
+                  className="text-[12px] uppercase tracking-[.04em] font-semibold"
                   style={{ color }}
                 >
                   {col.label}
@@ -644,7 +644,7 @@ function ColumnsView({
               ))}
               <button
                 onClick={onAdd}
-                className="mt-auto w-full py-2.5 border border-dashed border-[var(--cp-border)] rounded-[5px] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/40 hover:text-[var(--cp-accent)] transition font-mono text-[11.5px] uppercase tracking-[.06em]"
+                className="mt-auto w-full py-2.5 border border-dashed border-[var(--cp-border)] rounded-[5px] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/40 hover:text-[var(--cp-accent)] transition text-[12px] uppercase tracking-[.04em] font-semibold"
               >
                 + Add
               </button>
@@ -692,7 +692,7 @@ function ColumnCard({
           {entry.game_name}
         </div>
         <div
-          className="mt-0.5 font-mono text-[11px] tracking-[.06em] truncate"
+          className="mt-0.5 font-mono text-[12px] truncate"
           style={{ color: meta.color }}
         >
           {meta.text}

@@ -115,14 +115,14 @@ export default function PublicProfile() {
         </div>
 
         {/* Stats line */}
-        <p className="font-mono text-[var(--cp-text-dim)] text-[11px] mb-8 tracking-wide">
+        <p className="text-[var(--cp-text-dim)] text-[13px] mb-8">
           {stats.total_games} games · {stats.by_status["Completed"] || 0} completed · avg ★ {stats.average_rating || "—"} · joined {new Date(user.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
         </p>
 
         {/* Favorites */}
         {favorites.length > 0 && (
           <>
-            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">FAVORITE GAMES</p>
+            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">Favorite games</p>
             <div className="grid grid-cols-4 gap-3 mb-8">
               {favorites.map((fav) => (
                 <div key={fav.game_id}>
@@ -168,7 +168,7 @@ export default function PublicProfile() {
                     </div>
                   </div>
                   <div>
-                    <p className="font-mono text-[var(--cp-text-dim)] text-[11.5px] uppercase tracking-[.06em]">Completion rate</p>
+                    <p className="text-[var(--cp-text-dim)] text-[13px] font-medium">Completion rate</p>
                     <p className="text-[var(--cp-text-dim)] text-sm mt-1">
                       {stats.by_status["Completed"] || 0} of {stats.total_games} games completed
                     </p>
@@ -176,7 +176,7 @@ export default function PublicProfile() {
                 </div>
               </div>
               <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)]">
-                <p className="font-mono text-[var(--cp-text-dim)] text-[11.5px] uppercase tracking-[.06em] mb-3">STATUS</p>
+                <p className="text-[var(--cp-text-dim)] text-[13px] font-medium mb-3">Status</p>
                 {Object.entries(stats.by_status).map(([status, count]) => (
                   <div key={status} className="flex items-center gap-3 mb-2 last:mb-0">
                     <span className="status-dot" style={{ backgroundColor: STATUS_COLORS[status] || "#6b7280" }} />
@@ -184,7 +184,7 @@ export default function PublicProfile() {
                     <div className="flex-1 h-1.5 bg-[var(--cp-bg)] rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${(count / stats.total_games) * 100}%`, backgroundColor: STATUS_COLORS[status] || "#6b7280" }} />
                     </div>
-                    <span className="font-mono text-[11px] text-[var(--cp-text-dimmer)] w-6 text-right">{count}</span>
+                    <span className="font-mono text-[12px] text-[var(--cp-text-dim)] w-6 text-right">{count}</span>
                   </div>
                 ))}
               </div>
@@ -194,26 +194,26 @@ export default function PublicProfile() {
             <div className="grid grid-cols-4 gap-3 mb-8">
               <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
                 <p className="text-xl font-medium text-[var(--cp-text)] font-mono">{stats.total_games}</p>
-                <p className="font-mono text-[11.5px] text-[var(--cp-text-dim)] uppercase tracking-[.06em] mt-1">Total</p>
+                <p className="text-[12px] text-[var(--cp-text-dim)] mt-1">Total</p>
               </div>
               <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
                 <p className="text-xl font-medium text-green-400 font-mono">{stats.by_status["Completed"] || 0}</p>
-                <p className="font-mono text-[11.5px] text-[var(--cp-text-dim)] uppercase tracking-[.06em] mt-1">Completed</p>
+                <p className="text-[12px] text-[var(--cp-text-dim)] mt-1">Completed</p>
               </div>
               <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
                 <p className="text-xl font-medium text-blue-400 font-mono">{stats.by_status["Playing"] || 0}</p>
-                <p className="font-mono text-[11.5px] text-[var(--cp-text-dim)] uppercase tracking-[.06em] mt-1">Playing</p>
+                <p className="text-[12px] text-[var(--cp-text-dim)] mt-1">Playing</p>
               </div>
               <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
                 <p className="text-xl font-medium text-[var(--cp-star)] font-mono">{stats.average_rating || "—"}</p>
-                <p className="font-mono text-[11.5px] text-[var(--cp-text-dim)] uppercase tracking-[.06em] mt-1">Avg Rating</p>
+                <p className="text-[12px] text-[var(--cp-text-dim)] mt-1">Avg Rating</p>
               </div>
             </div>
 
             {/* Top Genres */}
             {stats.top_genres.length > 0 && (
               <>
-                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">TOP GENRES</p>
+                <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">Top genres</p>
                 <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)] mb-8">
                   {stats.top_genres.slice(0, 6).map((genre) => {
                     const maxCount = stats.top_genres[0]?.count || 1
@@ -223,7 +223,7 @@ export default function PublicProfile() {
                         <div className="flex-1 h-1.5 bg-[var(--cp-bg)] rounded-full overflow-hidden">
                           <div className="h-full rounded-full bg-[var(--cp-accent-2)]" style={{ width: `${(genre.count / maxCount) * 100}%` }} />
                         </div>
-                        <span className="font-mono text-[11px] text-[var(--cp-text-dimmer)] w-6 text-right">{genre.count}</span>
+                        <span className="font-mono text-[12px] text-[var(--cp-text-dim)] w-6 text-right">{genre.count}</span>
                       </div>
                     )
                   })}
@@ -234,7 +234,7 @@ export default function PublicProfile() {
             {/* Monthly Activity */}
             {monthly.some((m) => m.count > 0) && (
               <>
-                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">MONTHLY ACTIVITY</p>
+                <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">Monthly activity</p>
                 <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)] mb-8">
                   <div className="flex items-end gap-2 h-24">
                     {monthly.map((m) => (
@@ -247,7 +247,7 @@ export default function PublicProfile() {
                             backgroundColor: "var(--cp-accent-2)",
                           }}
                         />
-                        <span className="font-mono text-[11px] text-[var(--cp-text-dim)]">{m.label}</span>
+                        <span className="font-mono text-[12px] text-[var(--cp-text-dim)]">{m.label}</span>
                       </div>
                     ))}
                   </div>
@@ -260,7 +260,7 @@ export default function PublicProfile() {
         {/* Recent Diary */}
         {recent_diary.length > 0 && (
           <>
-            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">RECENT DIARY</p>
+            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">Recent diary</p>
             <div className="space-y-0 mb-8">
               {recent_diary.map((entry, i) => (
                 <div
@@ -284,7 +284,7 @@ export default function PublicProfile() {
                       {entry.note && ` · "${entry.note}"`}
                     </p>
                   </div>
-                  <span className="font-mono text-[11px] text-[var(--cp-star)]">
+                  <span className="font-mono text-[12px] text-[var(--cp-star)]">
                     {entry.rating ? `★ ${entry.rating}` : "—"}
                   </span>
                 </div>
@@ -296,12 +296,12 @@ export default function PublicProfile() {
         {/* Lists */}
         {lists.length > 0 && (
           <>
-            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">LISTS</p>
+            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">Lists</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
               {lists.map((list) => (
                 <div key={list.id} className="bg-[var(--cp-surf)] rounded-lg p-4 border border-[var(--cp-border)]">
                   <p className="text-sm font-medium text-[var(--cp-text)]">{list.name}</p>
-                  <p className="font-mono text-[11px] text-[var(--cp-text-dimmer)] mt-1">
+                  <p className="text-[12px] text-[var(--cp-text-dim)] mt-1">
                     {list.item_count} game{list.item_count !== 1 ? "s" : ""}
                   </p>
                   {list.preview_covers.length > 0 && (

@@ -104,7 +104,7 @@ export default function Search() {
       )}
       <div className="p-3">
         <h3 className="text-[var(--cp-text)] font-semibold text-sm truncate">{game.name}</h3>
-        <p className="font-mono text-[var(--cp-text-dim)] text-xs mt-1">
+        <p className="text-[var(--cp-text-dim)] text-[13px] mt-1">
           {getYear(game.first_release_date)}
           {game.genres && ` · ${game.genres.map((g) => g.name).join(", ")}`}
         </p>
@@ -138,7 +138,7 @@ export default function Search() {
         {!hasSearched && recentSearches.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <p className="font-mono text-[var(--cp-text-dim)] text-[12px] uppercase tracking-[.08em]">Recent searches</p>
+              <p className="text-[var(--cp-text-dim)] text-[13px] font-medium">Recent searches</p>
               <button onClick={clearRecent} className="text-[var(--cp-text-dimmer)] text-xs hover:text-[var(--cp-accent)] transition">
                 Clear
               </button>
@@ -217,7 +217,7 @@ export default function Search() {
         {/* New Releases — shown when no search yet */}
         {!hasSearched && !loading && (
           <div>
-            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">NEW RELEASES</p>
+            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">New releases</p>
             {loadingPopular ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {Array.from({ length: 10 }).map((_, i) => (

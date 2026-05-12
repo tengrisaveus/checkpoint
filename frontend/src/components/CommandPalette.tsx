@@ -71,7 +71,7 @@ function getDeveloper(game: Game): string | null {
 
 function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="px-2 py-1 bg-[var(--cp-bg)] border border-[var(--cp-border)] rounded-[3px] mr-1 font-mono text-[11px] text-[var(--cp-text-dim)] leading-none">
+    <kbd className="px-2 py-1 bg-[var(--cp-bg)] border border-[var(--cp-border)] rounded-[3px] mr-1 font-mono text-[12px] text-[var(--cp-text-dim)] leading-none">
       {children}
     </kbd>
   )
@@ -202,7 +202,7 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
             className="flex-1 bg-transparent border-none outline-none text-[var(--cp-text)] text-[17px] placeholder:text-[var(--cp-text-dimmer)]"
           />
           {filteredResults.length > 0 && (
-            <span className="hidden sm:inline-flex items-center font-mono text-[11px] text-[var(--cp-text-dim)]">
+            <span className="hidden sm:inline-flex items-center text-[12px] text-[var(--cp-text-dim)]">
               <Kbd>↵</Kbd>
             </span>
           )}
@@ -213,7 +213,7 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 px-3 py-3">
               {recent.length > 0 && (
                 <div>
-                  <div className="font-mono text-[12px] uppercase tracking-[.08em] text-[var(--cp-text-dim)] mb-2">
+                  <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
                     Recent
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -230,7 +230,7 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
                 </div>
               )}
               <div>
-                <div className="font-mono text-[12px] uppercase tracking-[.08em] text-[var(--cp-text-dim)] mb-2">
+                <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
                   Try
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -248,7 +248,7 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
             </div>
           ) : loading ? (
             <div>
-              <div className="font-mono text-[12px] uppercase tracking-[.08em] text-[var(--cp-text-dim)] px-3 py-1.5">
+              <div className="text-[13px] text-[var(--cp-text-dim)] font-medium px-3 py-1.5">
                 Searching…
               </div>
               <ResultSkeleton />
@@ -260,13 +260,13 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
               <div className="font-display italic text-[var(--cp-text-dim)] text-xl">
                 No matches for “{query}”
               </div>
-              <div className="font-mono text-[11.5px] uppercase tracking-[.06em] text-[var(--cp-text-dim)] mt-2">
+              <div className="text-[13px] text-[var(--cp-text-dim)] mt-2">
                 Try a different keyword
               </div>
             </div>
           ) : (
             <div>
-              <div className="font-mono text-[12px] uppercase tracking-[.08em] text-[var(--cp-text-dim)] px-3 py-1.5">
+              <div className="text-[13px] text-[var(--cp-text-dim)] font-medium px-3 py-1.5">
                 Results · {filteredResults.length}
               </div>
               {filteredResults.map((game, i) => {
@@ -303,13 +303,13 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
                         {highlightMatch(game.name, query)}
                       </div>
                       {sub && (
-                        <div className="font-mono text-[11.5px] tracking-[.06em] text-[var(--cp-text-dim)] truncate">
+                        <div className="text-[12px] text-[var(--cp-text-dim)] truncate">
                           {sub}
                         </div>
                       )}
                     </div>
                     {active && (
-                      <div className="font-mono text-[11.5px] uppercase tracking-[.06em] text-[var(--cp-text-dim)] flex items-center gap-1 hidden sm:flex">
+                      <div className="text-[12px] uppercase tracking-[.04em] text-[var(--cp-text-dim)] font-semibold flex items-center gap-1 hidden sm:flex">
                         Open
                         <Kbd>↵</Kbd>
                       </div>
@@ -321,7 +321,7 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
-        <div className="border-t border-[var(--cp-border)] px-3.5 py-2.5 flex justify-between items-center font-mono text-[11.5px] text-[var(--cp-text-dim)]">
+        <div className="border-t border-[var(--cp-border)] px-3.5 py-2.5 flex justify-between items-center text-[12px] text-[var(--cp-text-dim)]">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="flex items-center"><Kbd>↑</Kbd><Kbd>↓</Kbd> navigate</span>
             <span className="flex items-center"><Kbd>↵</Kbd> open</span>

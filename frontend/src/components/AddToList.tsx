@@ -41,8 +41,8 @@ export default function AddToList({ gameId }: AddToListProps) {
 
   return (
     <div className="space-y-3">
-      {success && <p className="text-[var(--cp-success)] text-sm font-mono">{success}</p>}
-      {error && <p className="text-[var(--cp-accent)] text-sm font-mono">{error}</p>}
+      {success && <p className="text-[var(--cp-success)] text-sm">{success}</p>}
+      {error && <p className="text-[var(--cp-accent)] text-sm">{error}</p>}
       <select
         value={selectedList}
         onChange={(e) => setSelectedList(e.target.value)}

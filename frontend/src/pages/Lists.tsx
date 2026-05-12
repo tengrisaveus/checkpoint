@@ -160,15 +160,15 @@ export default function Lists() {
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
           <div>
-            <div className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] mb-3">
-              YOUR LISTS · {lists.length}
+            <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+              Your lists · <span className="font-mono">{lists.length}</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <select
               value={sortMode}
               onChange={(e) => setSortMode(e.target.value as SortMode)}
-              className="font-mono text-[11px] uppercase tracking-wider bg-transparent text-[var(--cp-text-dim)] border border-[var(--cp-border)] rounded-sm px-3 py-2 outline-none hover:border-[var(--cp-accent)]/40 transition"
+              className="text-[12px] uppercase tracking-[.04em] font-semibold bg-transparent text-[var(--cp-text-dim)] border border-[var(--cp-border)] rounded-sm px-3 py-2 outline-none hover:border-[var(--cp-accent)]/40 transition"
             >
               <option value="recent">Recent</option>
               <option value="name">A–Z</option>
@@ -176,7 +176,7 @@ export default function Lists() {
             </select>
             <button
               onClick={() => setShowCreate(!showCreate)}
-              className="font-mono text-[11px] uppercase tracking-wider px-4 py-2 rounded-sm border border-[var(--cp-accent)]/50 text-[var(--cp-accent)] hover:bg-[var(--cp-accent)]/10 transition"
+              className="text-[12px] uppercase tracking-[.04em] font-semibold px-4 py-2 rounded-sm border border-[var(--cp-accent)]/50 text-[var(--cp-accent)] hover:bg-[var(--cp-accent)]/10 transition"
             >
               {showCreate ? "Cancel" : "+ New list"}
             </button>
@@ -202,7 +202,7 @@ export default function Lists() {
               />
               <button
                 onClick={handleCreate}
-                className="px-6 py-2 rounded-sm bg-[var(--cp-accent)] text-white font-mono uppercase text-[11px] tracking-wider hover:brightness-110 transition"
+                className="px-6 py-2 rounded-sm bg-[var(--cp-accent)] text-white uppercase text-[12px] tracking-[.04em] font-semibold hover:brightness-110 transition"
               >
                 Create list
               </button>
@@ -215,7 +215,7 @@ export default function Lists() {
             <p className="font-display italic text-2xl text-[var(--cp-text-dim)] mb-4">No lists yet.</p>
             <button
               onClick={() => setShowCreate(true)}
-              className="font-mono text-[11px] uppercase tracking-wider text-[var(--cp-accent)] hover:brightness-110 transition"
+              className="text-[12px] uppercase tracking-[.04em] font-semibold text-[var(--cp-accent)] hover:brightness-110 transition"
             >
               + Create your first list
             </button>
@@ -239,7 +239,7 @@ export default function Lists() {
                     {list.description}
                   </p>
                 )}
-                <p className="font-mono uppercase tracking-[.06em] text-[11.5px] text-[var(--cp-text-dim)] mt-3">
+                <p className="text-[12px] text-[var(--cp-text-dim)] mt-3">
                   {list.items.length} {list.items.length === 1 ? "game" : "games"} · updated {timeAgo(list.updated_at)}
                 </p>
               </div>

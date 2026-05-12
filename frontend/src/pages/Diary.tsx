@@ -167,8 +167,8 @@ export default function Diary() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div>
-            <div className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] mb-3">
-              YOUR DIARY · {entries.length} {entries.length === 1 ? "ENTRY" : "ENTRIES"}
+            <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+              Your diary · <span className="font-mono">{entries.length}</span> {entries.length === 1 ? "entry" : "entries"}
             </div>
             <h1 className="font-display text-4xl md:text-5xl tracking-tight text-[var(--cp-text)] leading-[1.05]">
               What you've been{" "}
@@ -184,7 +184,7 @@ export default function Diary() {
               >
                 ←
               </button>
-              <span className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text)] px-3 py-1.5 min-w-[88px] text-center border-x border-[var(--cp-border)]">
+              <span className="text-[13px] font-semibold text-[var(--cp-text)] px-3 py-1.5 min-w-[96px] text-center border-x border-[var(--cp-border)]">
                 {monthLabel}
               </span>
               <button
@@ -197,7 +197,7 @@ export default function Diary() {
             </div>
             <button
               onClick={() => navigate("/search")}
-              className="font-mono text-[12px] uppercase tracking-[.08em] px-4 py-1.5 border border-[var(--cp-accent)]/50 text-[var(--cp-accent)] hover:bg-[var(--cp-accent)]/10 rounded-sm transition whitespace-nowrap"
+              className="text-[13px] font-semibold px-4 py-1.5 border border-[var(--cp-accent)]/50 text-[var(--cp-accent)] hover:bg-[var(--cp-accent)]/10 rounded-sm transition whitespace-nowrap"
             >
               + New entry
             </button>
@@ -249,7 +249,7 @@ export default function Diary() {
             </p>
             <Link
               to="/search"
-              className="mt-4 inline-block font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-accent)] hover:brightness-110 transition"
+              className="mt-4 inline-block text-[13px] font-semibold text-[var(--cp-accent)] hover:brightness-110 transition"
             >
               Log your first entry →
             </Link>
@@ -262,14 +262,14 @@ export default function Diary() {
                 <div key={dayKey} className="grid md:grid-cols-[120px_1fr] gap-4 md:gap-8 mb-10 last:mb-0">
                   <div className="md:sticky md:top-4 md:self-start">
                     <div className="hidden md:block">
-                      <div className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] mb-1">
-                        {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
+                      <div className="text-[13px] text-[var(--cp-text-dim)] font-medium uppercase tracking-[.04em] mb-1">
+                        {date.toLocaleDateString("en-US", { weekday: "short" })}
                       </div>
                       <div className="font-display text-[56px] leading-none text-[var(--cp-text)]">
                         {date.getDate()}
                       </div>
-                      <div className="font-mono uppercase tracking-[.06em] text-[11.5px] text-[var(--cp-text-dim)] mt-1">
-                        {date.toLocaleDateString("en-US", { month: "long" }).toUpperCase()} · {date.getFullYear()}
+                      <div className="text-[12px] text-[var(--cp-text-dim)] mt-1">
+                        {date.toLocaleDateString("en-US", { month: "long" })} · <span className="font-mono">{date.getFullYear()}</span>
                       </div>
                     </div>
                     <h3 className="md:hidden font-display text-2xl tracking-tight text-[var(--cp-text)]">
@@ -311,7 +311,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
+      className={`px-3 py-1.5 rounded-sm text-[12px] uppercase tracking-[.04em] font-semibold transition flex items-center gap-2 ${
         active
           ? "bg-[var(--cp-accent)] text-white"
           : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
@@ -365,7 +365,7 @@ function EntryCard({
         <div className="flex gap-2.5 items-center mt-1.5 flex-wrap">
           {color && (
             <span
-              className="inline-flex items-center gap-1.5 px-2 py-[2px] rounded-[3px] border font-mono uppercase tracking-[.06em] text-[10.5px] font-medium"
+              className="inline-flex items-center gap-1.5 px-2 py-[2px] rounded-[3px] border uppercase tracking-[.04em] text-[11px] font-semibold"
               style={{
                 background: `${color}1a`,
                 borderColor: `${color}40`,

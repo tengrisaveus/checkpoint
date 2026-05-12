@@ -19,7 +19,7 @@ export default function StoreLink({ url, category }: StoreLinkProps) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="px-3 py-2 rounded-sm font-mono text-xs uppercase tracking-wider bg-transparent text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:border-[var(--cp-accent)]/40 transition inline-flex items-center gap-2 border border-[var(--cp-border)]"
+      className="px-3 py-2 rounded-sm text-[12px] uppercase tracking-[.04em] font-semibold bg-transparent text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:border-[var(--cp-accent)]/40 transition inline-flex items-center gap-2 border border-[var(--cp-border)]"
     >
       {store.name} ↗
     </a>

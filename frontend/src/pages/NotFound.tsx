@@ -7,7 +7,7 @@ export default function NotFound() {
 
   return (
     <div className="min-h-screen bg-[var(--cp-bg)] flex flex-col items-center justify-center p-8">
-      <p className="font-mono text-[var(--cp-text-dimmer)] text-xs uppercase tracking-[0.2em] mb-4">ERROR 404</p>
+      <p className="text-[var(--cp-text-dim)] text-[12px] uppercase tracking-[.04em] font-semibold mb-4">Error 404</p>
       <p className="font-display text-6xl md:text-8xl text-[var(--cp-text)] mb-4">
         Not <em className="italic text-[var(--cp-accent)]">found</em>.
       </p>

@@ -157,7 +157,7 @@ export default function GameDetail() {
       <div className="max-w-6xl mx-auto px-4 md:px-6 -mt-48 md:-mt-56 relative z-10">
         <button
           onClick={() => navigate(-1)}
-          className="text-white/50 hover:text-white text-[12px] font-mono uppercase tracking-[.08em] mb-6 inline-flex items-center gap-2 transition"
+          className="text-white/50 hover:text-white text-[12px] uppercase tracking-[.04em] font-semibold mb-6 inline-flex items-center gap-2 transition"
         >
           ← Back
         </button>
@@ -180,8 +180,8 @@ export default function GameDetail() {
               )}
 
               <div className="flex-1 min-w-0 md:pb-2">
-                <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-2">
-                  {getYear(game.first_release_date) || "—"}
+                <div className="text-[13px] text-[var(--cp-text-dim)] mb-2">
+                  <span className="font-mono">{getYear(game.first_release_date) || "—"}</span>
                   {developer && <> · {developer}</>}
                 </div>
                 <h1 className="font-display text-3xl md:text-[2.75rem] text-[var(--cp-text)] leading-[1.05] tracking-tight">
@@ -193,7 +193,7 @@ export default function GameDetail() {
                     {game.genres.slice(0, 5).map((g) => (
                       <span
                         key={g.name}
-                        className="px-2.5 py-1 rounded-sm text-[11px] font-medium text-[var(--cp-accent)]/90 bg-[var(--cp-accent)]/10 border border-[var(--cp-accent)]/25 font-mono tracking-wide"
+                        className="px-2.5 py-1 rounded-sm text-[11.5px] font-medium text-[var(--cp-accent)]/90 bg-[var(--cp-accent)]/10 border border-[var(--cp-accent)]/25"
                       >
                         {g.name}
                       </span>
@@ -215,7 +215,7 @@ export default function GameDetail() {
                       >
                         {game.aggregated_rating.toFixed(0)}
                       </div>
-                      <span className="font-mono text-[var(--cp-text-dim)] text-[11.5px] uppercase tracking-[.06em]">
+                      <span className="text-[var(--cp-text-dim)] text-[12px] uppercase tracking-[.04em] font-semibold">
                         Critic
                       </span>
                     </div>
@@ -235,7 +235,7 @@ export default function GameDetail() {
             {/* Summary */}
             {game.summary && (
               <div className="mt-8">
-                <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-2">
+                <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
                   About
                 </div>
                 <p
@@ -258,7 +258,7 @@ export default function GameDetail() {
 
             {storeLinks.length > 0 && (
               <div className="mt-6">
-                <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-2">
+                <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
                   Where to buy
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -271,7 +271,7 @@ export default function GameDetail() {
 
             {similarGames.length > 0 && (
               <div className="mt-8">
-                <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-3">
+                <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
                   Similar games
                 </div>
                 <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
@@ -321,14 +321,14 @@ export default function GameDetail() {
               <div className="border border-[var(--cp-border)] rounded-lg bg-[var(--cp-surf)]/70 backdrop-blur-sm overflow-hidden">
                 {/* Header */}
                 <div className="px-4 py-3 border-b border-[var(--cp-border)] flex items-center justify-between">
-                  <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase">
-                    {existingEntry ? "▸ In your library" : "▸ Add to library"}
+                  <div className="text-[13px] text-[var(--cp-text-dim)] font-medium">
+                    {existingEntry ? "In your library" : "Add to library"}
                   </div>
                   {existingEntry && statusColor && (
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full" style={{ background: statusColor }} />
                       <span
-                        className="font-mono text-[11.5px] tracking-[.06em] uppercase font-medium"
+                        className="text-[11.5px] tracking-[.04em] uppercase font-semibold"
                         style={{ color: statusColor }}
                       >
                         {existingEntry.status}
@@ -340,7 +340,7 @@ export default function GameDetail() {
                 <div className="p-4 space-y-4">
                   {/* STATUS — segmented */}
                   <div>
-                    <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-2">
+                    <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
                       Status
                     </div>
                     <div className="grid grid-cols-2 gap-1.5">
@@ -371,14 +371,14 @@ export default function GameDetail() {
 
                   {/* RATING — 10 cells */}
                   <div>
-                    <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-2 flex items-center justify-between font-medium">
+                    <div className="text-[13px] text-[var(--cp-text-dim)] mb-2 flex items-center justify-between font-medium">
                       <span>Your rating</span>
                       {rating ? (
-                        <span className="text-[var(--cp-star)] tracking-normal normal-case">
+                        <span className="font-mono text-[var(--cp-star)]">
                           {rating} / 10
                         </span>
                       ) : (
-                        <span className="text-[var(--cp-text-dimmer)] tracking-normal normal-case">—</span>
+                        <span className="text-[var(--cp-text-dimmer)]">—</span>
                       )}
                     </div>
                     <div className="grid grid-cols-10 gap-1">
@@ -388,7 +388,7 @@ export default function GameDetail() {
                           <button
                             key={n}
                             onClick={() => setRating(rating === n ? null : n)}
-                            className="aspect-square rounded-sm text-[11.5px] font-mono font-semibold transition flex items-center justify-center"
+                            className="aspect-square rounded-sm text-[12px] font-mono font-semibold transition flex items-center justify-center"
                             style={{
                               background: active ? "var(--cp-star)" : "transparent",
                               color: active ? "var(--cp-bg)" : "var(--cp-text-dimmer)",
@@ -406,7 +406,7 @@ export default function GameDetail() {
 
                   {/* REVIEW */}
                   <div>
-                    <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-2">
+                    <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
                       Review
                     </div>
                     <textarea
@@ -441,7 +441,7 @@ export default function GameDetail() {
                         setDiaryOpen(!diaryOpen);
                         setListOpen(false);
                       }}
-                      className={`py-2.5 text-[12px] font-mono tracking-[.08em] uppercase font-medium transition ${
+                      className={`py-2.5 text-[12px] tracking-[.04em] uppercase font-semibold transition ${
                         diaryOpen
                           ? "text-[var(--cp-accent)] bg-[var(--cp-accent)]/5"
                           : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"
@@ -454,7 +454,7 @@ export default function GameDetail() {
                         setListOpen(!listOpen);
                         setDiaryOpen(false);
                       }}
-                      className={`py-2.5 text-[12px] font-mono tracking-[.08em] uppercase font-medium transition ${
+                      className={`py-2.5 text-[12px] tracking-[.04em] uppercase font-semibold transition ${
                         listOpen
                           ? "text-[var(--cp-accent)] bg-[var(--cp-accent)]/5"
                           : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"
@@ -467,7 +467,7 @@ export default function GameDetail() {
                   {diaryOpen && (
                     <div className="p-4 space-y-3 border-t border-[var(--cp-border)]">
                       <div>
-                        <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-1.5">
+                        <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-1.5">
                           Date played
                         </div>
                         <input
@@ -478,7 +478,7 @@ export default function GameDetail() {
                         />
                       </div>
                       <div>
-                        <div className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-1.5">
+                        <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-1.5">
                           Note
                         </div>
                         <input

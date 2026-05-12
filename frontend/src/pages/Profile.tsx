@@ -41,9 +41,7 @@ function monthsBetween(iso: string) {
 
 function formatActivityDate(iso: string) {
   const d = new Date(iso);
-  return d
-    .toLocaleDateString("en-US", { month: "short", day: "2-digit" })
-    .toUpperCase();
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export default function Profile() {
@@ -129,12 +127,12 @@ export default function Profile() {
   const monthsMember = joinedIso ? monthsBetween(joinedIso) : 0;
 
   const sidebarStats: [string, string | number][] = [
-    ["GAMES", stats?.total_games ?? 0],
-    ["COMPLETED", stats?.by_status["Completed"] ?? 0],
-    ["PLAYING", stats?.by_status["Playing"] ?? 0],
-    ["BACKLOG", stats?.by_status["Want to Play"] ?? 0],
-    ["AVG RATING", stats?.average_rating ? `★ ${stats.average_rating}` : "—"],
-    ["DIARY", diary.length],
+    ["Games", stats?.total_games ?? 0],
+    ["Completed", stats?.by_status["Completed"] ?? 0],
+    ["Playing", stats?.by_status["Playing"] ?? 0],
+    ["Backlog", stats?.by_status["Want to Play"] ?? 0],
+    ["Avg rating", stats?.average_rating ? `★ ${stats.average_rating}` : "—"],
+    ["Diary", diary.length],
   ];
 
   const recentActivity = diary.slice(0, 6);
@@ -162,8 +160,8 @@ export default function Profile() {
             <h1 className="font-display text-3xl leading-none text-[var(--cp-text)]">
               {user?.username}
             </h1>
-            <p className="font-mono text-[11.5px] tracking-[.06em] text-[var(--cp-text-dim)] mt-1">
-              @{user?.username?.toUpperCase()}
+            <p className="text-[13px] text-[var(--cp-text-dim)] mt-1">
+              @{user?.username?.toLowerCase()}
             </p>
 
             <div className="mt-5 pt-4 border-t border-[var(--cp-border)]">
@@ -172,7 +170,7 @@ export default function Profile() {
                   key={k}
                   className="flex justify-between items-center py-[7px] border-b border-dashed border-[var(--cp-border)] last:border-b-0"
                 >
-                  <span className="font-mono text-[11.5px] tracking-[.06em] text-[var(--cp-text-dim)]">
+                  <span className="text-[13px] text-[var(--cp-text-dim)]">
                     {k}
                   </span>
                   <span className="font-mono text-[12px] text-[var(--cp-text)]">
@@ -184,10 +182,10 @@ export default function Profile() {
 
             {joinedIso && (
               <div className="mt-5">
-                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-2">
+                <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-1">
                   Joined
                 </p>
-                <p className="text-[12px] text-[var(--cp-text-dim)]">
+                <p className="text-[13px] text-[var(--cp-text-dim)]">
                   {joinedLabel}
                   {monthsMember > 0 && ` · ${monthsMember} months`}
                 </p>
@@ -211,8 +209,8 @@ export default function Profile() {
           {/* RIGHT MAIN */}
           <main className="lg:pl-9">
             {/* Favorites */}
-            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">
-              ▸ FOUR FAVORITES
+            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+              Four favorites
             </p>
             <div className="grid grid-cols-4 gap-2.5 mb-8">
               {slots.map((i) => {
@@ -262,8 +260,8 @@ export default function Profile() {
             {/* Progress */}
             {stats && stats.total_games > 0 && (
               <>
-                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">
-                  ▸ PROGRESS
+                <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+                  Progress
                 </p>
                 <div className="bg-[var(--cp-surf)] border border-[var(--cp-border)] rounded-xl p-4 mb-8">
                   <div className="flex items-center gap-5 pb-4 mb-4 border-b border-[var(--cp-border)]">
@@ -329,7 +327,7 @@ export default function Profile() {
                             }}
                           />
                         </div>
-                        <span className="font-mono text-[11.5px] text-[var(--cp-text-dim)] w-6 text-right">
+                        <span className="font-mono text-[12px] text-[var(--cp-text-dim)] w-6 text-right">
                           {count}
                         </span>
                       </div>
@@ -342,8 +340,8 @@ export default function Profile() {
             {/* Recent activity */}
             {recentActivity.length > 0 && (
               <>
-                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">
-                  ▸ RECENT ACTIVITY
+                <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+                  Recent activity
                 </p>
                 <div className="bg-[var(--cp-surf)] border border-[var(--cp-border)] rounded-xl p-2 mb-8">
                   {recentActivity.map((e, i) => {
@@ -366,7 +364,7 @@ export default function Profile() {
                             : "border-b border-dashed border-[var(--cp-border)]"
                         }`}
                       >
-                        <div className="font-mono text-[11.5px] tracking-normal text-[var(--cp-text-dim)]">
+                        <div className="font-mono text-[12px] text-[var(--cp-text-dim)]">
                           {formatActivityDate(e.played_at)}
                         </div>
                         {cover ? (
@@ -388,10 +386,10 @@ export default function Profile() {
                         </div>
                         {statusColor && (
                           <span
-                            className="font-mono text-[10.5px] tracking-normal font-medium"
+                            className="text-[11px] tracking-[.04em] uppercase font-semibold"
                             style={{ color: statusColor }}
                           >
-                            {e.status.toUpperCase()}
+                            {e.status}
                           </span>
                         )}
                       </div>

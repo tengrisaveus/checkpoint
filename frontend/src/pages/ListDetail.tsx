@@ -153,7 +153,7 @@ export default function ListDetail() {
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 -mt-[100px] relative">
         <button
           onClick={() => navigate("/lists")}
-          className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition mb-6 inline-block"
+          className="text-[12px] uppercase tracking-[.04em] font-semibold text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition mb-6 inline-block"
         >
           ← BACK TO LISTS
         </button>
@@ -177,13 +177,13 @@ export default function ListDetail() {
               <div className="flex gap-2">
                 <button
                   onClick={handleUpdate}
-                  className="px-4 py-2 rounded-sm bg-[var(--cp-accent)] text-white font-mono uppercase text-[11px] tracking-wider hover:brightness-110 transition"
+                  className="px-4 py-2 rounded-sm bg-[var(--cp-accent)] text-white uppercase text-[12px] tracking-[.04em] font-semibold hover:brightness-110 transition"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  className="px-4 py-2 rounded-sm text-[var(--cp-text-dim)] font-mono uppercase text-[11px] tracking-wider border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 transition"
+                  className="px-4 py-2 rounded-sm text-[var(--cp-text-dim)] uppercase text-[12px] tracking-[.04em] font-semibold border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 transition"
                 >
                   Cancel
                 </button>
@@ -193,8 +193,8 @@ export default function ListDetail() {
         ) : (
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
             <div className="min-w-0">
-              <div className="font-mono uppercase tracking-wider text-[11px] text-[var(--cp-accent)] mb-3">
-                ▸ A LIST BY @{(user?.username || "you").toUpperCase()}
+              <div className="text-[13px] font-medium text-[var(--cp-accent)] mb-3">
+                A list by @{(user?.username || "you").toLowerCase()}
               </div>
               <h1
                 className="font-display text-[40px] md:text-[64px] leading-[1.02] text-[var(--cp-text)]"
@@ -208,21 +208,21 @@ export default function ListDetail() {
                   {list.description}
                 </p>
               )}
-              <p className="font-mono uppercase tracking-[.06em] text-[11.5px] text-[var(--cp-text-dim)] mt-5">
+              <p className="text-[12px] text-[var(--cp-text-dim)] mt-5">
                 {itemCount} {itemCount === 1 ? "game" : "games"} · updated {timeAgo(list.updated_at)}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setEditing(true)}
-                className="font-mono uppercase tracking-wider text-[11px] px-4 py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)] transition"
+                className="uppercase tracking-[.04em] text-[12px] font-semibold px-4 py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)] transition"
               >
                 Edit
               </button>
               <button
                 disabled
                 title="Coming soon"
-                className="font-mono uppercase tracking-wider text-[11px] px-4 py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dimmer)] cursor-not-allowed"
+                className="uppercase tracking-[.04em] text-[12px] font-semibold px-4 py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dimmer)] cursor-not-allowed"
               >
                 Reorder
               </button>
@@ -231,7 +231,7 @@ export default function ListDetail() {
                   navigator.clipboard?.writeText(window.location.href)
                   setSuccess("Link copied!")
                 }}
-                className="font-mono uppercase tracking-wider text-[11px] px-4 py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)] transition"
+                className="uppercase tracking-[.04em] text-[12px] font-semibold px-4 py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)] transition"
               >
                 Share
               </button>
@@ -247,7 +247,7 @@ export default function ListDetail() {
                 <button
                   key={m}
                   onClick={() => setView(m)}
-                  className={`font-mono uppercase tracking-wider text-[11px] px-3 py-1.5 rounded-sm transition whitespace-nowrap ${
+                  className={`uppercase tracking-[.04em] text-[12px] font-semibold px-3 py-1.5 rounded-sm transition whitespace-nowrap ${
                     active
                       ? "bg-[var(--cp-accent)]/15 text-[var(--cp-accent)]"
                       : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"
@@ -260,7 +260,7 @@ export default function ListDetail() {
           </div>
           <button
             onClick={() => navigate("/search")}
-            className="font-mono uppercase tracking-wider text-[11px] text-[var(--cp-accent)] hover:brightness-110 transition pb-3 whitespace-nowrap"
+            className="uppercase tracking-[.04em] text-[12px] font-semibold text-[var(--cp-accent)] hover:brightness-110 transition pb-3 whitespace-nowrap"
           >
             + Add games
           </button>
@@ -273,7 +273,7 @@ export default function ListDetail() {
             </p>
             <button
               onClick={() => navigate("/search")}
-              className="font-mono uppercase tracking-wider text-[11px] text-[var(--cp-accent)] hover:brightness-110 transition"
+              className="uppercase tracking-[.04em] text-[12px] font-semibold text-[var(--cp-accent)] hover:brightness-110 transition"
             >
               Search for games →
             </button>
@@ -367,7 +367,7 @@ export default function ListDetail() {
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="font-mono uppercase tracking-wider text-[11px] text-[var(--cp-text-dim)] w-12 text-right">
+                    <div className="uppercase tracking-[.04em] text-[12px] font-semibold text-[var(--cp-text-dim)] w-12 text-right">
                       {rating != null ? `${rating}/10` : ""}
                     </div>
                     <button

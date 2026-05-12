@@ -35,7 +35,8 @@ body {
 }
 
 .font-mono {
-  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: "calt" 1, "ss01" 1;
 }
 
 /* Cover art hover: scale + glow instead of ring */

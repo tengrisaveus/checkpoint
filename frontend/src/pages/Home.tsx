@@ -36,10 +36,10 @@ function getGreeting(): string {
 
 function getDateLabel(): string {
   const now = new Date();
-  const month = now.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+  const month = now.toLocaleDateString("en-US", { month: "short" });
   const day = now.getDate();
   const weekNum = Math.ceil(((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7);
-  return `${month} ${day} · WK ${weekNum}`;
+  return `${month} ${day} · Wk ${weekNum}`;
 }
 
 export default function Home() {
@@ -109,8 +109,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-20 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-12 items-start">
             <div>
-              <p className="font-mono text-[12px] tracking-[.08em] uppercase text-[var(--cp-text-dim)]">
-                YOUR GAMING JOURNAL
+              <p className="text-[13px] text-[var(--cp-text-dim)] font-medium tracking-[.04em] uppercase">
+                A gaming journal
               </p>
               <h1 className="font-display text-5xl md:text-7xl text-[var(--cp-text)] leading-[0.95] mt-3 tracking-tight">
                 Your games, <em className="text-[var(--cp-accent)] italic">remembered</em>.
@@ -138,8 +138,8 @@ export default function Home() {
 
             {/* Right — game covers */}
             <div>
-              <p className="font-mono text-[12px] tracking-[.08em] uppercase text-[var(--cp-text-dim)] mb-3">
-                WHAT'S BEING PLAYED NOW
+              <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+                What's being played now
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {popularGames.slice(0, 4).map((game) => {
@@ -170,8 +170,8 @@ export default function Home() {
 
           {/* Browse button for non-logged-in */}
           <div className="mt-12 border-t border-[var(--cp-border)] pt-8">
-            <p className="font-mono text-[12px] tracking-[.08em] uppercase text-[var(--cp-text-dim)] mb-4">
-              BROWSE THE CATALOG
+            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-4">
+              Browse the catalog
             </p>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
               {popularGames.slice(4, 10).map((game) => {
@@ -228,7 +228,7 @@ export default function Home() {
               {stats ? `${stats.by_status["Playing"] || 0} playing · ${stats.by_status["Completed"] || 0} completed · ${recentDiary.length} diary entries` : "Loading stats..."}
             </p>
           </div>
-          <span className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] hidden md:block">
+          <span className="font-mono text-[12px] text-[var(--cp-text-dim)] hidden md:block">
             {getDateLabel()}
           </span>
         </div>
@@ -236,8 +236,8 @@ export default function Home() {
         {/* Continue Playing */}
         {playingGames.length > 0 && (
           <div className="mb-8">
-            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">
-              ▸ CONTINUE PLAYING · {playingGames.length} ACTIVE
+            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+              Continue playing · {playingGames.length} active
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {playingGames.slice(0, 3).map((game) => (
@@ -263,12 +263,12 @@ export default function Home() {
                     </p>
                     <div className="flex items-center gap-1.5 mt-1">
                       <span className="status-dot" style={{ backgroundColor: STATUS_COLORS["Playing"] }} />
-                      <span className="font-mono text-[11.5px] text-[var(--cp-text-dim)] tracking-[.06em] font-medium">
-                        PLAYING
+                      <span className="text-[11px] text-[var(--cp-text-dim)] tracking-[.04em] uppercase font-semibold">
+                        Playing
                       </span>
                     </div>
                     {game.rating && (
-                      <p className="font-mono text-[11.5px] text-[var(--cp-star)] mt-1.5">
+                      <p className="font-mono text-[12px] text-[var(--cp-star)] mt-1.5">
                         {"★".repeat(Math.floor(game.rating / 2))}{game.rating % 2 ? "½" : ""} · {game.rating}/10
                       </p>
                     )}
@@ -284,8 +284,8 @@ export default function Home() {
           {/* This Week Diary */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)]">
-                ▸ DIARY · THIS WEEK
+              <p className="text-[13px] text-[var(--cp-text-dim)] font-medium">
+                Diary · this week
               </p>
               <button
                 onClick={() => navigate("/diary")}
@@ -302,8 +302,8 @@ export default function Home() {
                     onClick={() => navigate(`/game/${entry.game_id}`)}
                     className="grid grid-cols-[44px_1fr_auto] gap-3 py-2.5 border-b border-dashed border-[var(--cp-border)] cursor-pointer items-center hover:bg-[var(--cp-surf)]/50 transition"
                   >
-                    <span className="font-mono text-[11px] text-[var(--cp-text-dimmer)] text-right">
-                      {formatDate(entry.played_at).toUpperCase().replace(",", "")}
+                    <span className="font-mono text-[12px] text-[var(--cp-text-dim)] text-right">
+                      {formatDate(entry.played_at).replace(",", "")}
                     </span>
                     <div className="min-w-0">
                       <p className="text-[var(--cp-text)] text-[13px] truncate">
@@ -317,7 +317,7 @@ export default function Home() {
                         {entry.note && ` · "${entry.note}"`}
                       </p>
                     </div>
-                    <span className="font-mono text-[11px] text-[var(--cp-star)]">
+                    <span className="font-mono text-[12px] text-[var(--cp-star)]">
                       {entry.rating ? "★".repeat(Math.min(Math.floor(entry.rating / 2), 5)) + (entry.rating % 2 ? "½" : "") : "—"}
                     </span>
                   </div>
@@ -331,8 +331,8 @@ export default function Home() {
           {/* Your Queue */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)]">
-                ▸ YOUR QUEUE · {queueGames.length} GAMES
+              <p className="text-[13px] text-[var(--cp-text-dim)] font-medium">
+                Your queue · {queueGames.length} {queueGames.length === 1 ? "game" : "games"}
               </p>
               <button
                 onClick={() => navigate("/library")}
@@ -372,9 +372,9 @@ export default function Home() {
                         const random = queueGames[Math.floor(Math.random() * queueGames.length)];
                         navigate(`/game/${random.game_id}`);
                       }}
-                      className="font-mono text-[11.5px] text-[var(--cp-accent)] tracking-[.06em] font-medium hover:brightness-110 transition"
+                      className="text-[12px] text-[var(--cp-accent)] font-semibold hover:brightness-110 transition"
                     >
-                      PICK ONE FOR ME →
+                      Pick one for me →
                     </button>
                   </div>
                 )}
@@ -394,19 +394,19 @@ export default function Home() {
         {(popularGames.length > 0 || upcomingGames.length > 0) && (
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-3">
-              <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)]">
-                ▸ FROM THE COMMUNITY
+              <p className="text-[13px] text-[var(--cp-text-dim)] font-medium">
+                From the community
               </p>
               <div className="flex gap-1">
                 <button
                   onClick={() => setCommunityTab("popular")}
-                  className={`font-mono text-[11.5px] tracking-[.06em] font-medium px-2.5 py-1 rounded-sm transition ${communityTab === "popular" ? "bg-[var(--cp-accent)]/15 text-[var(--cp-accent)]" : "text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)]"}`}
+                  className={`text-[12px] tracking-[.04em] uppercase font-semibold px-2.5 py-1 rounded-sm transition ${communityTab === "popular" ? "bg-[var(--cp-accent)]/15 text-[var(--cp-accent)]" : "text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)]"}`}
                 >
                   HOT
                 </button>
                 <button
                   onClick={() => setCommunityTab("upcoming")}
-                  className={`font-mono text-[11.5px] tracking-[.06em] font-medium px-2.5 py-1 rounded-sm transition ${communityTab === "upcoming" ? "bg-[var(--cp-accent)]/15 text-[var(--cp-accent)]" : "text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)]"}`}
+                  className={`text-[12px] tracking-[.04em] uppercase font-semibold px-2.5 py-1 rounded-sm transition ${communityTab === "upcoming" ? "bg-[var(--cp-accent)]/15 text-[var(--cp-accent)]" : "text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)]"}`}
                 >
                   UPCOMING
                 </button>
@@ -446,8 +446,8 @@ export default function Home() {
         {playingGames.length === 0 && recentGames.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
-              <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)]">
-                ▸ YOUR LIBRARY
+              <p className="text-[13px] text-[var(--cp-text-dim)] font-medium">
+                Your library
               </p>
               <button
                 onClick={() => navigate("/library")}
