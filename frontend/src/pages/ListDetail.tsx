@@ -153,7 +153,7 @@ export default function ListDetail() {
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 -mt-[100px] relative">
         <button
           onClick={() => navigate("/lists")}
-          className="font-mono uppercase tracking-wider text-[10px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition mb-6 inline-block"
+          className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition mb-6 inline-block"
         >
           ← BACK TO LISTS
         </button>
@@ -208,7 +208,7 @@ export default function ListDetail() {
                   {list.description}
                 </p>
               )}
-              <p className="font-mono uppercase tracking-wider text-[10px] text-[var(--cp-text-dimmer)] mt-5">
+              <p className="font-mono uppercase tracking-[.06em] text-[11.5px] text-[var(--cp-text-dim)] mt-5">
                 {itemCount} {itemCount === 1 ? "game" : "games"} · updated {timeAgo(list.updated_at)}
               </p>
             </div>

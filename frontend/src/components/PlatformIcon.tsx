@@ -61,7 +61,7 @@ export default function PlatformIcon({ name, abbreviation }: PlatformIconProps) 
 
   return (
     <span
-      className="px-2 py-1 rounded-sm font-mono text-[10px] uppercase tracking-wider border inline-flex items-center gap-1.5"
+      className="px-2 py-1 rounded-sm font-mono text-[11px] uppercase tracking-[.06em] font-medium border inline-flex items-center gap-1.5"
       style={{
         color: color,
         borderColor: color + "40",

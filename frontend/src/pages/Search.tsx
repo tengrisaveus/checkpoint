@@ -138,7 +138,7 @@ export default function Search() {
         {!hasSearched && recentSearches.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider">Recent searches</p>
+              <p className="font-mono text-[var(--cp-text-dim)] text-[12px] uppercase tracking-[.08em]">Recent searches</p>
               <button onClick={clearRecent} className="text-[var(--cp-text-dimmer)] text-xs hover:text-[var(--cp-accent)] transition">
                 Clear
               </button>
@@ -217,7 +217,7 @@ export default function Search() {
         {/* New Releases — shown when no search yet */}
         {!hasSearched && !loading && (
           <div>
-            <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">NEW RELEASES</p>
+            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">NEW RELEASES</p>
             {loadingPopular ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {Array.from({ length: 10 }).map((_, i) => (

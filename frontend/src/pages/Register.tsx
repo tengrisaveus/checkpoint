@@ -34,7 +34,7 @@ export default function Register() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider block mb-1.5">USERNAME</label>
+            <label className="font-mono text-[var(--cp-text-dim)] text-[12px] uppercase tracking-[.08em] block mb-1.5">USERNAME</label>
             <input
               type="text"
               placeholder="Your username"
@@ -44,7 +44,7 @@ export default function Register() {
             />
           </div>
           <div>
-            <label className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider block mb-1.5">EMAIL</label>
+            <label className="font-mono text-[var(--cp-text-dim)] text-[12px] uppercase tracking-[.08em] block mb-1.5">EMAIL</label>
             <input
               type="email"
               placeholder="you@email.com"
@@ -54,7 +54,7 @@ export default function Register() {
             />
           </div>
           <div>
-            <label className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider block mb-1.5">PASSWORD</label>
+            <label className="font-mono text-[var(--cp-text-dim)] text-[12px] uppercase tracking-[.08em] block mb-1.5">PASSWORD</label>
             <input
               type="password"
               placeholder="Min 6 characters"

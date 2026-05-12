@@ -162,7 +162,7 @@ export default function Profile() {
             <h1 className="font-display text-3xl leading-none text-[var(--cp-text)]">
               {user?.username}
             </h1>
-            <p className="font-mono text-[10px] tracking-[0.1em] text-[var(--cp-text-dimmer)] mt-1">
+            <p className="font-mono text-[11.5px] tracking-[.06em] text-[var(--cp-text-dim)] mt-1">
               @{user?.username?.toUpperCase()}
             </p>
 
@@ -172,7 +172,7 @@ export default function Profile() {
                   key={k}
                   className="flex justify-between items-center py-[7px] border-b border-dashed border-[var(--cp-border)] last:border-b-0"
                 >
-                  <span className="font-mono text-[10px] tracking-[0.1em] text-[var(--cp-text-dimmer)]">
+                  <span className="font-mono text-[11.5px] tracking-[.06em] text-[var(--cp-text-dim)]">
                     {k}
                   </span>
                   <span className="font-mono text-[12px] text-[var(--cp-text)]">
@@ -184,7 +184,7 @@ export default function Profile() {
 
             {joinedIso && (
               <div className="mt-5">
-                <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] uppercase mb-2">
+                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] uppercase mb-2">
                   Joined
                 </p>
                 <p className="text-[12px] text-[var(--cp-text-dim)]">
@@ -211,7 +211,7 @@ export default function Profile() {
           {/* RIGHT MAIN */}
           <main className="lg:pl-9">
             {/* Favorites */}
-            <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">
+            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">
               ▸ FOUR FAVORITES
             </p>
             <div className="grid grid-cols-4 gap-2.5 mb-8">
@@ -262,7 +262,7 @@ export default function Profile() {
             {/* Progress */}
             {stats && stats.total_games > 0 && (
               <>
-                <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">
+                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">
                   ▸ PROGRESS
                 </p>
                 <div className="bg-[var(--cp-surf)] border border-[var(--cp-border)] rounded-xl p-4 mb-8">
@@ -329,7 +329,7 @@ export default function Profile() {
                             }}
                           />
                         </div>
-                        <span className="font-mono text-[10px] text-[var(--cp-text-dimmer)] w-6 text-right">
+                        <span className="font-mono text-[11.5px] text-[var(--cp-text-dim)] w-6 text-right">
                           {count}
                         </span>
                       </div>
@@ -342,7 +342,7 @@ export default function Profile() {
             {/* Recent activity */}
             {recentActivity.length > 0 && (
               <>
-                <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">
+                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">
                   ▸ RECENT ACTIVITY
                 </p>
                 <div className="bg-[var(--cp-surf)] border border-[var(--cp-border)] rounded-xl p-2 mb-8">
@@ -366,7 +366,7 @@ export default function Profile() {
                             : "border-b border-dashed border-[var(--cp-border)]"
                         }`}
                       >
-                        <div className="font-mono text-[10px] tracking-[0.08em] text-[var(--cp-text-dimmer)]">
+                        <div className="font-mono text-[11.5px] tracking-normal text-[var(--cp-text-dim)]">
                           {formatActivityDate(e.played_at)}
                         </div>
                         {cover ? (
@@ -388,7 +388,7 @@ export default function Profile() {
                         </div>
                         {statusColor && (
                           <span
-                            className="font-mono text-[9.5px] tracking-[0.08em]"
+                            className="font-mono text-[10.5px] tracking-normal font-medium"
                             style={{ color: statusColor }}
                           >
                             {e.status.toUpperCase()}

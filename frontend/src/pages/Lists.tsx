@@ -160,7 +160,7 @@ export default function Lists() {
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
           <div>
-            <div className="font-mono uppercase tracking-wider text-[10px] text-[var(--cp-text-dimmer)] mb-3">
+            <div className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] mb-3">
               YOUR LISTS · {lists.length}
             </div>
           </div>
@@ -239,7 +239,7 @@ export default function Lists() {
                     {list.description}
                   </p>
                 )}
-                <p className="font-mono uppercase tracking-wider text-[10px] text-[var(--cp-text-dimmer)] mt-3">
+                <p className="font-mono uppercase tracking-[.06em] text-[11.5px] text-[var(--cp-text-dim)] mt-3">
                   {list.items.length} {list.items.length === 1 ? "game" : "games"} · updated {timeAgo(list.updated_at)}
                 </p>
               </div>

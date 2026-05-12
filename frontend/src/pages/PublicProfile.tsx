@@ -122,7 +122,7 @@ export default function PublicProfile() {
         {/* Favorites */}
         {favorites.length > 0 && (
           <>
-            <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">FAVORITE GAMES</p>
+            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">FAVORITE GAMES</p>
             <div className="grid grid-cols-4 gap-3 mb-8">
               {favorites.map((fav) => (
                 <div key={fav.game_id}>
@@ -168,7 +168,7 @@ export default function PublicProfile() {
                     </div>
                   </div>
                   <div>
-                    <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider">Completion rate</p>
+                    <p className="font-mono text-[var(--cp-text-dim)] text-[11.5px] uppercase tracking-[.06em]">Completion rate</p>
                     <p className="text-[var(--cp-text-dim)] text-sm mt-1">
                       {stats.by_status["Completed"] || 0} of {stats.total_games} games completed
                     </p>
@@ -176,7 +176,7 @@ export default function PublicProfile() {
                 </div>
               </div>
               <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)]">
-                <p className="font-mono text-[var(--cp-text-dimmer)] text-[10px] uppercase tracking-wider mb-3">STATUS</p>
+                <p className="font-mono text-[var(--cp-text-dim)] text-[11.5px] uppercase tracking-[.06em] mb-3">STATUS</p>
                 {Object.entries(stats.by_status).map(([status, count]) => (
                   <div key={status} className="flex items-center gap-3 mb-2 last:mb-0">
                     <span className="status-dot" style={{ backgroundColor: STATUS_COLORS[status] || "#6b7280" }} />
@@ -194,26 +194,26 @@ export default function PublicProfile() {
             <div className="grid grid-cols-4 gap-3 mb-8">
               <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
                 <p className="text-xl font-medium text-[var(--cp-text)] font-mono">{stats.total_games}</p>
-                <p className="font-mono text-[10px] text-[var(--cp-text-dimmer)] uppercase tracking-wider mt-1">Total</p>
+                <p className="font-mono text-[11.5px] text-[var(--cp-text-dim)] uppercase tracking-[.06em] mt-1">Total</p>
               </div>
               <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
                 <p className="text-xl font-medium text-green-400 font-mono">{stats.by_status["Completed"] || 0}</p>
-                <p className="font-mono text-[10px] text-[var(--cp-text-dimmer)] uppercase tracking-wider mt-1">Completed</p>
+                <p className="font-mono text-[11.5px] text-[var(--cp-text-dim)] uppercase tracking-[.06em] mt-1">Completed</p>
               </div>
               <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
                 <p className="text-xl font-medium text-blue-400 font-mono">{stats.by_status["Playing"] || 0}</p>
-                <p className="font-mono text-[10px] text-[var(--cp-text-dimmer)] uppercase tracking-wider mt-1">Playing</p>
+                <p className="font-mono text-[11.5px] text-[var(--cp-text-dim)] uppercase tracking-[.06em] mt-1">Playing</p>
               </div>
               <div className="bg-[var(--cp-surf)] rounded-lg p-3 border border-[var(--cp-border)] text-center">
                 <p className="text-xl font-medium text-[var(--cp-star)] font-mono">{stats.average_rating || "—"}</p>
-                <p className="font-mono text-[10px] text-[var(--cp-text-dimmer)] uppercase tracking-wider mt-1">Avg Rating</p>
+                <p className="font-mono text-[11.5px] text-[var(--cp-text-dim)] uppercase tracking-[.06em] mt-1">Avg Rating</p>
               </div>
             </div>
 
             {/* Top Genres */}
             {stats.top_genres.length > 0 && (
               <>
-                <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">TOP GENRES</p>
+                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">TOP GENRES</p>
                 <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)] mb-8">
                   {stats.top_genres.slice(0, 6).map((genre) => {
                     const maxCount = stats.top_genres[0]?.count || 1
@@ -234,7 +234,7 @@ export default function PublicProfile() {
             {/* Monthly Activity */}
             {monthly.some((m) => m.count > 0) && (
               <>
-                <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">MONTHLY ACTIVITY</p>
+                <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">MONTHLY ACTIVITY</p>
                 <div className="bg-[var(--cp-surf)] rounded-lg p-5 border border-[var(--cp-border)] mb-8">
                   <div className="flex items-end gap-2 h-24">
                     {monthly.map((m) => (
@@ -247,7 +247,7 @@ export default function PublicProfile() {
                             backgroundColor: "var(--cp-accent-2)",
                           }}
                         />
-                        <span className="font-mono text-[10px] text-[var(--cp-text-dimmer)]">{m.label}</span>
+                        <span className="font-mono text-[11px] text-[var(--cp-text-dim)]">{m.label}</span>
                       </div>
                     ))}
                   </div>
@@ -260,7 +260,7 @@ export default function PublicProfile() {
         {/* Recent Diary */}
         {recent_diary.length > 0 && (
           <>
-            <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">RECENT DIARY</p>
+            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">RECENT DIARY</p>
             <div className="space-y-0 mb-8">
               {recent_diary.map((entry, i) => (
                 <div
@@ -296,7 +296,7 @@ export default function PublicProfile() {
         {/* Lists */}
         {lists.length > 0 && (
           <>
-            <p className="font-mono text-[10px] tracking-[0.14em] text-[var(--cp-text-dimmer)] mb-3">LISTS</p>
+            <p className="font-mono text-[12px] tracking-[.08em] text-[var(--cp-text-dim)] mb-3">LISTS</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
               {lists.map((list) => (
                 <div key={list.id} className="bg-[var(--cp-surf)] rounded-lg p-4 border border-[var(--cp-border)]">

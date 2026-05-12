@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect, useMemo } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import api from "../api"
 import type { DiaryEntry } from "../types"
 import { ListSkeleton } from "../components/Skeleton"
@@ -12,160 +12,397 @@ const STATUS_COLORS: Record<string, string> = {
   Dropped: "#ef4444",
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  Playing: "Playing",
+  Completed: "Completed",
+  "Want to Play": "Backlog",
+  Dropped: "Dropped",
+}
+
+type FilterMode = "all" | "rating" | "note"
+
+function startOfDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
+function startOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1)
+}
+
+function isoDayKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
+function parseDay(s: string): Date {
+  const day = s.split("T")[0]
+  const [y, m, d] = day.split("-").map(Number)
+  return new Date(y, m - 1, d)
+}
+
+function getCoverUrl(url: string | null) {
+  if (!url) return null
+  return url.startsWith("http") ? url : `https:${url}`
+}
+
 export default function Diary() {
   useTitle("Diary")
+  const navigate = useNavigate()
   const [entries, setEntries] = useState<DiaryEntry[]>([])
   const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
+  const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(new Date()))
+  const [filter, setFilter] = useState<FilterMode>("all")
 
   useEffect(() => {
     api.get("/diary")
-      .then((res) => setEntries(res.data))
+      .then((res) => {
+        setEntries(res.data)
+        if (res.data.length > 0) {
+          const newest = res.data.reduce((max: DiaryEntry, e: DiaryEntry) =>
+            new Date(e.played_at) > new Date(max.played_at) ? e : max,
+          )
+          setCurrentMonth(startOfMonth(parseDay(newest.played_at)))
+        }
+      })
       .catch(() => setEntries([]))
       .finally(() => setLoading(false))
   }, [])
 
   const handleDelete = async (entryId: number) => {
+    const prev = entries
+    setEntries(entries.filter((e) => e.id !== entryId))
     try {
       await api.delete(`/diary/${entryId}`)
-      setEntries((prev) => prev.filter((e) => e.id !== entryId))
     } catch {
-      // ignore
+      setEntries(prev)
     }
   }
 
-  const getCoverUrl = (url: string | null) => {
-    if (!url) return null
-    return url.startsWith("http") ? url : `https:${url}`
-  }
+  const heatmap = useMemo(() => {
+    const today = startOfDay(new Date())
+    const todayWeekday = today.getDay()
+    const end = new Date(today)
+    end.setDate(end.getDate() + (6 - todayWeekday))
+    const start = new Date(end)
+    start.setDate(start.getDate() - 12 * 7 + 1)
 
-  const formatDayHeader = (dateStr: string) => {
-    const d = new Date(dateStr)
-    const day = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()
-    const num = d.getDate()
-    return `${day} · ${num}`
-  }
+    const counts: Record<string, number> = {}
+    for (const e of entries) {
+      const k = isoDayKey(parseDay(e.played_at))
+      counts[k] = (counts[k] || 0) + 1
+    }
 
-  // Group entries by month, then by day within each month
-  const grouped: Record<string, DiaryEntry[]> = {}
-  entries.forEach((entry) => {
-    const monthKey = new Date(entry.played_at).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
+    const weeks: { date: Date; count: number; key: string }[][] = []
+    const cursor = new Date(start)
+    for (let w = 0; w < 12; w++) {
+      const week: { date: Date; count: number; key: string }[] = []
+      for (let d = 0; d < 7; d++) {
+        const dt = new Date(cursor)
+        const k = isoDayKey(dt)
+        week.push({ date: new Date(dt), count: counts[k] || 0, key: k })
+        cursor.setDate(cursor.getDate() + 1)
+      }
+      weeks.push(week)
+    }
+    return weeks
+  }, [entries])
+
+  const monthEntries = useMemo(() => {
+    return entries.filter((e) => {
+      const d = parseDay(e.played_at)
+      return (
+        d.getFullYear() === currentMonth.getFullYear() &&
+        d.getMonth() === currentMonth.getMonth()
+      )
     })
-    if (!grouped[monthKey]) grouped[monthKey] = []
-    grouped[monthKey].push(entry)
+  }, [entries, currentMonth])
+
+  const filterCounts = useMemo(() => ({
+    all: monthEntries.length,
+    rating: monthEntries.filter((e) => e.rating).length,
+    note: monthEntries.filter((e) => e.note?.trim()).length,
+  }), [monthEntries])
+
+  const filteredEntries = useMemo(() => {
+    if (filter === "rating") return monthEntries.filter((e) => e.rating)
+    if (filter === "note") return monthEntries.filter((e) => e.note?.trim())
+    return monthEntries
+  }, [monthEntries, filter])
+
+  const byDay = useMemo(() => {
+    const map: Record<string, DiaryEntry[]> = {}
+    for (const e of filteredEntries) {
+      const k = isoDayKey(parseDay(e.played_at))
+      if (!map[k]) map[k] = []
+      map[k].push(e)
+    }
+    return Object.entries(map).sort((a, b) => b[0].localeCompare(a[0]))
+  }, [filteredEntries])
+
+  const prevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
+  }
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-10">
+        <div className="max-w-[1100px] mx-auto space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => <ListSkeleton key={i} />)}
+        </div>
+      </div>
+    )
+  }
+
+  const monthLabel = currentMonth.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
   })
+  const monthLongName = currentMonth.toLocaleDateString("en-US", { month: "long" })
 
-  // Count stats per month
-  const getMonthStats = (monthEntries: DiaryEntry[]) => {
-    const uniqueGames = new Set(monthEntries.map((e) => e.game_id)).size
-    const completed = monthEntries.filter((e) => e.status === "Completed").length
-    const ratings = monthEntries.filter((e) => e.rating).map((e) => e.rating!)
-    const avgRating = ratings.length > 0 ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : null
-    return { entries: monthEntries.length, games: uniqueGames, completed, avgRating }
-  }
+  return (
+    <div className="min-h-screen bg-[var(--cp-bg)]">
+      <div className="max-w-[1100px] mx-auto px-6 md:px-10 py-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+          <div>
+            <div className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] mb-3">
+              YOUR DIARY · {entries.length} {entries.length === 1 ? "ENTRY" : "ENTRIES"}
+            </div>
+            <h1 className="font-display text-4xl md:text-5xl tracking-tight text-[var(--cp-text)] leading-[1.05]">
+              What you've been{" "}
+              <em className="italic text-[var(--cp-accent)]">playing</em>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center border border-[var(--cp-border)] rounded-sm overflow-hidden">
+              <button
+                onClick={prevMonth}
+                className="px-2.5 py-1.5 text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:bg-[var(--cp-surf)] transition"
+                aria-label="Previous month"
+              >
+                ←
+              </button>
+              <span className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text)] px-3 py-1.5 min-w-[88px] text-center border-x border-[var(--cp-border)]">
+                {monthLabel}
+              </span>
+              <button
+                onClick={nextMonth}
+                className="px-2.5 py-1.5 text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:bg-[var(--cp-surf)] transition"
+                aria-label="Next month"
+              >
+                →
+              </button>
+            </div>
+            <button
+              onClick={() => navigate("/search")}
+              className="font-mono text-[12px] uppercase tracking-[.08em] px-4 py-1.5 border border-[var(--cp-accent)]/50 text-[var(--cp-accent)] hover:bg-[var(--cp-accent)]/10 rounded-sm transition whitespace-nowrap"
+            >
+              + New entry
+            </button>
+          </div>
+        </div>
 
-  // Group entries within a month by day
-  const groupByDay = (monthEntries: DiaryEntry[]) => {
-    const days: Record<string, DiaryEntry[]> = {}
-    monthEntries.forEach((entry) => {
-      const dayKey = entry.played_at.split("T")[0]
-      if (!days[dayKey]) days[dayKey] = []
-      days[dayKey].push(entry)
-    })
-    return Object.entries(days)
-  }
+        {/* Heatmap */}
+        <div className="hidden md:flex items-end gap-[3px] mb-10">
+          {heatmap.map((week, wi) => (
+            <div key={wi} className="flex flex-col gap-[3px]">
+              {week.map((cell, di) => {
+                const intensity = cell.count === 0 ? 0 : Math.min(cell.count / 3, 1)
+                const bg = cell.count === 0
+                  ? "var(--cp-surf)"
+                  : `rgba(233, 78, 194, ${0.18 + intensity * 0.62})`
+                const label = cell.date.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
+                return (
+                  <div
+                    key={di}
+                    title={`${label} · ${cell.count} ${cell.count === 1 ? "entry" : "entries"}`}
+                    className="w-3 h-3 rounded-[2px]"
+                    style={{ backgroundColor: bg }}
+                  />
+                )
+              })}
+            </div>
+          ))}
+        </div>
 
-  if (loading) return (
-    <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-4">
-        {Array.from({ length: 5 }).map((_, i) => <ListSkeleton key={i} />)}
+        {/* Filter chips */}
+        {monthEntries.length > 0 && (
+          <div className="flex items-center gap-2 mb-8 flex-wrap">
+            <FilterChip active={filter === "all"} onClick={() => setFilter("all")} label="All" count={filterCounts.all} />
+            <FilterChip active={filter === "rating"} onClick={() => setFilter("rating")} label="With rating" count={filterCounts.rating} />
+            <FilterChip active={filter === "note"} onClick={() => setFilter("note")} label="With note" count={filterCounts.note} />
+          </div>
+        )}
+
+        {/* Empty state */}
+        {byDay.length === 0 ? (
+          <div className="border border-dashed border-[var(--cp-border)] rounded-lg py-16 text-center">
+            <p className="font-display italic text-2xl text-[var(--cp-text-dim)]">
+              {monthEntries.length === 0
+                ? `Nothing logged in ${monthLongName}.`
+                : "No entries match this filter."}
+            </p>
+            <Link
+              to="/search"
+              className="mt-4 inline-block font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-accent)] hover:brightness-110 transition"
+            >
+              Log your first entry →
+            </Link>
+          </div>
+        ) : (
+          <div>
+            {byDay.map(([dayKey, dayEntries]) => {
+              const date = parseDay(dayKey)
+              return (
+                <div key={dayKey} className="grid md:grid-cols-[120px_1fr] gap-4 md:gap-8 mb-10 last:mb-0">
+                  <div className="md:sticky md:top-4 md:self-start">
+                    <div className="hidden md:block">
+                      <div className="font-mono uppercase tracking-[.08em] text-[12px] text-[var(--cp-text-dim)] mb-1">
+                        {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
+                      </div>
+                      <div className="font-display text-[56px] leading-none text-[var(--cp-text)]">
+                        {date.getDate()}
+                      </div>
+                      <div className="font-mono uppercase tracking-[.06em] text-[11.5px] text-[var(--cp-text-dim)] mt-1">
+                        {date.toLocaleDateString("en-US", { month: "long" }).toUpperCase()} · {date.getFullYear()}
+                      </div>
+                    </div>
+                    <h3 className="md:hidden font-display text-2xl tracking-tight text-[var(--cp-text)]">
+                      {date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                    </h3>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    {dayEntries.map((entry) => (
+                      <EntryCard
+                        key={entry.id}
+                        entry={entry}
+                        onDelete={handleDelete}
+                        onNavigate={(gid) => navigate(`/game/${gid}`)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
+}
+
+function FilterChip({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean
+  onClick: () => void
+  label: string
+  count: number
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-sm font-mono uppercase tracking-[.06em] text-[11.5px] transition flex items-center gap-2 ${
+        active
+          ? "bg-[var(--cp-accent)] text-white"
+          : "text-[var(--cp-text-dim)] border border-[var(--cp-border)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)]"
+      }`}
+    >
+      {label} · {count}
+    </button>
+  )
+}
+
+function EntryCard({
+  entry,
+  onDelete,
+  onNavigate,
+}: {
+  entry: DiaryEntry
+  onDelete: (id: number) => void
+  onNavigate: (gameId: number) => void
+}) {
+  const cover = getCoverUrl(entry.game_cover_url)
+  const color = STATUS_COLORS[entry.status]
+  const label = STATUS_LABEL[entry.status] || entry.status
 
   return (
-    <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="font-display text-3xl md:text-4xl text-[var(--cp-text)] mb-8">Diary</h1>
+    <div className="group relative flex gap-4 p-4 bg-[var(--cp-surf)] border border-[var(--cp-border)] rounded-lg hover:border-[var(--cp-accent)]/30 transition">
+      <div
+        onClick={() => onNavigate(entry.game_id)}
+        className="cursor-pointer shrink-0"
+      >
+        {cover ? (
+          <img
+            src={cover}
+            alt={entry.game_name}
+            className="w-14 md:w-16 aspect-[3/4] object-cover rounded-md"
+          />
+        ) : (
+          <div className="w-14 md:w-16 aspect-[3/4] bg-[var(--cp-surf-2)] rounded-md flex items-center justify-center p-1 font-display italic text-[11px] text-[var(--cp-text-dimmer)] text-center">
+            {entry.game_name}
+          </div>
+        )}
+      </div>
 
-        {entries.length === 0 && (
-          <p className="text-[var(--cp-text-dim)] text-center font-display text-xl italic mt-12">
-            No diary entries yet.
-            <span onClick={() => navigate("/search")} className="text-[var(--cp-accent)] cursor-pointer hover:brightness-110 transition not-italic text-base ml-2">
-              Search for games →
+      <div className="flex-1 min-w-0 pr-8">
+        <h3
+          onClick={() => onNavigate(entry.game_id)}
+          className="font-display text-xl tracking-tight text-[var(--cp-text)] cursor-pointer hover:text-[var(--cp-accent)] transition leading-tight"
+        >
+          {entry.game_name}
+        </h3>
+
+        <div className="flex gap-2.5 items-center mt-1.5 flex-wrap">
+          {color && (
+            <span
+              className="inline-flex items-center gap-1.5 px-2 py-[2px] rounded-[3px] border font-mono uppercase tracking-[.06em] text-[10.5px] font-medium"
+              style={{
+                background: `${color}1a`,
+                borderColor: `${color}40`,
+                color,
+              }}
+            >
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full"
+                style={{ background: color }}
+              />
+              {label}
             </span>
+          )}
+          {entry.rating != null && (
+            <span className="font-mono text-[13px] text-[#fbbf24]">
+              ★ {entry.rating}/10
+            </span>
+          )}
+        </div>
+
+        {entry.note?.trim() && (
+          <p className="font-display italic text-[15px] text-[var(--cp-text-dim)] mt-2 leading-relaxed line-clamp-3">
+            {entry.note}
           </p>
         )}
-
-        {Object.entries(grouped).map(([month, monthEntries]) => {
-          const stats = getMonthStats(monthEntries)
-          const days = groupByDay(monthEntries)
-
-          return (
-            <div key={month} className="mb-10">
-              <div className="mb-4">
-                <h2 className="font-display text-2xl text-[var(--cp-text)]">{month}</h2>
-                <p className="font-mono text-[var(--cp-text-dim)] text-[11px] mt-1">
-                  {stats.entries} entries · {stats.games} games · {stats.completed} completed
-                  {stats.avgRating && ` · avg ★ ${stats.avgRating}`}
-                </p>
-              </div>
-
-              {days.map(([dayKey, dayEntries]) => (
-                <div key={dayKey} className="mb-4">
-                  <div className="flex gap-3 items-baseline border-b border-[var(--cp-border)] pb-1.5 mb-2">
-                    <span className="font-mono text-[11px] text-[var(--cp-accent)] tracking-wide">
-                      {formatDayHeader(dayKey)}
-                    </span>
-                  </div>
-
-                  {dayEntries.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="grid items-center gap-3 py-2.5 border-b border-dashed border-[var(--cp-border)]/50 last:border-none"
-                      style={{ gridTemplateColumns: "auto 1fr auto auto" }}
-                    >
-                      <div onClick={() => navigate(`/game/${entry.game_id}`)} className="cursor-pointer">
-                        {getCoverUrl(entry.game_cover_url) ? (
-                          <img src={getCoverUrl(entry.game_cover_url)!} alt={entry.game_name} className="w-8 aspect-[3/4] object-cover rounded-sm" />
-                        ) : (
-                          <div className="w-8 aspect-[3/4] bg-[var(--cp-surf-2)] rounded-sm" />
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-                        <p
-                          onClick={() => navigate(`/game/${entry.game_id}`)}
-                          className="text-[var(--cp-text)] text-[13px] cursor-pointer hover:text-[var(--cp-accent)] transition truncate"
-                        >
-                          {entry.game_name}
-                        </p>
-                        <p className="text-[var(--cp-text-dim)] text-[11px] truncate">
-                          <span className="inline-flex items-center gap-1">
-                            <span className="status-dot" style={{ backgroundColor: STATUS_COLORS[entry.status] || "#6b7280" }} />
-                            {entry.status}
-                          </span>
-                          {entry.note && ` · "${entry.note}"`}
-                        </p>
-                      </div>
-
-                      <span className="font-mono text-[11px] text-[var(--cp-star)]">
-                        {entry.rating ? `★ ${entry.rating}` : "—"}
-                      </span>
-
-                      <button onClick={() => handleDelete(entry.id)} className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-accent)] text-xs transition">
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )
-        })}
       </div>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          onDelete(entry.id)
+        }}
+        className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[var(--cp-text-dimmer)] hover:text-[var(--cp-accent)] hover:bg-[var(--cp-bg)] opacity-0 group-hover:opacity-100 transition text-xs"
+        aria-label="Delete entry"
+      >
+        ✕
+      </button>
     </div>
   )
 }
