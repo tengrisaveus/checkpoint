@@ -163,9 +163,6 @@ export default function Lists() {
             <div className="font-mono uppercase tracking-wider text-[10px] text-[var(--cp-text-dimmer)] mb-3">
               YOUR LISTS · {lists.length}
             </div>
-            <h1 className="font-display text-4xl md:text-5xl text-[var(--cp-text)] leading-[1.05]">
-              Curated by <em className="italic text-[var(--cp-accent)]">you</em>.
-            </h1>
           </div>
           <div className="flex items-center gap-3">
             <select

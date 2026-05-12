@@ -150,9 +150,6 @@ export default function Library() {
             <div className="font-mono uppercase tracking-wider text-[11px] text-[var(--cp-text-dimmer)] mb-3">
               YOUR LIBRARY · {total} {total === 1 ? "GAME" : "GAMES"}
             </div>
-            <h1 className="font-display text-[36px] md:text-5xl text-[var(--cp-text)] leading-[1.05]">
-              Everything you've <em className="italic text-[var(--cp-accent)]">played</em>
-            </h1>
           </div>
           <div className="hidden sm:flex items-center gap-1.5">
             {([
