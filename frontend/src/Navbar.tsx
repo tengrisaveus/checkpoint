@@ -30,7 +30,6 @@ export default function Navbar() {
               <Link to="/profile" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Profile</Link>
               <Link to="/diary" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Diary</Link>
               <Link to="/lists" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Lists</Link>
-              <Link to="/settings" className="text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Settings</Link>
             </>
           )}
         </div>
@@ -76,7 +75,6 @@ export default function Navbar() {
               <Link to="/profile" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Profile</Link>
               <Link to="/diary" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Diary</Link>
               <Link to="/lists" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Lists</Link>
-              <Link to="/settings" onClick={() => setMenuOpen(false)} className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm">Settings</Link>
             </>
           )}
           <div className="border-t border-[var(--cp-border)] pt-3">
