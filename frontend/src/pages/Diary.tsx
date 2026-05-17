@@ -167,8 +167,8 @@ export default function Diary() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dim)] mb-3">
-              Your diary · <span className="font-mono">{entries.length}</span> {entries.length === 1 ? "entry" : "entries"}
+            <div className="text-[12px] text-[var(--cp-text-dim)] mb-3">
+              Your diary · <span className="font-mono tabular-nums">{entries.length}</span> {entries.length === 1 ? "entry" : "entries"}
             </div>
             <h1 className="font-display text-3xl md:text-4xl tracking-tight text-[var(--cp-text)] leading-[1.05]">
               Diary
@@ -241,14 +241,14 @@ export default function Diary() {
         {/* Empty state */}
         {byDay.length === 0 ? (
           <div className="border border-dashed border-[var(--cp-border)] rounded-lg py-16 text-center">
-            <p className="text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dim)]">
+            <p className="text-[13px] text-[var(--cp-text-dim)]">
               {monthEntries.length === 0
-                ? `nothing in ${monthLongName.toLowerCase()}`
-                : "no entries match this filter"}
+                ? `Nothing in ${monthLongName}.`
+                : "No entries match this filter."}
             </p>
             <Link
               to="/search"
-              className="mt-4 inline-block text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-accent)] hover:brightness-110 transition"
+              className="mt-3 inline-block text-[13px] font-medium text-[var(--cp-accent)] hover:brightness-110 transition"
             >
               Log a session →
             </Link>
@@ -268,7 +268,7 @@ export default function Diary() {
                         {date.getDate()}
                       </div>
                       <div className="text-[12px] text-[var(--cp-text-dim)] mt-1">
-                        {date.toLocaleDateString("en-US", { month: "long" })} · <span className="font-mono">{date.getFullYear()}</span>
+                        {date.toLocaleDateString("en-US", { month: "long" })} · <span className="font-mono tabular-nums">{date.getFullYear()}</span>
                       </div>
                     </div>
                     <h3 className="md:hidden font-display text-2xl tracking-tight text-[var(--cp-text)]">
@@ -364,7 +364,7 @@ function EntryCard({
         <div className="flex gap-2.5 items-center mt-1.5 flex-wrap">
           {color && (
             <span
-              className="inline-flex items-center gap-1.5 px-2 py-[2px] rounded-[3px] border uppercase tracking-[.04em] text-[11px] font-semibold"
+              className="inline-flex items-center gap-1.5 px-2 py-[2px] rounded-[3px] border uppercase tracking-[.06em] text-[12px] font-semibold"
               style={{
                 background: `${color}1a`,
                 borderColor: `${color}40`,
@@ -379,7 +379,7 @@ function EntryCard({
             </span>
           )}
           {entry.rating != null && (
-            <span className="font-mono text-[13px] text-[#fbbf24]">
+            <span className="font-mono tabular-nums text-[13px] text-[#fbbf24]">
               ★ {entry.rating}/10
             </span>
           )}

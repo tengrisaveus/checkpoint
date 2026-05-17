@@ -19,7 +19,8 @@ const STATUS_COLORS: Record<string, string> = {
   Dropped: "#ef4444",
 };
 
-const RAIL_LABEL = "text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dim)]";
+const RAIL_LABEL = "text-[12px] uppercase tracking-[.06em] font-semibold text-[var(--cp-text-dim)]";
+const RAIL_HINT = "text-[12px] text-[var(--cp-text-dimmer)]";
 
 const SESSION_PROMPTS: Record<string, string> = {
   Playing: "What happened today? Boss kill, area cleared…",
@@ -238,7 +239,7 @@ export default function GameDetail() {
 
               <div className="flex-1 min-w-0 md:pb-2">
                 <div className="text-[13px] text-[var(--cp-text-dim)] mb-2">
-                  <span className="font-mono">{getYear(game.first_release_date) || "—"}</span>
+                  <span className="font-mono tabular-nums">{getYear(game.first_release_date) || "—"}</span>
                   {developer && <> · {developer}</>}
                 </div>
                 <h1 className="font-display text-3xl md:text-[2.75rem] text-[var(--cp-text)] leading-[1.05] tracking-tight">
@@ -262,7 +263,7 @@ export default function GameDetail() {
                   {game.aggregated_rating && (
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-10 h-10 rounded-md flex items-center justify-center font-mono font-bold text-sm ring-1 ${
+                        className={`w-10 h-10 rounded-md flex items-center justify-center font-mono tabular-nums font-bold text-sm ring-1 ${
                           game.aggregated_rating >= 75
                             ? "bg-green-500/15 text-green-400 ring-green-500/30"
                             : game.aggregated_rating >= 50
@@ -321,12 +322,12 @@ export default function GameDetail() {
             {similarGames.length > 0 && (
               <div className="mt-8">
                 <div className="flex items-center justify-between mb-3">
-                  <div className={RAIL_LABEL}>More like this</div>
+                  <div className="text-[12px] font-medium text-[var(--cp-text-dim)]">More like this</div>
                   <Link
                     to={`/search?similar=${id}`}
-                    className="text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dim)] hover:text-[var(--cp-accent)] transition"
+                    className="text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-accent)] transition"
                   >
-                    see all →
+                    See all →
                   </Link>
                 </div>
                 <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
@@ -377,7 +378,7 @@ export default function GameDetail() {
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full" style={{ background: statusColor }} />
                       <span
-                        className="text-[11px] font-mono uppercase tracking-[.12em] font-semibold"
+                        className="text-[12px] uppercase tracking-[.06em] font-semibold"
                         style={{ color: statusColor }}
                       >
                         {status}
@@ -418,11 +419,14 @@ export default function GameDetail() {
                   {/* SCORE — gated on Completed */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className={RAIL_LABEL}>
-                        {ratingUnlocked ? "Score" : "Score · unlocks when completed"}
+                      <span className="flex items-baseline gap-2">
+                        <span className={RAIL_LABEL}>Score</span>
+                        {!ratingUnlocked && (
+                          <span className={RAIL_HINT}>· unlocks when completed</span>
+                        )}
                       </span>
                       {ratingUnlocked && rating ? (
-                        <span className="font-mono text-[12px] text-[var(--cp-star)]">
+                        <span className="font-mono tabular-nums text-[12px] text-[var(--cp-star)]">
                           {rating} / 10
                         </span>
                       ) : null}
@@ -435,7 +439,7 @@ export default function GameDetail() {
                             <button
                               key={n}
                               onClick={() => setRating(rating === n ? null : n)}
-                              className="aspect-square rounded-sm text-[12px] font-mono font-semibold transition flex items-center justify-center"
+                              className="aspect-square rounded-sm text-[12px] font-mono tabular-nums font-semibold transition flex items-center justify-center"
                               style={{
                                 background: active ? "var(--cp-star)" : "transparent",
                                 color: active ? "var(--cp-bg)" : "var(--cp-text-dimmer)",
@@ -457,7 +461,7 @@ export default function GameDetail() {
                         {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
                           <div
                             key={n}
-                            className="aspect-square rounded-sm text-[12px] font-mono font-semibold flex items-center justify-center border border-[var(--cp-border)] text-[var(--cp-text-dimmer)]"
+                            className="aspect-square rounded-sm text-[12px] font-mono tabular-nums font-semibold flex items-center justify-center border border-[var(--cp-border)] text-[var(--cp-text-dimmer)]"
                           >
                             {n}
                           </div>
@@ -469,11 +473,9 @@ export default function GameDetail() {
                   {/* REVIEW — gated on Completed */}
                   {ratingUnlocked && (
                     <div>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-baseline justify-between mb-2">
                         <span className={RAIL_LABEL}>Review</span>
-                        <span className="text-[10.5px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dimmer)]">
-                          optional
-                        </span>
+                        <span className={RAIL_HINT}>optional</span>
                       </div>
                       <textarea
                         value={review}
@@ -529,10 +531,10 @@ export default function GameDetail() {
                 {status && (
                   <div className="border-t border-[var(--cp-border)] p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-baseline gap-2">
                         <span className={RAIL_LABEL}>Sessions</span>
                         {sessions.length > 0 && (
-                          <span className="font-mono text-[11px] text-[var(--cp-text-dimmer)]">
+                          <span className="font-mono tabular-nums text-[12px] text-[var(--cp-text-dimmer)]">
                             {sessions.length}
                           </span>
                         )}
@@ -540,9 +542,9 @@ export default function GameDetail() {
                       {sessions.length > 0 && !composerOpen && (
                         <button
                           onClick={() => setComposerOpen(true)}
-                          className={`text-[11px] font-mono uppercase tracking-[.12em] px-2 py-1 rounded-sm transition ${
+                          className={`text-[12px] px-2.5 py-1 rounded-sm transition ${
                             status === "Playing"
-                              ? "bg-[var(--cp-accent)] text-white hover:brightness-110"
+                              ? "bg-[var(--cp-accent)] text-white font-semibold hover:brightness-110"
                               : "border border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:border-[var(--cp-text-dimmer)]"
                           }`}
                         >
@@ -558,7 +560,7 @@ export default function GameDetail() {
                             key={s.id}
                             className="flex items-baseline gap-2 text-[12.5px] leading-snug"
                           >
-                            <span className="font-mono text-[11px] uppercase tracking-[.08em] text-[var(--cp-text-dimmer)] shrink-0 w-12">
+                            <span className="font-mono tabular-nums text-[12px] text-[var(--cp-text-dimmer)] shrink-0 w-14">
                               {formatSessionDate(s.played_at)}
                             </span>
                             <span className="text-[var(--cp-text-dim)] truncate">
@@ -587,7 +589,7 @@ export default function GameDetail() {
                             type="date"
                             value={sessionDate}
                             onChange={(e) => setSessionDate(e.target.value)}
-                            className="p-2 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-[12.5px] font-mono"
+                            className="p-2 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-[12.5px] font-mono tabular-nums"
                           />
                           <input
                             type="text"
