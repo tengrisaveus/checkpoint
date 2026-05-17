@@ -76,15 +76,6 @@ async def igdb_request(endpoint: str, query: str):
         raise HTTPException(status_code=502, detail="IGDB API error")
 
 
-def _reorder_by_ids(games: list[dict], ids: list[int]) -> list[dict]:
-    """
-    IGDB 'games' endpoint'i `where id = (a,b,c)` query'lerinde dönüş sırasını
-    korumuyor — kendi sıralama mantığımıza göre yeniden diziyoruz.
-    """
-    order = {gid: i for i, gid in enumerate(ids)}
-    return sorted(games, key=lambda g: order.get(g.get("id"), 10_000))
-
-
 async def search_games(query: str):
     clean_query = query.replace('"', "").replace(";", "").strip()
     if not clean_query:
@@ -111,27 +102,27 @@ async def get_game_detail(game_id: int):
 
 async def get_popular_games():
     """
-    Popüler oyunlar — IGDB'nin "Visits" trendine total_rating_count eşiği
-    eklenerek niş oyunlar elendi. primitives'ten gelen sıra (visits desc)
-    games endpoint'inde korunmadığı için sonradan _reorder_by_ids ile diziliyor.
+    Popüler oyunlar — IGDB Visits trendindeki geniş bir havuzdan (top 200)
+    yüksek rating sayısına sahip oyunlar süzülüp en çok puanlanana göre
+    sıralanıyor. Sonuç: hem trendde olan hem de gerçekten tanınmış oyunlar.
     """
     popular = await igdb_request(
         "popularity_primitives",
         "fields game_id, value; where popularity_type = 1; "
-        "sort value desc; limit 100;",
+        "sort value desc; limit 200;",
     )
     if not popular:
         return []
     ids = [p["game_id"] for p in popular]
-    games = await igdb_request(
+    return await igdb_request(
         "games",
         f"fields name, cover.url, first_release_date, genres.name, "
         f"platforms.name, aggregated_rating, total_rating_count; "
         f"where id = ({','.join(map(str, ids))}) & cover != null "
         f"& game_type = {MAIN_GAME_TYPES} "
-        f"& total_rating_count > 20; limit 30;",
+        f"& total_rating_count > 100; "
+        f"sort total_rating_count desc; limit 20;",
     )
-    return _reorder_by_ids(games, ids)[:20]
 
 
 async def get_new_releases():
