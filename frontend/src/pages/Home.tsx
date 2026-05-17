@@ -97,97 +97,104 @@ export default function Home() {
   if (!user) {
     return (
       <div className="min-h-screen bg-[var(--cp-bg)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-20 pb-16">
-          <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-12 items-start">
-            <div>
-              <p className="text-[13px] text-[var(--cp-text-dim)] font-medium tracking-[.04em] uppercase">
-                A gaming journal
-              </p>
-              <h1 className="font-display text-5xl md:text-7xl text-[var(--cp-text)] leading-[0.95] mt-3 tracking-tight">
-                Your games, <em className="text-[var(--cp-accent)] italic">remembered</em>.
-              </h1>
-              <p className="text-[var(--cp-text-dim)] text-base md:text-lg leading-relaxed mt-5 max-w-[52ch]">
-                A log, a rating, a review, a list. Checkpoint is where you keep
-                track of what you've played, what you're playing, and what's next.
-              </p>
-              <div className="flex gap-3 mt-8">
-                <button
-                  onClick={() => navigate("/register")}
-                  className="px-6 py-3 rounded-sm bg-[var(--cp-accent)] text-white font-semibold hover:brightness-110 transition text-sm"
-                >
-                  Start tracking
-                </button>
-                <button
-                  onClick={handleDemo}
-                  disabled={demoLoading}
-                  className="px-6 py-3 rounded-sm text-[var(--cp-text)] text-sm border border-[var(--cp-border)] hover:border-[var(--cp-accent)] transition"
-                >
-                  {demoLoading ? "Logging in..." : "Peek as demo →"}
-                </button>
-              </div>
-            </div>
-
-            {/* Right — game covers */}
-            <div>
-              <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
-                What's being played now
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {popularGames.slice(0, 4).map((game) => {
-                  const cover = getGameCoverUrl(game)
-                  return (
-                    <div
-                      key={game.id}
-                      onClick={() => navigate(`/game/${game.id}`)}
-                      className="cursor-pointer group"
-                    >
-                      {cover ? (
-                        <img
-                          src={cover}
-                          alt={game.name}
-                          className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
-                        />
-                      ) : (
-                        <div className="w-full aspect-[3/4] bg-[var(--cp-surf)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-sm cover-placeholder p-2 text-center">
-                          {game.name}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+        {/* Top bar */}
+        <div className="max-w-[1120px] mx-auto px-6 lg:px-10 pt-8 pb-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[var(--cp-accent)]" />
+            <span className="text-[15px] text-[var(--cp-text)]">checkpoint</span>
           </div>
+          <button
+            onClick={() => navigate("/login")}
+            className="text-[14px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition"
+          >
+            Sign in
+          </button>
+        </div>
 
-          {/* Browse button for non-logged-in */}
-          <div className="mt-12 border-t border-[var(--cp-border)] pt-8">
-            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-4">
-              Browse the catalog
-            </p>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-              {popularGames.slice(4, 10).map((game) => {
-                const cover = getGameCoverUrl(game)
-                return (
-                  <div
-                    key={game.id}
-                    onClick={() => navigate(`/game/${game.id}`)}
-                    className="cursor-pointer group"
-                  >
-                    {cover ? (
-                      <img
-                        src={cover}
-                        alt={game.name}
-                        className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
-                      />
-                    ) : (
-                      <div className="w-full aspect-[3/4] bg-[var(--cp-surf)] rounded-md" />
-                    )}
-                    <p className="text-[11px] text-[var(--cp-text-dim)] mt-1.5 truncate">
+        {/* Hero */}
+        <div className="max-w-[1120px] mx-auto px-6 lg:px-10 pt-16 pb-14">
+          <h1
+            className="font-display text-[40px] md:text-[52px] text-[var(--cp-text)] leading-[1.15]"
+            style={{ fontWeight: 400, letterSpacing: "-0.005em", maxWidth: "18ch" }}
+          >
+            Save your progress.
+          </h1>
+          <p className="text-[16px] leading-relaxed text-[var(--cp-text-dim)] max-w-[52ch] mt-5">
+            Checkpoint is a quiet place to keep track of the games you play — what you finished, what you bounced off of, and what's waiting.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <button
+              onClick={() => navigate("/register")}
+              className="px-5 py-2.5 rounded-md text-[14px] font-medium bg-[var(--cp-accent)] text-white hover:brightness-110 transition"
+            >
+              Make an account
+            </button>
+            <button
+              onClick={handleDemo}
+              disabled={demoLoading}
+              className="px-5 py-2.5 rounded-md text-[14px] font-medium border border-[var(--cp-border)] text-[var(--cp-text)] bg-transparent hover:border-[var(--cp-accent)] transition disabled:opacity-60"
+            >
+              {demoLoading ? "Signing in…" : "Try the demo"}
+            </button>
+          </div>
+        </div>
+
+        {/* Popular */}
+        <div className="max-w-[1120px] mx-auto px-6 lg:px-10 pt-6 pb-20">
+          <div className="flex items-baseline justify-between mb-6 border-b border-[var(--cp-border)] pb-2.5">
+            <span className="text-[15px] text-[var(--cp-text)]">Popular right now</span>
+            <button
+              onClick={() => navigate("/search")}
+              className="text-[13px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition"
+            >
+              Browse all →
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-4 gap-y-7">
+            {popularGames.slice(0, 12).map((game) => {
+              const cover = getGameCoverUrl(game)
+              const year = game.first_release_date
+                ? new Date(game.first_release_date * 1000).getFullYear()
+                : null
+              return (
+                <div
+                  key={game.id}
+                  onClick={() => navigate(`/game/${game.id}`)}
+                  className="cursor-pointer group"
+                >
+                  {cover ? (
+                    <img
+                      src={cover}
+                      alt={game.name}
+                      className="w-full aspect-[3/4] object-cover rounded-md cover-hover"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[3/4] bg-[var(--cp-surf)] rounded-md flex items-center justify-center text-[var(--cp-text-dimmer)] text-sm cover-placeholder p-2 text-center">
                       {game.name}
+                    </div>
+                  )}
+                  <p className="mt-2.5 text-[14px] text-[var(--cp-text)] truncate">
+                    {game.name}
+                  </p>
+                  {year && (
+                    <p className="text-[12px] text-[var(--cp-text-dimmer)] mt-0.5">
+                      {year}
                     </p>
-                  </div>
-                )
-              })}
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="max-w-[1120px] mx-auto px-6 lg:px-10 py-10">
+          <div className="flex items-center justify-between text-[13px] text-[var(--cp-text-dimmer)] border-t border-[var(--cp-border)] pt-6">
+            <span>© Checkpoint</span>
+            <div className="flex gap-5">
+              <a href="#" className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)] transition">About</a>
+              <a href="#" className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)] transition">API</a>
+              <a href="#" className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)] transition">GitHub</a>
             </div>
           </div>
         </div>
