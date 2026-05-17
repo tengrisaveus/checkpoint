@@ -111,14 +111,14 @@ async def get_game_detail(game_id: int):
 
 async def get_popular_games():
     """
-    Most visited games on IGDB — popularity_type 1 = Visits.
-    primitives'ten gelen sıra (visits desc) games endpoint'inde korunmadığı için
-    sonradan _reorder_by_ids ile yeniden diziliyor.
+    Popüler oyunlar — IGDB'nin "Visits" trendine total_rating_count eşiği
+    eklenerek niş oyunlar elendi. primitives'ten gelen sıra (visits desc)
+    games endpoint'inde korunmadığı için sonradan _reorder_by_ids ile diziliyor.
     """
     popular = await igdb_request(
         "popularity_primitives",
         "fields game_id, value; where popularity_type = 1; "
-        "sort value desc; limit 30;",
+        "sort value desc; limit 100;",
     )
     if not popular:
         return []
@@ -126,78 +126,64 @@ async def get_popular_games():
     games = await igdb_request(
         "games",
         f"fields name, cover.url, first_release_date, genres.name, "
-        f"platforms.name, aggregated_rating; "
+        f"platforms.name, aggregated_rating, total_rating_count; "
         f"where id = ({','.join(map(str, ids))}) & cover != null "
-        f"& game_type = {MAIN_GAME_TYPES}; limit 30;",
+        f"& game_type = {MAIN_GAME_TYPES} "
+        f"& total_rating_count > 20; limit 30;",
     )
     return _reorder_by_ids(games, ids)[:20]
 
 
 async def get_new_releases():
     """
-    "Hot" — son 2 yılda çıkmış ve şu an aktif oynanan oyunlar.
-    popularity_type 3 = Playing (currently active players).
+    "Hot" — son 2 yılda çıkmış, IGDB'de yaygın olarak puanlanmış oyunlar.
+    popularity_primitives'in "Playing" tracker'ı çok az kullanıcıdan besleniyor
+    ve sonuçlara unknown indie'ler karıştırıyordu; bunun yerine total_rating_count
+    ile sıralayıp eşik koyuyoruz — tanınmışlık için güvenilir bir proxy.
     """
-    playing = await igdb_request(
-        "popularity_primitives",
-        "fields game_id, value; where popularity_type = 3; "
-        "sort value desc; limit 100;",
-    )
-    if not playing:
-        return []
-    ids = [p["game_id"] for p in playing]
-    two_years_ago = int(time.time()) - (730 * 24 * 60 * 60)
-    games = await igdb_request(
+    now = int(time.time())
+    two_years_ago = now - (730 * 24 * 60 * 60)
+    return await igdb_request(
         "games",
         f"fields name, cover.url, first_release_date, genres.name, "
-        f"platforms.name, aggregated_rating; "
-        f"where id = ({','.join(map(str, ids))}) & cover != null "
+        f"platforms.name, aggregated_rating, total_rating_count; "
+        f"where first_release_date > {two_years_ago} "
+        f"& first_release_date < {now} "
+        f"& cover != null "
         f"& game_type = {MAIN_GAME_TYPES} "
-        f"& first_release_date > {two_years_ago}; limit 30;",
+        f"& total_rating_count > 20; "
+        f"sort total_rating_count desc; limit 20;",
     )
-    return _reorder_by_ids(games, ids)[:20]
 
 
 async def get_upcoming_games():
     """
     Önümüzdeki 6 ay içinde çıkacak oyunlar.
-    release_dates'ten tarih sırası alınıp games endpoint'inde edition/version
-    filtrelendikten sonra orijinal tarih sırası geri yükleniyor.
+    Henüz çıkmadığı için total_rating_count yok; bunun yerine `hypes`
+    (IGDB kullanıcılarının heyecan sayacı) ile sıralayıp eşik koyuyoruz.
     """
     now = int(time.time())
     six_months = now + (180 * 24 * 60 * 60)
-    releases = await igdb_request(
-        "release_dates",
-        f"fields game; where date > {now} & date < {six_months}; "
-        f"sort date asc; limit 100;",
-    )
-    if not releases:
-        return []
-    seen: set[int] = set()
-    ids: list[int] = []
-    for r in releases:
-        gid = r.get("game")
-        if isinstance(gid, int) and gid not in seen:
-            seen.add(gid)
-            ids.append(gid)
-    if not ids:
-        return []
-    games = await igdb_request(
+    return await igdb_request(
         "games",
-        f"fields name, cover.url, first_release_date, genres.name, platforms.name; "
-        f"where id = ({','.join(map(str, ids))}) & cover != null "
-        f"& game_type = {MAIN_GAME_TYPES} & version_parent = null; limit 30;",
+        f"fields name, cover.url, first_release_date, genres.name, platforms.name, hypes; "
+        f"where first_release_date > {now} "
+        f"& first_release_date < {six_months} "
+        f"& cover != null "
+        f"& game_type = {MAIN_GAME_TYPES} "
+        f"& version_parent = null "
+        f"& hypes > 1; "
+        f"sort hypes desc; limit 20;",
     )
-    return _reorder_by_ids(games, ids)[:20]
 
 
 async def get_games_by_genre(genre_id: int):
     return await igdb_request(
         "games",
         f"fields name, cover.url, first_release_date, genres.name, "
-        f"platforms.name, aggregated_rating; "
+        f"platforms.name, aggregated_rating, total_rating_count; "
         f"where genres = ({genre_id}) & cover != null "
-        f"& game_type = {MAIN_GAME_TYPES} & aggregated_rating_count > 5; "
+        f"& game_type = {MAIN_GAME_TYPES} & total_rating_count > 20; "
         f"sort aggregated_rating desc; limit 20;",
     )
 
@@ -228,8 +214,8 @@ async def get_similar_games(game_id: int):
     genre_list = ",".join(str(g) for g in genres)
     return await igdb_request(
         "games",
-        f"fields name, cover.url, first_release_date, genres.name; "
+        f"fields name, cover.url, first_release_date, genres.name, total_rating_count; "
         f"where genres = ({genre_list}) & id != {game_id} & cover != null "
-        f"& game_type = {MAIN_GAME_TYPES} & aggregated_rating_count > 10; "
+        f"& game_type = {MAIN_GAME_TYPES} & total_rating_count > 20; "
         f"sort aggregated_rating desc; limit 10;",
     )
