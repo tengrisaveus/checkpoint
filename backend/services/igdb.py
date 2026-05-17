@@ -127,8 +127,7 @@ async def get_popular_games():
         "games",
         f"fields name, cover.url, first_release_date, genres.name, "
         f"platforms.name, aggregated_rating; "
-        f"where id = ({','.join(map(str, ids))}) & cover != null "
-        f"& category = {MAIN_GAME_CATEGORIES}; limit 30;",
+        f"where id = ({','.join(map(str, ids))}) & cover != null; limit 30;",
     )
     return _reorder_by_ids(games, ids)[:20]
 
@@ -152,8 +151,7 @@ async def get_new_releases():
         f"fields name, cover.url, first_release_date, genres.name, "
         f"platforms.name, aggregated_rating; "
         f"where id = ({','.join(map(str, ids))}) & cover != null "
-        f"& category = {MAIN_GAME_CATEGORIES} "
-        f"& first_release_date > {two_years_ago}; limit 30;",
+f"& first_release_date > {two_years_ago}; limit 30;",
     )
     return _reorder_by_ids(games, ids)[:20]
 
@@ -186,7 +184,7 @@ async def get_upcoming_games():
         "games",
         f"fields name, cover.url, first_release_date, genres.name, platforms.name; "
         f"where id = ({','.join(map(str, ids))}) & cover != null "
-        f"& category = {MAIN_GAME_CATEGORIES} & version_parent = null; limit 30;",
+f"& version_parent = null; limit 30;",
     )
     return _reorder_by_ids(games, ids)[:20]
 
@@ -197,7 +195,7 @@ async def get_games_by_genre(genre_id: int):
         f"fields name, cover.url, first_release_date, genres.name, "
         f"platforms.name, aggregated_rating; "
         f"where genres = ({genre_id}) & cover != null "
-        f"& category = {MAIN_GAME_CATEGORIES} & aggregated_rating_count > 5; "
+        f"& aggregated_rating_count > 5; "
         f"sort aggregated_rating desc; limit 20;",
     )
 
@@ -230,6 +228,6 @@ async def get_similar_games(game_id: int):
         "games",
         f"fields name, cover.url, first_release_date, genres.name; "
         f"where genres = ({genre_list}) & id != {game_id} & cover != null "
-        f"& category = {MAIN_GAME_CATEGORIES} & aggregated_rating_count > 10; "
+        f"& aggregated_rating_count > 10; "
         f"sort aggregated_rating desc; limit 10;",
     )
