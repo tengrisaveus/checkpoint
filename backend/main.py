@@ -11,6 +11,7 @@ from routers.library import router as library_router
 from routers.diary import router as diary_router
 from routers.lists import router as lists_router
 from routers.profile import router as profile_router
+from routers.connections import router as connections_router
 
 app = FastAPI()
 app.state.limiter = limiter
@@ -21,8 +22,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://checkpoint-delta.vercel.app",
-        "https://*.vercel.app",
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,6 +35,7 @@ app.include_router(library_router, prefix="/library", tags=["Library"])
 app.include_router(diary_router, prefix="/diary", tags=["Diary"])
 app.include_router(lists_router, prefix="/lists", tags=["Lists"])
 app.include_router(profile_router, prefix="/profile", tags=["Profile"])
+app.include_router(connections_router, prefix="/connections", tags=["Connections"])
 
 
 @app.get("/")
