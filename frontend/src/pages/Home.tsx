@@ -97,22 +97,8 @@ export default function Home() {
   if (!user) {
     return (
       <div className="min-h-screen bg-[var(--cp-bg)]">
-        {/* Top bar */}
-        <div className="max-w-[1120px] mx-auto px-6 lg:px-10 pt-8 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--cp-accent)]" />
-            <span className="text-[15px] text-[var(--cp-text)]">checkpoint</span>
-          </div>
-          <button
-            onClick={() => navigate("/login")}
-            className="text-[14px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition"
-          >
-            Sign in
-          </button>
-        </div>
-
         {/* Hero */}
-        <div className="max-w-[1120px] mx-auto px-6 lg:px-10 pt-16 pb-14">
+        <div className="max-w-[1120px] mx-auto px-6 lg:px-10 pt-24 pb-14 flex flex-col items-center text-center">
           <h1
             className="font-display text-[40px] md:text-[52px] text-[var(--cp-text)] leading-[1.15]"
             style={{ fontWeight: 400, letterSpacing: "-0.005em", maxWidth: "18ch" }}
@@ -122,12 +108,12 @@ export default function Home() {
           <p className="text-[16px] leading-relaxed text-[var(--cp-text-dim)] max-w-[52ch] mt-5">
             Checkpoint is a quiet place to keep track of the games you play — what you finished, what you bounced off of, and what's waiting.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3 justify-center">
             <button
               onClick={() => navigate("/register")}
               className="px-5 py-2.5 rounded-md text-[14px] font-medium bg-[var(--cp-accent)] text-white hover:brightness-110 transition"
             >
-              Make an account
+              Create an account
             </button>
             <button
               onClick={handleDemo}
