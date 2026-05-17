@@ -12,10 +12,10 @@ access_token = None
 # Tüm IGDB istekleri için global timeout süresi (saniye)
 IGDB_TIMEOUT = 10.0
 
-# IGDB category değerleri:
+# IGDB game_type değerleri (eski `category` alanı 2025'te deprecate oldu, ID'ler aynı):
 # 0 = main_game, 4 = standalone_expansion, 8 = remake, 9 = remaster, 10 = expanded_game
 # Edition / bundle / DLC olanları (1, 2, 3, 5, 6, 7, 11, 12, 13, 14) bu filtre eler.
-MAIN_GAME_CATEGORIES = "(0,4,8,9,10)"
+MAIN_GAME_TYPES = "(0,4,8,9,10)"
 
 
 async def get_twitch_token():
@@ -127,7 +127,8 @@ async def get_popular_games():
         "games",
         f"fields name, cover.url, first_release_date, genres.name, "
         f"platforms.name, aggregated_rating; "
-        f"where id = ({','.join(map(str, ids))}) & cover != null; limit 30;",
+        f"where id = ({','.join(map(str, ids))}) & cover != null "
+        f"& game_type = {MAIN_GAME_TYPES}; limit 30;",
     )
     return _reorder_by_ids(games, ids)[:20]
 
@@ -151,7 +152,8 @@ async def get_new_releases():
         f"fields name, cover.url, first_release_date, genres.name, "
         f"platforms.name, aggregated_rating; "
         f"where id = ({','.join(map(str, ids))}) & cover != null "
-f"& first_release_date > {two_years_ago}; limit 30;",
+        f"& game_type = {MAIN_GAME_TYPES} "
+        f"& first_release_date > {two_years_ago}; limit 30;",
     )
     return _reorder_by_ids(games, ids)[:20]
 
@@ -184,7 +186,7 @@ async def get_upcoming_games():
         "games",
         f"fields name, cover.url, first_release_date, genres.name, platforms.name; "
         f"where id = ({','.join(map(str, ids))}) & cover != null "
-f"& version_parent = null; limit 30;",
+        f"& game_type = {MAIN_GAME_TYPES} & version_parent = null; limit 30;",
     )
     return _reorder_by_ids(games, ids)[:20]
 
@@ -195,7 +197,7 @@ async def get_games_by_genre(genre_id: int):
         f"fields name, cover.url, first_release_date, genres.name, "
         f"platforms.name, aggregated_rating; "
         f"where genres = ({genre_id}) & cover != null "
-        f"& aggregated_rating_count > 5; "
+        f"& game_type = {MAIN_GAME_TYPES} & aggregated_rating_count > 5; "
         f"sort aggregated_rating desc; limit 20;",
     )
 
@@ -228,6 +230,6 @@ async def get_similar_games(game_id: int):
         "games",
         f"fields name, cover.url, first_release_date, genres.name; "
         f"where genres = ({genre_list}) & id != {game_id} & cover != null "
-        f"& aggregated_rating_count > 10; "
+        f"& game_type = {MAIN_GAME_TYPES} & aggregated_rating_count > 10; "
         f"sort aggregated_rating desc; limit 10;",
     )
