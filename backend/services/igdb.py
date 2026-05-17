@@ -120,7 +120,7 @@ async def get_popular_games():
         f"platforms.name, aggregated_rating, total_rating_count; "
         f"where id = ({','.join(map(str, ids))}) & cover != null "
         f"& game_type = {MAIN_GAME_TYPES} "
-        f"& total_rating_count > 100; "
+        f"& total_rating_count > 50; "
         f"sort total_rating_count desc; limit 20;",
     )
 
