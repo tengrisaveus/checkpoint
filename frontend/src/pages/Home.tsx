@@ -27,19 +27,10 @@ interface StatsData {
   completion_ratio: number;
 }
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
-
 function getDateLabel(): string {
   const now = new Date();
   const month = now.toLocaleDateString("en-US", { month: "short" });
-  const day = now.getDate();
-  const weekNum = Math.ceil(((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7);
-  return `${month} ${day} · Wk ${weekNum}`;
+  return `${month} ${now.getDate()}`;
 }
 
 export default function Home() {
@@ -222,7 +213,7 @@ export default function Home() {
         <div className="flex items-baseline justify-between mb-8">
           <div>
             <h1 className="font-display text-2xl md:text-3xl text-[var(--cp-text)] leading-none">
-              {getGreeting()}, <em className="italic">{user.username}</em>.
+              Welcome back, <em className="italic">{user.username}</em>.
             </h1>
             <p className="text-[var(--cp-text-dim)] text-sm mt-2">
               {stats ? `${stats.by_status["Playing"] || 0} playing · ${stats.by_status["Completed"] || 0} completed · ${recentDiary.length} diary entries` : "Loading stats..."}

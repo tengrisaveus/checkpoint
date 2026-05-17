@@ -22,13 +22,6 @@ const STATUS_COLORS: Record<string, string> = {
 const RAIL_LABEL = "text-[12px] uppercase tracking-[.06em] font-semibold text-[var(--cp-text-dim)]";
 const RAIL_HINT = "text-[12px] text-[var(--cp-text-dimmer)]";
 
-const SESSION_PROMPTS: Record<string, string> = {
-  Playing: "What happened today? Boss kill, area cleared…",
-  Completed: "Add a final entry — wrap-up thoughts, credits roll…",
-  Dropped: "Why you stepped away.",
-  "Want to Play": "Log a session once you start playing.",
-};
-
 function getBackdropUrl(game: Game): string | null {
   const source = game.artworks?.[0] || game.screenshots?.[0];
   if (!source?.url) return null;
@@ -193,7 +186,6 @@ export default function GameDetail() {
   const developer = game.involved_companies?.find((c) => c.company)?.company.name;
   const statusColor = status ? STATUS_COLORS[status] : null;
   const ratingUnlocked = status === "Completed";
-  const sessionPrompt = SESSION_PROMPTS[status] || "Log a session once you pick a status.";
   const recentSessions = sessions.slice(0, 3);
 
   return (
@@ -419,12 +411,7 @@ export default function GameDetail() {
                   {/* SCORE — gated on Completed */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="flex items-baseline gap-2">
-                        <span className={RAIL_LABEL}>Score</span>
-                        {!ratingUnlocked && (
-                          <span className={RAIL_HINT}>· unlocks when completed</span>
-                        )}
-                      </span>
+                      <span className={RAIL_LABEL}>Score</span>
                       {ratingUnlocked && rating ? (
                         <span className="font-mono tabular-nums text-[12px] text-[var(--cp-star)]">
                           {rating} / 10
@@ -565,7 +552,7 @@ export default function GameDetail() {
                             </span>
                             <span className="text-[var(--cp-text-dim)] truncate">
                               {s.note?.trim() || (
-                                <em className="text-[var(--cp-text-dimmer)]">no note</em>
+                                <span className="text-[var(--cp-text-dimmer)]">—</span>
                               )}
                             </span>
                           </li>
@@ -578,7 +565,7 @@ export default function GameDetail() {
                         onClick={() => setComposerOpen(true)}
                         className="w-full border border-dashed border-[var(--cp-border)] rounded-md py-4 px-3 text-[12px] text-[var(--cp-text-dim)] hover:border-[var(--cp-text-dimmer)] hover:text-[var(--cp-text)] transition text-left"
                       >
-                        + {sessionPrompt}
+                        + Log a session
                       </button>
                     )}
 
@@ -593,7 +580,7 @@ export default function GameDetail() {
                           />
                           <input
                             type="text"
-                            placeholder={sessionPrompt}
+                            placeholder="Note"
                             value={sessionNote}
                             onChange={(e) => setSessionNote(e.target.value)}
                             maxLength={500}
