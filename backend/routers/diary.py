@@ -44,16 +44,19 @@ async def add_diary_entry(
 
 @router.get("/", response_model=list[DiaryEntryResponse])
 def get_diary(
+    game_id: int | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Returns all diary entries for the current user, newest first."""
-    return (
-        db.query(DiaryEntry)
-        .filter(DiaryEntry.user_id == current_user.id)
-        .order_by(DiaryEntry.played_at.desc())
-        .all()
-    )
+    """Returns diary entries for the current user, newest first.
+
+    Pass ``game_id`` to scope the result to a single game (used by the Sessions
+    block on GameDetail).
+    """
+    query = db.query(DiaryEntry).filter(DiaryEntry.user_id == current_user.id)
+    if game_id is not None:
+        query = query.filter(DiaryEntry.game_id == game_id)
+    return query.order_by(DiaryEntry.played_at.desc()).all()
 
 
 @router.get("/monthly")

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../AuthContext";
 import { GAME_STATUSES } from "../types";
-import type { Game, LibraryEntry } from "../types";
+import type { Game, LibraryEntry, DiaryEntry } from "../types";
 import { getCoverUrl, getYear } from "../utils";
 import Toast from "../components/Toast";
 import { DetailSkeleton } from "../components/Skeleton";
@@ -19,10 +19,24 @@ const STATUS_COLORS: Record<string, string> = {
   Dropped: "#ef4444",
 };
 
+const RAIL_LABEL = "text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dim)]";
+
+const SESSION_PROMPTS: Record<string, string> = {
+  Playing: "What happened today? Boss kill, area cleared…",
+  Completed: "Add a final entry — wrap-up thoughts, credits roll…",
+  Dropped: "Why you stepped away.",
+  "Want to Play": "Log a session once you start playing.",
+};
+
 function getBackdropUrl(game: Game): string | null {
   const source = game.artworks?.[0] || game.screenshots?.[0];
   if (!source?.url) return null;
   return `https:${source.url.replace("t_thumb", "t_1080p")}`;
+}
+
+function formatSessionDate(iso: string): string {
+  const [y, m, d] = iso.split("T")[0].split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export default function GameDetail() {
@@ -37,15 +51,18 @@ export default function GameDetail() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [existingEntry, setExistingEntry] = useState<LibraryEntry | null>(null);
-  const [diaryOpen, setDiaryOpen] = useState(false);
-  const [listOpen, setListOpen] = useState(false);
-  const [diaryDate, setDiaryDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
-  const [diaryNote, setDiaryNote] = useState("");
   const [expandSummary, setExpandSummary] = useState(false);
   const [similarGames, setSimilarGames] = useState<Game[]>([]);
   const [saving, setSaving] = useState(false);
+  const [sessions, setSessions] = useState<DiaryEntry[]>([]);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [sessionDate, setSessionDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [sessionNote, setSessionNote] = useState("");
+  const [logging, setLogging] = useState(false);
+  const [listModalOpen, setListModalOpen] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
 
   useTitle(game?.name || "Loading...");
 
@@ -73,9 +90,29 @@ export default function GameDetail() {
   }, [user, id]);
 
   useEffect(() => {
+    if (!user || !id) return;
+    api.get(`/diary?game_id=${id}`).then((res) => setSessions(res.data)).catch(() => {});
+  }, [user, id]);
+
+  useEffect(() => {
     if (!id) return;
     api.get(`/games/${id}/similar`).then((res) => setSimilarGames(res.data)).catch(() => {});
   }, [id]);
+
+  // Rating + review only persist when the entry is Completed. If the user
+  // toggles to a non-Completed status, drop the in-memory values so the UI
+  // matches what would be saved.
+  useEffect(() => {
+    if (status && status !== "Completed") {
+      setRating(null);
+      setReview("");
+    }
+  }, [status]);
+
+  // Reset the "Saved ✓" affordance whenever the user edits anything.
+  useEffect(() => {
+    setJustSaved(false);
+  }, [status, rating, review]);
 
   const handleSave = async () => {
     if (!status) {
@@ -83,20 +120,32 @@ export default function GameDetail() {
       return;
     }
     setSaving(true);
+    const payloadRating = status === "Completed" ? rating : null;
+    const payloadReview = status === "Completed" ? (review || null) : null;
     try {
       if (existingEntry) {
-        await api.put(`/library/${id}`, { status, rating, review: review || null });
-        setExistingEntry({ ...existingEntry, status, rating, review });
+        await api.put(`/library/${id}`, {
+          status,
+          rating: payloadRating,
+          review: payloadReview,
+        });
+        setExistingEntry({
+          ...existingEntry,
+          status,
+          rating: payloadRating,
+          review: payloadReview,
+        });
       } else {
         const res = await api.post("/library", {
           game_id: Number(id),
           status,
-          rating,
-          review: review || null,
+          rating: payloadRating,
+          review: payloadReview,
         });
         setExistingEntry(res.data);
       }
-      setSuccess(existingEntry ? "Updated!" : "Added to library!");
+      setJustSaved(true);
+      setSuccess(existingEntry ? "Updated" : "Added to library");
     } catch {
       setError("Something went wrong");
     } finally {
@@ -104,21 +153,26 @@ export default function GameDetail() {
     }
   };
 
-  const handleDiaryLog = async () => {
-    if (!diaryDate) return;
+  const handleLogSession = async () => {
+    if (!sessionDate) return;
+    setLogging(true);
     try {
-      await api.post("/diary", {
+      const res = await api.post("/diary", {
         game_id: Number(id),
-        played_at: diaryDate,
-        status: status || null,
-        rating,
-        note: diaryNote || null,
+        played_at: sessionDate,
+        status: status || "Playing",
+        rating: null,
+        note: sessionNote || null,
       });
-      setSuccess("Diary entry added!");
-      setDiaryNote("");
-      setDiaryOpen(false);
+      setSessions([res.data, ...sessions]);
+      setSessionNote("");
+      setSessionDate(new Date().toISOString().split("T")[0]);
+      setComposerOpen(false);
+      setSuccess("Session logged");
     } catch {
-      setError("Something went wrong");
+      setError("Couldn't log session");
+    } finally {
+      setLogging(false);
     }
   };
 
@@ -136,7 +190,10 @@ export default function GameDetail() {
   const storeLinks = game.websites?.filter((w) => [1, 13, 16, 17].includes(w.category)) || [];
   const summaryLong = (game.summary?.length || 0) > 300;
   const developer = game.involved_companies?.find((c) => c.company)?.company.name;
-  const statusColor = existingEntry ? STATUS_COLORS[existingEntry.status] : null;
+  const statusColor = status ? STATUS_COLORS[status] : null;
+  const ratingUnlocked = status === "Completed";
+  const sessionPrompt = SESSION_PROMPTS[status] || "Log a session once you pick a status.";
+  const recentSessions = sessions.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-[var(--cp-bg)]">
@@ -232,12 +289,9 @@ export default function GameDetail() {
               </div>
             </div>
 
-            {/* Summary */}
+            {/* Summary — no "About" label, paragraph carries itself */}
             {game.summary && (
               <div className="mt-8">
-                <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
-                  About
-                </div>
                 <p
                   className={`text-[var(--cp-text-dim)] text-sm leading-relaxed ${
                     !expandSummary && summaryLong ? "line-clamp-5" : ""
@@ -257,22 +311,23 @@ export default function GameDetail() {
             )}
 
             {storeLinks.length > 0 && (
-              <div className="mt-6">
-                <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
-                  Where to buy
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {storeLinks.map((w, i) => (
-                    <StoreLink key={i} url={w.url} category={w.category} />
-                  ))}
-                </div>
+              <div className="mt-6 flex gap-2 flex-wrap">
+                {storeLinks.map((w, i) => (
+                  <StoreLink key={i} url={w.url} category={w.category} />
+                ))}
               </div>
             )}
 
             {similarGames.length > 0 && (
               <div className="mt-8">
-                <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
-                  Similar games
+                <div className="flex items-center justify-between mb-3">
+                  <div className={RAIL_LABEL}>More like this</div>
+                  <Link
+                    to={`/search?similar=${id}`}
+                    className="text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dim)] hover:text-[var(--cp-accent)] transition"
+                  >
+                    see all →
+                  </Link>
                 </div>
                 <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
                   {similarGames.slice(0, 5).map((g) => (
@@ -306,10 +361,7 @@ export default function GameDetail() {
           <aside className="lg:sticky lg:top-4 space-y-3">
             {!user ? (
               <div className="border border-[var(--cp-border)] rounded-lg bg-[var(--cp-surf)]/60 p-6 text-center backdrop-blur-sm">
-                <div className="font-display text-xl text-[var(--cp-text)] mb-1">Track this game</div>
-                <p className="text-[var(--cp-text-dim)] text-sm mb-4">
-                  Sign in to log your status, rating and review.
-                </p>
+                <div className="font-display text-xl text-[var(--cp-text)] mb-4">Sign in to track</div>
                 <button
                   onClick={() => navigate("/login")}
                   className="w-full px-4 py-2.5 rounded-sm bg-[var(--cp-accent)] text-white font-semibold text-sm hover:brightness-110 transition"
@@ -319,105 +371,119 @@ export default function GameDetail() {
               </div>
             ) : (
               <div className="border border-[var(--cp-border)] rounded-lg bg-[var(--cp-surf)]/70 backdrop-blur-sm overflow-hidden">
-                {/* Header */}
-                <div className="px-4 py-3 border-b border-[var(--cp-border)] flex items-center justify-between">
-                  <div className="text-[13px] text-[var(--cp-text-dim)] font-medium">
-                    {existingEntry ? "In your library" : "Add to library"}
-                  </div>
-                  {existingEntry && statusColor && (
-                    <div className="flex items-center gap-1.5">
+                {/* Header — status ribbon when chosen, mono TRACK label otherwise */}
+                <div className="px-4 py-3 border-b border-[var(--cp-border)] flex items-center justify-between min-h-[44px]">
+                  {status && statusColor ? (
+                    <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full" style={{ background: statusColor }} />
                       <span
-                        className="text-[11.5px] tracking-[.04em] uppercase font-semibold"
+                        className="text-[11px] font-mono uppercase tracking-[.12em] font-semibold"
                         style={{ color: statusColor }}
                       >
-                        {existingEntry.status}
+                        {status}
                       </span>
                     </div>
+                  ) : (
+                    <span className={RAIL_LABEL}>Track</span>
                   )}
                 </div>
 
-                <div className="p-4 space-y-4">
-                  {/* STATUS — segmented */}
-                  <div>
-                    <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
-                      Status
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {GAME_STATUSES.map((s) => {
-                        const active = status === s;
-                        const color = STATUS_COLORS[s];
-                        return (
-                          <button
-                            key={s}
-                            onClick={() => setStatus(s)}
-                            className="px-2.5 py-2 rounded-sm text-xs text-left transition flex items-center gap-2 border"
-                            style={{
-                              borderColor: active ? color : "var(--cp-border)",
-                              background: active ? `${color}1a` : "transparent",
-                              color: active ? color : "var(--cp-text-dim)",
-                            }}
-                          >
-                            <span
-                              className="w-1.5 h-1.5 rounded-full shrink-0"
-                              style={{ background: color }}
-                            />
-                            <span className="truncate">{s}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                <div className="p-4 space-y-5">
+                  {/* STATUS — segmented (no label, the chips speak for themselves) */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {GAME_STATUSES.map((s) => {
+                      const active = status === s;
+                      const color = STATUS_COLORS[s];
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => setStatus(s)}
+                          className="px-2.5 py-2 rounded-sm text-xs text-left transition flex items-center gap-2 border"
+                          style={{
+                            borderColor: active ? color : "var(--cp-border)",
+                            background: active ? `${color}1a` : "transparent",
+                            color: active ? color : "var(--cp-text-dim)",
+                          }}
+                        >
+                          <span
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ background: color }}
+                          />
+                          <span className="truncate">{s}</span>
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  {/* RATING — 10 cells */}
+                  {/* SCORE — gated on Completed */}
                   <div>
-                    <div className="text-[13px] text-[var(--cp-text-dim)] mb-2 flex items-center justify-between font-medium">
-                      <span>Your rating</span>
-                      {rating ? (
-                        <span className="font-mono text-[var(--cp-star)]">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={RAIL_LABEL}>
+                        {ratingUnlocked ? "Score" : "Score · unlocks when completed"}
+                      </span>
+                      {ratingUnlocked && rating ? (
+                        <span className="font-mono text-[12px] text-[var(--cp-star)]">
                           {rating} / 10
                         </span>
-                      ) : (
-                        <span className="text-[var(--cp-text-dimmer)]">—</span>
-                      )}
+                      ) : null}
                     </div>
-                    <div className="grid grid-cols-10 gap-1">
-                      {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
-                        const active = rating !== null && n <= rating;
-                        return (
-                          <button
+                    {ratingUnlocked ? (
+                      <div className="grid grid-cols-10 gap-1">
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
+                          const active = rating !== null && n <= rating;
+                          return (
+                            <button
+                              key={n}
+                              onClick={() => setRating(rating === n ? null : n)}
+                              className="aspect-square rounded-sm text-[12px] font-mono font-semibold transition flex items-center justify-center"
+                              style={{
+                                background: active ? "var(--cp-star)" : "transparent",
+                                color: active ? "var(--cp-bg)" : "var(--cp-text-dimmer)",
+                                border: active
+                                  ? "1px solid var(--cp-star)"
+                                  : "1px solid var(--cp-border)",
+                              }}
+                            >
+                              {n}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div
+                        aria-hidden
+                        className="grid grid-cols-10 gap-1 opacity-40 pointer-events-none select-none"
+                      >
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                          <div
                             key={n}
-                            onClick={() => setRating(rating === n ? null : n)}
-                            className="aspect-square rounded-sm text-[12px] font-mono font-semibold transition flex items-center justify-center"
-                            style={{
-                              background: active ? "var(--cp-star)" : "transparent",
-                              color: active ? "var(--cp-bg)" : "var(--cp-text-dimmer)",
-                              border: active
-                                ? "1px solid var(--cp-star)"
-                                : "1px solid var(--cp-border)",
-                            }}
+                            className="aspect-square rounded-sm text-[12px] font-mono font-semibold flex items-center justify-center border border-[var(--cp-border)] text-[var(--cp-text-dimmer)]"
                           >
                             {n}
-                          </button>
-                        );
-                      })}
-                    </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  {/* REVIEW */}
-                  <div>
-                    <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
-                      Review
+                  {/* REVIEW — gated on Completed */}
+                  {ratingUnlocked && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={RAIL_LABEL}>Review</span>
+                        <span className="text-[10.5px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dimmer)]">
+                          optional
+                        </span>
+                      </div>
+                      <textarea
+                        value={review}
+                        onChange={(e) => setReview(e.target.value)}
+                        rows={3}
+                        maxLength={2000}
+                        className="w-full p-2.5 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 resize-none border border-[var(--cp-border)] text-sm leading-relaxed"
+                      />
                     </div>
-                    <textarea
-                      placeholder="A line or two about your experience…"
-                      value={review}
-                      onChange={(e) => setReview(e.target.value)}
-                      rows={3}
-                      maxLength={2000}
-                      className="w-full p-2.5 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)]/60 outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 resize-none border border-[var(--cp-border)] text-sm leading-relaxed"
-                    />
-                  </div>
+                  )}
 
                   {/* PRIMARY CTA */}
                   <button
@@ -425,87 +491,136 @@ export default function GameDetail() {
                     disabled={!status || saving}
                     className="w-full py-2.5 rounded-sm bg-[var(--cp-accent)] text-white text-sm font-semibold hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    {saving
-                      ? "Saving…"
-                      : existingEntry
-                      ? "Save changes"
-                      : "Add to library"}
+                    {saving ? "Saving…" : justSaved ? "Saved ✓" : "Save"}
                   </button>
-                </div>
 
-                {/* Secondary footer: diary + list toggles */}
-                <div className="border-t border-[var(--cp-border)]">
-                  <div className="grid grid-cols-2 divide-x divide-[var(--cp-border)]">
+                  {/* Secondary outline chips: Add to list · Share */}
+                  <div className="grid grid-cols-2 gap-1.5">
                     <button
-                      onClick={() => {
-                        setDiaryOpen(!diaryOpen);
-                        setListOpen(false);
-                      }}
-                      className={`py-2.5 text-[12px] tracking-[.04em] uppercase font-semibold transition ${
-                        diaryOpen
-                          ? "text-[var(--cp-accent)] bg-[var(--cp-accent)]/5"
-                          : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"
-                      }`}
-                    >
-                      📖 Log diary
-                    </button>
-                    <button
-                      onClick={() => {
-                        setListOpen(!listOpen);
-                        setDiaryOpen(false);
-                      }}
-                      className={`py-2.5 text-[12px] tracking-[.04em] uppercase font-semibold transition ${
-                        listOpen
-                          ? "text-[var(--cp-accent)] bg-[var(--cp-accent)]/5"
-                          : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"
-                      }`}
+                      onClick={() => setListModalOpen((v) => !v)}
+                      className="py-2 rounded-sm border border-[var(--cp-border)] text-[12.5px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:border-[var(--cp-text-dimmer)] transition"
                     >
                       + Add to list
                     </button>
+                    <button
+                      onClick={() => {
+                        const url = window.location.href;
+                        if (navigator.share) {
+                          navigator.share({ title: game.name, url }).catch(() => {});
+                        } else {
+                          navigator.clipboard?.writeText(url);
+                          setSuccess("Link copied");
+                        }
+                      }}
+                      className="py-2 rounded-sm border border-[var(--cp-border)] text-[12.5px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:border-[var(--cp-text-dimmer)] transition"
+                    >
+                      Share
+                    </button>
                   </div>
 
-                  {diaryOpen && (
-                    <div className="p-4 space-y-3 border-t border-[var(--cp-border)]">
-                      <div>
-                        <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-1.5">
-                          Date played
-                        </div>
-                        <input
-                          type="date"
-                          value={diaryDate}
-                          onChange={(e) => setDiaryDate(e.target.value)}
-                          className="w-full p-2 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-sm"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-1.5">
-                          Note
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Quick thoughts…"
-                          value={diaryNote}
-                          onChange={(e) => setDiaryNote(e.target.value)}
-                          maxLength={500}
-                          className="w-full p-2 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)]/60 outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-sm"
-                        />
-                      </div>
-                      <button
-                        onClick={handleDiaryLog}
-                        disabled={!diaryDate}
-                        className="w-full py-2 rounded-sm bg-transparent border border-[var(--cp-accent)]/60 text-[var(--cp-accent)] text-xs font-semibold hover:bg-[var(--cp-accent)]/10 transition disabled:opacity-40"
-                      >
-                        Log entry
-                      </button>
-                    </div>
-                  )}
-
-                  {listOpen && (
-                    <div className="p-4 border-t border-[var(--cp-border)]">
+                  {listModalOpen && (
+                    <div className="pt-2">
                       <AddToList gameId={Number(id)} />
                     </div>
                   )}
                 </div>
+
+                {/* SESSIONS — surfaces diary inline, always visible once a status is set */}
+                {status && (
+                  <div className="border-t border-[var(--cp-border)] p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={RAIL_LABEL}>Sessions</span>
+                        {sessions.length > 0 && (
+                          <span className="font-mono text-[11px] text-[var(--cp-text-dimmer)]">
+                            {sessions.length}
+                          </span>
+                        )}
+                      </div>
+                      {sessions.length > 0 && !composerOpen && (
+                        <button
+                          onClick={() => setComposerOpen(true)}
+                          className={`text-[11px] font-mono uppercase tracking-[.12em] px-2 py-1 rounded-sm transition ${
+                            status === "Playing"
+                              ? "bg-[var(--cp-accent)] text-white hover:brightness-110"
+                              : "border border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:border-[var(--cp-text-dimmer)]"
+                          }`}
+                        >
+                          + Log a session
+                        </button>
+                      )}
+                    </div>
+
+                    {recentSessions.length > 0 && (
+                      <ul className="space-y-1.5">
+                        {recentSessions.map((s) => (
+                          <li
+                            key={s.id}
+                            className="flex items-baseline gap-2 text-[12.5px] leading-snug"
+                          >
+                            <span className="font-mono text-[11px] uppercase tracking-[.08em] text-[var(--cp-text-dimmer)] shrink-0 w-12">
+                              {formatSessionDate(s.played_at)}
+                            </span>
+                            <span className="text-[var(--cp-text-dim)] truncate">
+                              {s.note?.trim() || (
+                                <em className="text-[var(--cp-text-dimmer)]">no note</em>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {sessions.length === 0 && !composerOpen && (
+                      <button
+                        onClick={() => setComposerOpen(true)}
+                        className="w-full border border-dashed border-[var(--cp-border)] rounded-md py-4 px-3 text-[12px] text-[var(--cp-text-dim)] hover:border-[var(--cp-text-dimmer)] hover:text-[var(--cp-text)] transition text-left"
+                      >
+                        + {sessionPrompt}
+                      </button>
+                    )}
+
+                    {composerOpen && (
+                      <div className="space-y-2 pt-1">
+                        <div className="flex gap-1.5">
+                          <input
+                            type="date"
+                            value={sessionDate}
+                            onChange={(e) => setSessionDate(e.target.value)}
+                            className="p-2 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-[12.5px] font-mono"
+                          />
+                          <input
+                            type="text"
+                            placeholder={sessionPrompt}
+                            value={sessionNote}
+                            onChange={(e) => setSessionNote(e.target.value)}
+                            maxLength={500}
+                            className="flex-1 min-w-0 p-2 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)]/70 outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-[12.5px]"
+                            autoFocus
+                          />
+                        </div>
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={handleLogSession}
+                            disabled={!sessionDate || logging}
+                            className="flex-1 py-1.5 rounded-sm bg-[var(--cp-accent)] text-white text-[12px] font-semibold hover:brightness-110 transition disabled:opacity-40"
+                          >
+                            {logging ? "Logging…" : "Log it"}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setComposerOpen(false);
+                              setSessionNote("");
+                            }}
+                            className="px-3 py-1.5 rounded-sm border border-[var(--cp-border)] text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </aside>

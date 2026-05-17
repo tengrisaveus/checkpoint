@@ -187,12 +187,24 @@ def update_game(
     if not entry:
         raise HTTPException(status_code=404, detail="Game not in library")
 
+    new_status = game_data.status.value if game_data.status is not None else str(entry.status)
+
+    # Rating and review only make sense on Completed entries. Reject incoming
+    # values that violate this against the effective status, and wipe stored
+    # values when an entry transitions away from Completed.
+    if new_status != "Completed" and (game_data.rating is not None or game_data.review):
+        raise HTTPException(status_code=400, detail="Rating and review are only allowed when status is Completed")
+
     if game_data.status is not None:
         entry.status = game_data.status.value  # type: ignore
     if game_data.rating is not None:
         entry.rating = game_data.rating  # type: ignore
     if game_data.review is not None:
         entry.review = game_data.review  # type: ignore
+
+    if new_status != "Completed":
+        entry.rating = None  # type: ignore
+        entry.review = None  # type: ignore
 
     db.commit()
     db.refresh(entry)

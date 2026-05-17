@@ -167,12 +167,11 @@ export default function Diary() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div>
-            <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">
+            <div className="text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dim)] mb-3">
               Your diary · <span className="font-mono">{entries.length}</span> {entries.length === 1 ? "entry" : "entries"}
             </div>
-            <h1 className="font-display text-4xl md:text-5xl tracking-tight text-[var(--cp-text)] leading-[1.05]">
-              What you've been{" "}
-              <em className="italic text-[var(--cp-accent)]">playing</em>
+            <h1 className="font-display text-3xl md:text-4xl tracking-tight text-[var(--cp-text)] leading-[1.05]">
+              Diary
             </h1>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
@@ -242,16 +241,16 @@ export default function Diary() {
         {/* Empty state */}
         {byDay.length === 0 ? (
           <div className="border border-dashed border-[var(--cp-border)] rounded-lg py-16 text-center">
-            <p className="font-display italic text-2xl text-[var(--cp-text-dim)]">
+            <p className="text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-text-dim)]">
               {monthEntries.length === 0
-                ? `Nothing logged in ${monthLongName}.`
-                : "No entries match this filter."}
+                ? `nothing in ${monthLongName.toLowerCase()}`
+                : "no entries match this filter"}
             </p>
             <Link
               to="/search"
-              className="mt-4 inline-block text-[13px] font-semibold text-[var(--cp-accent)] hover:brightness-110 transition"
+              className="mt-4 inline-block text-[11px] font-mono uppercase tracking-[.12em] text-[var(--cp-accent)] hover:brightness-110 transition"
             >
-              Log your first entry →
+              Log a session →
             </Link>
           </div>
         ) : (

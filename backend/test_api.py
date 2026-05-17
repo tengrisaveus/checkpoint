@@ -269,6 +269,63 @@ def test_invalid_rating():
     }, headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 422
 
+
+def test_rating_rejected_when_not_completed():
+    # Rating + review only make sense once a game is marked Completed.
+    # Adding a rating on a Playing entry should be rejected by Pydantic (422).
+    token = get_token()
+    res = client.post("/library/", json={
+        "game_id": 1022,
+        "status": "Playing",
+        "rating": 8,
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 422
+
+
+def test_rating_accepted_when_completed():
+    token = get_token()
+    res = client.post("/library/", json={
+        "game_id": 1022,
+        "status": "Completed",
+        "rating": 8,
+        "review": "Loved it.",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json()["rating"] == 8
+    assert res.json()["review"] == "Loved it."
+
+
+def test_status_revert_clears_rating_and_review():
+    # When a Completed entry is rolled back to Playing, the stored rating and
+    # review become meaningless — the router should null them out.
+    token = get_token()
+    client.post("/library/", json={
+        "game_id": 1022,
+        "status": "Completed",
+        "rating": 9,
+        "review": "Top tier.",
+    }, headers={"Authorization": f"Bearer {token}"})
+    res = client.put("/library/1022", json={
+        "status": "Playing",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json()["status"] == "Playing"
+    assert res.json()["rating"] is None
+    assert res.json()["review"] is None
+
+
+def test_update_rating_without_completed_status_rejected():
+    # Updating just rating on a Playing entry (without changing status) should fail.
+    token = get_token()
+    client.post("/library/", json={
+        "game_id": 1022,
+        "status": "Playing",
+    }, headers={"Authorization": f"Bearer {token}"})
+    res = client.put("/library/1022", json={
+        "rating": 7,
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 400
+
 # ========== HEALTH TESTS ==========
 
 def test_health_endpoint():
