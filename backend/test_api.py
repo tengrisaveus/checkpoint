@@ -479,3 +479,30 @@ def test_diary_monthly():
     assert res.status_code == 200
     assert len(res.json()) == 6  # last 6 months
     assert all("month" in m and "label" in m and "count" in m for m in res.json())
+
+def test_completing_a_game_creates_diary_entry():
+    """
+    Library entry status'u Completed'a transition ettiğinde diary'de eş
+    bir kayıt otomatik oluşmalı — manual session log kalktığı için bu
+    auto-creation feature'ının core invariant'i.
+    """
+    token = get_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    client.post("/library/", json={
+        "game_id": 1022,
+        "status": "Playing",
+    }, headers=headers)
+
+    # Playing → Completed transition diary entry üretmeli
+    client.put("/library/1022", json={
+        "status": "Completed",
+        "rating": 9,
+    }, headers=headers)
+
+    diary = client.get("/diary/", headers=headers).json()
+    statuses = [d["status"] for d in diary]
+    assert "Playing" in statuses   # initial add'den
+    assert "Completed" in statuses # transition'dan
+    completed_entry = next(d for d in diary if d["status"] == "Completed")
+    assert completed_entry["rating"] == 9

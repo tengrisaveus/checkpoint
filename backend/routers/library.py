@@ -1,12 +1,33 @@
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from core.database import get_db
 from core.auth import get_current_user
-from models import User, UserGame
+from models import User, UserGame, DiaryEntry
 from schemas import UserGameCreate, UserGameUpdate, UserGameResponse
 from services.igdb import get_game_detail
 
 router = APIRouter()
+
+
+def _create_diary_entry(db: Session, user_id: int, entry: UserGame, new_status: str) -> None:
+    """
+    Library entry'sinden otomatik diary kaydı yaratır.
+    Yalnızca `Playing` veya `Completed` status'leri için çağrılmalı — caller
+    transition kontrolünü yapar. game_name/game_cover_url library entry'sinde
+    cache'li olduğu için ekstra IGDB çağrısı gerekmiyor.
+    """
+    diary = DiaryEntry(
+        user_id=user_id,
+        game_id=entry.game_id,
+        game_name=entry.game_name,
+        game_cover_url=entry.game_cover_url,
+        played_at=date.today(),
+        status=new_status,
+        rating=entry.rating if new_status == "Completed" else None,
+        note=None,
+    )
+    db.add(diary)
 
 
 @router.post("/", response_model=UserGameResponse)
@@ -18,6 +39,7 @@ async def add_game(
     """
     Adds a game to the user's library.
     Fetches metadata from IGDB and upgrades the cover thumbnail to full size.
+    Auto-creates a diary entry if the initial status is Playing or Completed.
     """
     existing = db.query(UserGame).filter(
         UserGame.user_id == current_user.id,
@@ -26,7 +48,6 @@ async def add_game(
     if existing:
         raise HTTPException(status_code=400, detail="Game already in library")
 
-    # Fetch game metadata from IGDB to store name and cover alongside the entry
     results = await get_game_detail(game_data.game_id)
     if not results:
         raise HTTPException(status_code=404, detail="Game not found on IGDB")
@@ -34,7 +55,6 @@ async def add_game(
     game_info = results[0]
     cover_url = None
     if game_info.get("cover") and game_info["cover"].get("url"):
-        # IGDB returns thumbnail URLs (t_thumb); upgrade to full cover size (t_cover_big)
         cover_url = game_info["cover"]["url"].replace("t_thumb", "t_cover_big")
 
     genres_str = None
@@ -53,6 +73,11 @@ async def add_game(
     )
 
     db.add(new_entry)
+
+    # İlk eklemede status Playing/Completed ise diary'ye de düş
+    if new_entry.status in ("Playing", "Completed"):
+        _create_diary_entry(db, current_user.id, new_entry, new_entry.status)
+
     db.commit()
     db.refresh(new_entry)
 
@@ -68,8 +93,6 @@ def get_library(
     return db.query(UserGame).filter(UserGame.user_id == current_user.id).all()
 
 
-# IMPORTANT: /stats must be defined before /{game_id} (PUT) to avoid any future
-# route conflicts if a GET /{game_id} endpoint is ever added.
 @router.get("/stats")
 def get_stats(
     db: Session = Depends(get_db),
@@ -104,7 +127,6 @@ def get_stats(
     completed = by_status.get("Completed", 0)
     completion_ratio = round(completed / total * 100) if total > 0 else 0
 
-    # Top genres
     genre_count: dict[str, int] = {}
     for entry in entries:
         genres = str(entry.game_genres) if entry.game_genres is not None else ""
@@ -150,13 +172,11 @@ def update_favorites(
     if len(game_ids) > 4:
         raise HTTPException(status_code=400, detail="Maximum 4 favorites allowed")
 
-    # Clear existing favorites
     db.query(UserGame).filter(
         UserGame.user_id == current_user.id,
         UserGame.is_favorite == True,
     ).update({"is_favorite": False})
 
-    # Set new favorites
     for gid in game_ids:
         entry = db.query(UserGame).filter(
             UserGame.user_id == current_user.id,
@@ -178,7 +198,8 @@ def update_game(
 ):
     """
     Updates status, rating, or review for a game in the user's library.
-    Only fields explicitly provided (non-None) are updated (partial update semantics).
+    Auto-creates a diary entry when status transitions INTO Playing or Completed
+    (replay scenarios — Completed → Playing — count as a new run).
     """
     entry = db.query(UserGame).filter(
         UserGame.user_id == current_user.id,
@@ -187,11 +208,9 @@ def update_game(
     if not entry:
         raise HTTPException(status_code=404, detail="Game not in library")
 
-    new_status = game_data.status.value if game_data.status is not None else str(entry.status)
+    old_status = str(entry.status)
+    new_status = game_data.status.value if game_data.status is not None else old_status
 
-    # Rating and review only make sense on Completed entries. Reject incoming
-    # values that violate this against the effective status, and wipe stored
-    # values when an entry transitions away from Completed.
     if new_status != "Completed" and (game_data.rating is not None or game_data.review):
         raise HTTPException(status_code=400, detail="Rating and review are only allowed when status is Completed")
 
@@ -206,6 +225,11 @@ def update_game(
         entry.rating = None  # type: ignore
         entry.review = None  # type: ignore
 
+    # Status değiştiyse ve hedef Playing/Completed ise diary entry yarat.
+    # Aynı status'a re-save (örn. sadece review eklendi) entry üretmiyor.
+    if old_status != new_status and new_status in ("Playing", "Completed"):
+        _create_diary_entry(db, current_user.id, entry, new_status)
+
     db.commit()
     db.refresh(entry)
 
@@ -218,7 +242,8 @@ def remove_game(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Removes a game from the user's library. Returns 404 if the game isn't in the library."""
+    """Removes a game from the user's library. Diary entries are preserved
+    (deleting from library doesn't erase historical plays)."""
     entry = db.query(UserGame).filter(
         UserGame.user_id == current_user.id,
         UserGame.game_id == game_id,

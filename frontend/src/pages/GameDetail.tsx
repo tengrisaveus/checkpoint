@@ -19,7 +19,8 @@ const STATUS_COLORS: Record<string, string> = {
   Dropped: "#ef4444",
 };
 
-const RAIL_LABEL = "text-[12px] uppercase tracking-[.06em] font-semibold text-[var(--cp-text-dim)]";
+const RAIL_LABEL =
+  "text-[12px] uppercase tracking-[.06em] font-semibold text-[var(--cp-text-dim)]";
 const RAIL_HINT = "text-[12px] text-[var(--cp-text-dimmer)]";
 
 function getBackdropUrl(game: Game): string | null {
@@ -30,7 +31,10 @@ function getBackdropUrl(game: Game): string | null {
 
 function formatSessionDate(iso: string): string {
   const [y, m, d] = iso.split("T")[0].split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export default function GameDetail() {
@@ -49,12 +53,6 @@ export default function GameDetail() {
   const [similarGames, setSimilarGames] = useState<Game[]>([]);
   const [saving, setSaving] = useState(false);
   const [sessions, setSessions] = useState<DiaryEntry[]>([]);
-  const [composerOpen, setComposerOpen] = useState(false);
-  const [sessionDate, setSessionDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
-  const [sessionNote, setSessionNote] = useState("");
-  const [logging, setLogging] = useState(false);
   const [listModalOpen, setListModalOpen] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
 
@@ -70,27 +68,36 @@ export default function GameDetail() {
 
   useEffect(() => {
     if (!user) return;
-    api.get("/library").then((res) => {
-      const found = res.data.find(
-        (e: LibraryEntry) => e.game_id === Number(id),
-      );
-      if (found) {
-        setExistingEntry(found);
-        setStatus(found.status);
-        setRating(found.rating);
-        setReview(found.review || "");
-      }
-    }).catch(() => {});
+    api
+      .get("/library")
+      .then((res) => {
+        const found = res.data.find(
+          (e: LibraryEntry) => e.game_id === Number(id),
+        );
+        if (found) {
+          setExistingEntry(found);
+          setStatus(found.status);
+          setRating(found.rating);
+          setReview(found.review || "");
+        }
+      })
+      .catch(() => {});
   }, [user, id]);
 
   useEffect(() => {
     if (!user || !id) return;
-    api.get(`/diary?game_id=${id}`).then((res) => setSessions(res.data)).catch(() => {});
+    api
+      .get(`/diary?game_id=${id}`)
+      .then((res) => setSessions(res.data))
+      .catch(() => {});
   }, [user, id]);
 
   useEffect(() => {
     if (!id) return;
-    api.get(`/games/${id}/similar`).then((res) => setSimilarGames(res.data)).catch(() => {});
+    api
+      .get(`/games/${id}/similar`)
+      .then((res) => setSimilarGames(res.data))
+      .catch(() => {});
   }, [id]);
 
   // Rating + review only persist when the entry is Completed. If the user
@@ -115,7 +122,7 @@ export default function GameDetail() {
     }
     setSaving(true);
     const payloadRating = status === "Completed" ? rating : null;
-    const payloadReview = status === "Completed" ? (review || null) : null;
+    const payloadReview = status === "Completed" ? review || null : null;
     try {
       if (existingEntry) {
         await api.put(`/library/${id}`, {
@@ -139,34 +146,15 @@ export default function GameDetail() {
         setExistingEntry(res.data);
       }
       setJustSaved(true);
+      api
+        .get(`/diary?game_id=${id}`)
+        .then((res) => setSessions(res.data))
+        .catch(() => {});
       setSuccess(existingEntry ? "Updated" : "Added to library");
     } catch {
       setError("Something went wrong");
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleLogSession = async () => {
-    if (!sessionDate) return;
-    setLogging(true);
-    try {
-      const res = await api.post("/diary", {
-        game_id: Number(id),
-        played_at: sessionDate,
-        status: status || "Playing",
-        rating: null,
-        note: sessionNote || null,
-      });
-      setSessions([res.data, ...sessions]);
-      setSessionNote("");
-      setSessionDate(new Date().toISOString().split("T")[0]);
-      setComposerOpen(false);
-      setSuccess("Session logged");
-    } catch {
-      setError("Couldn't log session");
-    } finally {
-      setLogging(false);
     }
   };
 
@@ -181,22 +169,36 @@ export default function GameDetail() {
   if (!game) return null;
 
   const backdrop = getBackdropUrl(game);
-  const storeLinks = game.websites?.filter((w) => [1, 13, 16, 17].includes(w.category)) || [];
+  const storeLinks =
+    game.websites?.filter((w) => [1, 13, 16, 17].includes(w.category)) || [];
   const summaryLong = (game.summary?.length || 0) > 300;
-  const developer = game.involved_companies?.find((c) => c.company)?.company.name;
+  const developer = game.involved_companies?.find((c) => c.company)?.company
+    .name;
   const statusColor = status ? STATUS_COLORS[status] : null;
   const ratingUnlocked = status === "Completed";
   const recentSessions = sessions.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-[var(--cp-bg)]">
-      {success && <Toast message={success} type="success" onClose={() => setSuccess("")} />}
-      {error && <Toast message={error} type="error" onClose={() => setError("")} />}
+      {success && (
+        <Toast
+          message={success}
+          type="success"
+          onClose={() => setSuccess("")}
+        />
+      )}
+      {error && (
+        <Toast message={error} type="error" onClose={() => setError("")} />
+      )}
 
       {/* BACKDROP */}
       <div className="relative h-[240px] md:h-[360px] overflow-hidden">
         {backdrop ? (
-          <img src={backdrop} alt="" className="w-full h-full object-cover scale-105 blur-[2px]" />
+          <img
+            src={backdrop}
+            alt=""
+            className="w-full h-full object-cover scale-105 blur-[2px]"
+          />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[var(--cp-surf)] to-[var(--cp-bg)]" />
         )}
@@ -231,7 +233,9 @@ export default function GameDetail() {
 
               <div className="flex-1 min-w-0 md:pb-2">
                 <div className="text-[13px] text-[var(--cp-text-dim)] mb-2">
-                  <span className="font-mono tabular-nums">{getYear(game.first_release_date) || "—"}</span>
+                  <span className="font-mono tabular-nums">
+                    {getYear(game.first_release_date) || "—"}
+                  </span>
                   {developer && <> · {developer}</>}
                 </div>
                 <h1 className="font-display text-3xl md:text-[2.75rem] text-[var(--cp-text)] leading-[1.05] tracking-tight">
@@ -259,8 +263,8 @@ export default function GameDetail() {
                           game.aggregated_rating >= 75
                             ? "bg-green-500/15 text-green-400 ring-green-500/30"
                             : game.aggregated_rating >= 50
-                            ? "bg-yellow-500/15 text-yellow-400 ring-yellow-500/30"
-                            : "bg-red-500/15 text-red-400 ring-red-500/30"
+                              ? "bg-yellow-500/15 text-yellow-400 ring-yellow-500/30"
+                              : "bg-red-500/15 text-red-400 ring-red-500/30"
                         }`}
                       >
                         {game.aggregated_rating.toFixed(0)}
@@ -274,7 +278,11 @@ export default function GameDetail() {
                   {game.platforms && (
                     <div className="flex gap-1.5 flex-wrap">
                       {game.platforms.slice(0, 4).map((p) => (
-                        <PlatformIcon key={p.name} name={p.name} abbreviation={p.abbreviation} />
+                        <PlatformIcon
+                          key={p.name}
+                          name={p.name}
+                          abbreviation={p.abbreviation}
+                        />
                       ))}
                     </div>
                   )}
@@ -314,7 +322,9 @@ export default function GameDetail() {
             {similarGames.length > 0 && (
               <div className="mt-8">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="text-[12px] font-medium text-[var(--cp-text-dim)]">More like this</div>
+                  <div className="text-[12px] font-medium text-[var(--cp-text-dim)]">
+                    More like this
+                  </div>
                   <Link
                     to={`/search?similar=${id}`}
                     className="text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-accent)] transition"
@@ -340,7 +350,9 @@ export default function GameDetail() {
                           {g.name}
                         </div>
                       )}
-                      <p className="text-[11px] text-[var(--cp-text-dim)] mt-1.5 truncate">{g.name}</p>
+                      <p className="text-[11px] text-[var(--cp-text-dim)] mt-1.5 truncate">
+                        {g.name}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -354,7 +366,9 @@ export default function GameDetail() {
           <aside className="lg:sticky lg:top-4 space-y-3">
             {!user ? (
               <div className="border border-[var(--cp-border)] rounded-lg bg-[var(--cp-surf)]/60 p-6 text-center backdrop-blur-sm">
-                <div className="font-display text-xl text-[var(--cp-text)] mb-4">Sign in to track</div>
+                <div className="font-display text-xl text-[var(--cp-text)] mb-4">
+                  Sign in to track
+                </div>
                 <button
                   onClick={() => navigate("/login")}
                   className="w-full px-4 py-2.5 rounded-sm bg-[var(--cp-accent)] text-white font-semibold text-sm hover:brightness-110 transition"
@@ -368,7 +382,10 @@ export default function GameDetail() {
                 <div className="px-4 py-3 border-b border-[var(--cp-border)] flex items-center justify-between min-h-[44px]">
                   {status && statusColor ? (
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full" style={{ background: statusColor }} />
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ background: statusColor }}
+                      />
                       <span
                         className="text-[12px] uppercase tracking-[.06em] font-semibold"
                         style={{ color: statusColor }}
@@ -420,39 +437,49 @@ export default function GameDetail() {
                     </div>
                     {ratingUnlocked ? (
                       <div className="grid grid-cols-10 gap-1">
-                        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
-                          const active = rating !== null && n <= rating;
-                          return (
-                            <button
-                              key={n}
-                              onClick={() => setRating(rating === n ? null : n)}
-                              className="aspect-square rounded-sm text-[12px] font-mono tabular-nums font-semibold transition flex items-center justify-center"
-                              style={{
-                                background: active ? "var(--cp-star)" : "transparent",
-                                color: active ? "var(--cp-bg)" : "var(--cp-text-dimmer)",
-                                border: active
-                                  ? "1px solid var(--cp-star)"
-                                  : "1px solid var(--cp-border)",
-                              }}
-                            >
-                              {n}
-                            </button>
-                          );
-                        })}
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                          (n) => {
+                            const active = rating !== null && n <= rating;
+                            return (
+                              <button
+                                key={n}
+                                onClick={() =>
+                                  setRating(rating === n ? null : n)
+                                }
+                                className="aspect-square rounded-sm text-[12px] font-mono tabular-nums font-semibold transition flex items-center justify-center"
+                                style={{
+                                  background: active
+                                    ? "var(--cp-star)"
+                                    : "transparent",
+                                  color: active
+                                    ? "var(--cp-bg)"
+                                    : "var(--cp-text-dimmer)",
+                                  border: active
+                                    ? "1px solid var(--cp-star)"
+                                    : "1px solid var(--cp-border)",
+                                }}
+                              >
+                                {n}
+                              </button>
+                            );
+                          },
+                        )}
                       </div>
                     ) : (
                       <div
                         aria-hidden
                         className="grid grid-cols-10 gap-1 opacity-40 pointer-events-none select-none"
                       >
-                        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-                          <div
-                            key={n}
-                            className="aspect-square rounded-sm text-[12px] font-mono tabular-nums font-semibold flex items-center justify-center border border-[var(--cp-border)] text-[var(--cp-text-dimmer)]"
-                          >
-                            {n}
-                          </div>
-                        ))}
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                          (n) => (
+                            <div
+                              key={n}
+                              className="aspect-square rounded-sm text-[12px] font-mono tabular-nums font-semibold flex items-center justify-center border border-[var(--cp-border)] text-[var(--cp-text-dimmer)]"
+                            >
+                              {n}
+                            </div>
+                          ),
+                        )}
                       </div>
                     )}
                   </div>
@@ -495,7 +522,9 @@ export default function GameDetail() {
                       onClick={() => {
                         const url = window.location.href;
                         if (navigator.share) {
-                          navigator.share({ title: game.name, url }).catch(() => {});
+                          navigator
+                            .share({ title: game.name, url })
+                            .catch(() => {});
                         } else {
                           navigator.clipboard?.writeText(url);
                           setSuccess("Link copied");
@@ -514,33 +543,19 @@ export default function GameDetail() {
                   )}
                 </div>
 
-                {/* SESSIONS — surfaces diary inline, always visible once a status is set */}
+                {/* SESSIONS — read-only history of status transitions; entries are auto-created on save */}
                 {status && (
                   <div className="border-t border-[var(--cp-border)] p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-baseline gap-2">
-                        <span className={RAIL_LABEL}>Sessions</span>
-                        {sessions.length > 0 && (
-                          <span className="font-mono tabular-nums text-[12px] text-[var(--cp-text-dimmer)]">
-                            {sessions.length}
-                          </span>
-                        )}
-                      </div>
-                      {sessions.length > 0 && !composerOpen && (
-                        <button
-                          onClick={() => setComposerOpen(true)}
-                          className={`text-[12px] px-2.5 py-1 rounded-sm transition ${
-                            status === "Playing"
-                              ? "bg-[var(--cp-accent)] text-white font-semibold hover:brightness-110"
-                              : "border border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:border-[var(--cp-text-dimmer)]"
-                          }`}
-                        >
-                          + Log a session
-                        </button>
+                    <div className="flex items-baseline gap-2">
+                      <span className={RAIL_LABEL}>Sessions</span>
+                      {sessions.length > 0 && (
+                        <span className="font-mono tabular-nums text-[12px] text-[var(--cp-text-dimmer)]">
+                          {sessions.length}
+                        </span>
                       )}
                     </div>
 
-                    {recentSessions.length > 0 && (
+                    {sessions.length > 0 ? (
                       <ul className="space-y-1.5">
                         {recentSessions.map((s) => (
                           <li
@@ -550,63 +565,26 @@ export default function GameDetail() {
                             <span className="font-mono tabular-nums text-[12px] text-[var(--cp-text-dimmer)] shrink-0 w-14">
                               {formatSessionDate(s.played_at)}
                             </span>
+                            <span
+                              className="w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{
+                                background:
+                                  STATUS_COLORS[s.status] ||
+                                  "var(--cp-text-dimmer)",
+                              }}
+                              aria-hidden
+                            />
                             <span className="text-[var(--cp-text-dim)] truncate">
-                              {s.note?.trim() || (
-                                <span className="text-[var(--cp-text-dimmer)]">—</span>
-                              )}
+                              {s.status}
                             </span>
                           </li>
                         ))}
                       </ul>
-                    )}
-
-                    {sessions.length === 0 && !composerOpen && (
-                      <button
-                        onClick={() => setComposerOpen(true)}
-                        className="w-full border border-dashed border-[var(--cp-border)] rounded-md py-4 px-3 text-[12px] text-[var(--cp-text-dim)] hover:border-[var(--cp-text-dimmer)] hover:text-[var(--cp-text)] transition text-left"
-                      >
-                        + Log a session
-                      </button>
-                    )}
-
-                    {composerOpen && (
-                      <div className="space-y-2 pt-1">
-                        <div className="flex gap-1.5">
-                          <input
-                            type="date"
-                            value={sessionDate}
-                            onChange={(e) => setSessionDate(e.target.value)}
-                            className="p-2 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-[12.5px] font-mono tabular-nums"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Note"
-                            value={sessionNote}
-                            onChange={(e) => setSessionNote(e.target.value)}
-                            maxLength={500}
-                            className="flex-1 min-w-0 p-2 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)]/70 outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-[12.5px]"
-                            autoFocus
-                          />
-                        </div>
-                        <div className="flex gap-1.5">
-                          <button
-                            onClick={handleLogSession}
-                            disabled={!sessionDate || logging}
-                            className="flex-1 py-1.5 rounded-sm bg-[var(--cp-accent)] text-white text-[12px] font-semibold hover:brightness-110 transition disabled:opacity-40"
-                          >
-                            {logging ? "Logging…" : "Log it"}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setComposerOpen(false);
-                              setSessionNote("");
-                            }}
-                            className="px-3 py-1.5 rounded-sm border border-[var(--cp-border)] text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
+                    ) : (
+                      <p className="text-[12px] text-[var(--cp-text-dimmer)] leading-relaxed">
+                        Sessions appear automatically when you mark this game as
+                        Playing or Completed.
+                      </p>
                     )}
                   </div>
                 )}
