@@ -5,16 +5,16 @@ from core.config import get_settings
 
 settings = get_settings()
 
-# Twitch OAuth2 erişim token'ı modül seviyesinde önbelleklenir.
-# Token süresi dolduğunda igdb_request içinde 401 retry ile yenilenir.
+# Twitch OAuth2 access token is cached at module level.
+# It is refreshed via a 401 retry inside igdb_request when it expires.
 access_token = None
 
-# Tüm IGDB istekleri için global timeout süresi (saniye)
+# Global timeout (seconds) for all IGDB requests
 IGDB_TIMEOUT = 10.0
 
-# IGDB game_type değerleri (eski `category` alanı 2025'te deprecate oldu, ID'ler aynı):
+# IGDB game_type values (the old `category` field was deprecated in 2025, IDs are the same):
 # 0 = main_game, 4 = standalone_expansion, 8 = remake, 9 = remaster, 10 = expanded_game
-# Edition / bundle / DLC olanları (1, 2, 3, 5, 6, 7, 11, 12, 13, 14) bu filtre eler.
+# This filter excludes editions / bundles / DLC (1, 2, 3, 5, 6, 7, 11, 12, 13, 14).
 MAIN_GAME_TYPES = "(0,4,8,9,10)"
 
 
@@ -102,9 +102,9 @@ async def get_game_detail(game_id: int):
 
 async def get_popular_games():
     """
-    Popüler oyunlar — IGDB Visits trendindeki geniş bir havuzdan (top 200)
-    yüksek rating sayısına sahip oyunlar süzülüp en çok puanlanana göre
-    sıralanıyor. Sonuç: hem trendde olan hem de gerçekten tanınmış oyunlar.
+    Popular games — pulled from a wide pool of the IGDB Visits trend (top 200),
+    filtered to games with a high rating count, then sorted by total rating count.
+    Result: games that are both trending and genuinely well-known.
     """
     popular = await igdb_request(
         "popularity_primitives",
@@ -127,10 +127,10 @@ async def get_popular_games():
 
 async def get_new_releases():
     """
-    "Hot" — son 2 yılda çıkmış, IGDB'de yaygın olarak puanlanmış oyunlar.
-    popularity_primitives'in "Playing" tracker'ı çok az kullanıcıdan besleniyor
-    ve sonuçlara unknown indie'ler karıştırıyordu; bunun yerine total_rating_count
-    ile sıralayıp eşik koyuyoruz — tanınmışlık için güvenilir bir proxy.
+    "Hot" — games released in the last 2 years that are widely rated on IGDB.
+    The popularity_primitives "Playing" tracker is fed by very few users and was
+    mixing unknown indies into the results; instead we sort by total_rating_count
+    with a threshold — a reliable proxy for recognition.
     """
     now = int(time.time())
     two_years_ago = now - (730 * 24 * 60 * 60)
@@ -149,9 +149,9 @@ async def get_new_releases():
 
 async def get_upcoming_games():
     """
-    Önümüzdeki 6 ay içinde çıkacak oyunlar.
-    Henüz çıkmadığı için total_rating_count yok; bunun yerine `hypes`
-    (IGDB kullanıcılarının heyecan sayacı) ile sıralayıp eşik koyuyoruz.
+    Games releasing within the next 6 months.
+    They have no total_rating_count yet since they haven't shipped; instead we
+    sort by `hypes` (IGDB users' excitement counter) with a threshold.
     """
     now = int(time.time())
     six_months = now + (180 * 24 * 60 * 60)
@@ -181,9 +181,8 @@ async def get_games_by_genre(genre_id: int):
 
 async def get_similar_games(game_id: int):
     """
-    Önce IGDB'nin similar_games alanını dener. Boş gelirse aynı genre'lardan
-    yüksek puanlı oyunları fallback olarak döner (boş "Similar Games" rail'i
-    göstermemek için).
+    First tries IGDB's similar_games field. If empty, falls back to top-rated
+    games from the same genres (so we never show an empty "Similar Games" rail).
     """
     result = await igdb_request(
         "games",
@@ -198,7 +197,7 @@ async def get_similar_games(game_id: int):
     if similar:
         return similar
 
-    # Fallback: aynı genre'dan top-rated, kendisini hariç tut
+    # Fallback: top-rated from the same genre, excluding the game itself
     genres = result[0].get("genres", [])
     if not genres:
         return []

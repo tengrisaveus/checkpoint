@@ -1,20 +1,20 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./AuthContext";
-import { CommandPaletteProvider } from "./CommandPaletteContext";
-import Navbar from "./Navbar";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Search from "./pages/Search";
-import GameDetail from "./pages/GameDetail";
-import Library from "./pages/Library";
-import NotFound from "./pages/NotFound";
-import ProtectedRoute from "./ProtectedRoute";
-import Diary from "./pages/Diary";
-import Profile from "./pages/Profile";
-import Lists from "./pages/Lists";
-import ListDetail from "./pages/ListDetail";
-import PublicProfile from "./pages/PublicProfile";
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { AuthProvider } from "./AuthContext"
+import { CommandPaletteProvider } from "./CommandPaletteContext"
+import Navbar from "./Navbar"
+import Home from "./pages/Home"
+import Login from "./pages/Login"
+import Register from "./pages/Register"
+import Search from "./pages/Search"
+import GameDetail from "./pages/GameDetail"
+import Library from "./pages/Library"
+import NotFound from "./pages/NotFound"
+import ProtectedRoute from "./ProtectedRoute"
+import Diary from "./pages/Diary"
+import Profile from "./pages/Profile"
+import Lists from "./pages/Lists"
+import ListDetail from "./pages/ListDetail"
+import PublicProfile from "./pages/PublicProfile"
 
 function App() {
   return (
@@ -74,7 +74,7 @@ function App() {
         </CommandPaletteProvider>
       </AuthProvider>
     </BrowserRouter>
-  );
+  )
 }
 
-export default App;
+export default App

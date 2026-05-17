@@ -1,162 +1,162 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import api from "../api";
-import { useAuth } from "../AuthContext";
-import { GAME_STATUSES } from "../types";
-import type { Game, LibraryEntry, DiaryEntry } from "../types";
-import { getCoverUrl, getYear } from "../utils";
-import Toast from "../components/Toast";
-import { DetailSkeleton } from "../components/Skeleton";
-import PlatformIcon from "../components/PlatformIcon";
-import StoreLink from "../components/StoreLink";
-import AddToList from "../components/AddToList";
-import useTitle from "../hooks/useTitle";
+import { useState, useEffect } from "react"
+import { useParams, useNavigate, Link } from "react-router-dom"
+import api from "../api"
+import { useAuth } from "../AuthContext"
+import { GAME_STATUSES } from "../types"
+import type { Game, LibraryEntry, DiaryEntry } from "../types"
+import { getCoverUrl, getYear } from "../utils"
+import Toast from "../components/Toast"
+import { DetailSkeleton } from "../components/Skeleton"
+import PlatformIcon from "../components/PlatformIcon"
+import StoreLink from "../components/StoreLink"
+import AddToList from "../components/AddToList"
+import useTitle from "../hooks/useTitle"
 
 const STATUS_COLORS: Record<string, string> = {
   Completed: "#22c55e",
   Playing: "#3b82f6",
   "Want to Play": "#eab308",
   Dropped: "#ef4444",
-};
+}
 
 const RAIL_LABEL =
-  "text-[12px] uppercase tracking-[.06em] font-semibold text-[var(--cp-text-dim)]";
-const RAIL_HINT = "text-[12px] text-[var(--cp-text-dimmer)]";
+  "text-[12px] uppercase tracking-[.06em] font-semibold text-[var(--cp-text-dim)]"
+const RAIL_HINT = "text-[12px] text-[var(--cp-text-dimmer)]"
 
 function getBackdropUrl(game: Game): string | null {
-  const source = game.artworks?.[0] || game.screenshots?.[0];
-  if (!source?.url) return null;
-  return `https:${source.url.replace("t_thumb", "t_1080p")}`;
+  const source = game.artworks?.[0] || game.screenshots?.[0]
+  if (!source?.url) return null
+  return `https:${source.url.replace("t_thumb", "t_1080p")}`
 }
 
 function formatSessionDate(iso: string): string {
-  const [y, m, d] = iso.split("T")[0].split("-").map(Number);
+  const [y, m, d] = iso.split("T")[0].split("-").map(Number)
   return new Date(y, m - 1, d).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-  });
+  })
 }
 
 export default function GameDetail() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [game, setGame] = useState<Game | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState("");
-  const [rating, setRating] = useState<number | null>(null);
-  const [review, setReview] = useState("");
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-  const [existingEntry, setExistingEntry] = useState<LibraryEntry | null>(null);
-  const [expandSummary, setExpandSummary] = useState(false);
-  const [similarGames, setSimilarGames] = useState<Game[]>([]);
-  const [saving, setSaving] = useState(false);
-  const [sessions, setSessions] = useState<DiaryEntry[]>([]);
-  const [listModalOpen, setListModalOpen] = useState(false);
-  const [justSaved, setJustSaved] = useState(false);
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const [game, setGame] = useState<Game | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState("")
+  const [rating, setRating] = useState<number | null>(null)
+  const [review, setReview] = useState("")
+  const [success, setSuccess] = useState("")
+  const [error, setError] = useState("")
+  const [existingEntry, setExistingEntry] = useState<LibraryEntry | null>(null)
+  const [expandSummary, setExpandSummary] = useState(false)
+  const [similarGames, setSimilarGames] = useState<Game[]>([])
+  const [saving, setSaving] = useState(false)
+  const [sessions, setSessions] = useState<DiaryEntry[]>([])
+  const [listModalOpen, setListModalOpen] = useState(false)
+  const [justSaved, setJustSaved] = useState(false)
 
-  useTitle(game?.name || "Loading...");
+  useTitle(game?.name || "Loading...")
 
   useEffect(() => {
     api
       .get(`/games/${id}`)
       .then((res) => setGame(res.data))
       .catch(() => navigate("/"))
-      .finally(() => setLoading(false));
-  }, [id, navigate]);
+      .finally(() => setLoading(false))
+  }, [id, navigate])
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) return
     api
       .get("/library")
       .then((res) => {
         const found = res.data.find(
           (e: LibraryEntry) => e.game_id === Number(id),
-        );
+        )
         if (found) {
-          setExistingEntry(found);
-          setStatus(found.status);
-          setRating(found.rating);
-          setReview(found.review || "");
+          setExistingEntry(found)
+          setStatus(found.status)
+          setRating(found.rating)
+          setReview(found.review || "")
         }
       })
-      .catch(() => {});
-  }, [user, id]);
+      .catch(() => {})
+  }, [user, id])
 
   useEffect(() => {
-    if (!user || !id) return;
+    if (!user || !id) return
     api
       .get(`/diary?game_id=${id}`)
       .then((res) => setSessions(res.data))
-      .catch(() => {});
-  }, [user, id]);
+      .catch(() => {})
+  }, [user, id])
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) return
     api
       .get(`/games/${id}/similar`)
       .then((res) => setSimilarGames(res.data))
-      .catch(() => {});
-  }, [id]);
+      .catch(() => {})
+  }, [id])
 
   // Rating + review only persist when the entry is Completed. If the user
   // toggles to a non-Completed status, drop the in-memory values so the UI
   // matches what would be saved.
   useEffect(() => {
     if (status && status !== "Completed") {
-      setRating(null);
-      setReview("");
+      setRating(null)
+      setReview("")
     }
-  }, [status]);
+  }, [status])
 
   // Reset the "Saved ✓" affordance whenever the user edits anything.
   useEffect(() => {
-    setJustSaved(false);
-  }, [status, rating, review]);
+    setJustSaved(false)
+  }, [status, rating, review])
 
   const handleSave = async () => {
     if (!status) {
-      setError("Pick a status first");
-      return;
+      setError("Pick a status first")
+      return
     }
-    setSaving(true);
-    const payloadRating = status === "Completed" ? rating : null;
-    const payloadReview = status === "Completed" ? review || null : null;
+    setSaving(true)
+    const payloadRating = status === "Completed" ? rating : null
+    const payloadReview = status === "Completed" ? review || null : null
     try {
       if (existingEntry) {
         await api.put(`/library/${id}`, {
           status,
           rating: payloadRating,
           review: payloadReview,
-        });
+        })
         setExistingEntry({
           ...existingEntry,
           status,
           rating: payloadRating,
           review: payloadReview,
-        });
+        })
       } else {
         const res = await api.post("/library", {
           game_id: Number(id),
           status,
           rating: payloadRating,
           review: payloadReview,
-        });
-        setExistingEntry(res.data);
+        })
+        setExistingEntry(res.data)
       }
-      setJustSaved(true);
+      setJustSaved(true)
       api
         .get(`/diary?game_id=${id}`)
         .then((res) => setSessions(res.data))
-        .catch(() => {});
-      setSuccess(existingEntry ? "Updated" : "Added to library");
+        .catch(() => {})
+      setSuccess(existingEntry ? "Updated" : "Added to library")
     } catch {
-      setError("Something went wrong");
+      setError("Something went wrong")
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   if (loading)
     return (
@@ -165,18 +165,18 @@ export default function GameDetail() {
           <DetailSkeleton />
         </div>
       </div>
-    );
-  if (!game) return null;
+    )
+  if (!game) return null
 
-  const backdrop = getBackdropUrl(game);
+  const backdrop = getBackdropUrl(game)
   const storeLinks =
-    game.websites?.filter((w) => [1, 13, 16, 17].includes(w.category)) || [];
-  const summaryLong = (game.summary?.length || 0) > 300;
+    game.websites?.filter((w) => [1, 13, 16, 17].includes(w.category)) || []
+  const summaryLong = (game.summary?.length || 0) > 300
   const developer = game.involved_companies?.find((c) => c.company)?.company
-    .name;
-  const statusColor = status ? STATUS_COLORS[status] : null;
-  const ratingUnlocked = status === "Completed";
-  const recentSessions = sessions.slice(0, 3);
+    .name
+  const statusColor = status ? STATUS_COLORS[status] : null
+  const ratingUnlocked = status === "Completed"
+  const recentSessions = sessions.slice(0, 3)
 
   return (
     <div className="min-h-screen bg-[var(--cp-bg)]">
@@ -402,8 +402,8 @@ export default function GameDetail() {
                   {/* STATUS — segmented (no label, the chips speak for themselves) */}
                   <div className="grid grid-cols-2 gap-1.5">
                     {GAME_STATUSES.map((s) => {
-                      const active = status === s;
-                      const color = STATUS_COLORS[s];
+                      const active = status === s
+                      const color = STATUS_COLORS[s]
                       return (
                         <button
                           key={s}
@@ -421,7 +421,7 @@ export default function GameDetail() {
                           />
                           <span className="truncate">{s}</span>
                         </button>
-                      );
+                      )
                     })}
                   </div>
 
@@ -439,7 +439,7 @@ export default function GameDetail() {
                       <div className="grid grid-cols-10 gap-1">
                         {Array.from({ length: 10 }, (_, i) => i + 1).map(
                           (n) => {
-                            const active = rating !== null && n <= rating;
+                            const active = rating !== null && n <= rating
                             return (
                               <button
                                 key={n}
@@ -461,7 +461,7 @@ export default function GameDetail() {
                               >
                                 {n}
                               </button>
-                            );
+                            )
                           },
                         )}
                       </div>
@@ -520,14 +520,14 @@ export default function GameDetail() {
                     </button>
                     <button
                       onClick={() => {
-                        const url = window.location.href;
+                        const url = window.location.href
                         if (navigator.share) {
                           navigator
                             .share({ title: game.name, url })
-                            .catch(() => {});
+                            .catch(() => {})
                         } else {
-                          navigator.clipboard?.writeText(url);
-                          setSuccess("Link copied");
+                          navigator.clipboard?.writeText(url)
+                          setSuccess("Link copied")
                         }
                       }}
                       className="py-2 rounded-sm border border-[var(--cp-border)] text-[12.5px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] hover:border-[var(--cp-text-dimmer)] transition"
@@ -594,5 +594,5 @@ export default function GameDetail() {
         </div>
       </div>
     </div>
-  );
+  )
 }

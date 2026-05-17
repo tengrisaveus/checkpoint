@@ -1,47 +1,47 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import api from "../api";
-import useTitle from "../hooks/useTitle";
+import { useState, useEffect } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import api from "../api"
+import useTitle from "../hooks/useTitle"
 
 interface PublicProfileData {
   user: {
-    username: string;
-    created_at: string;
-  };
+    username: string
+    created_at: string
+  }
   stats: {
-    total_games: number;
-    by_status: Record<string, number>;
-    average_rating: number | null;
-    rated_count: number;
-    completion_ratio: number;
-    top_genres: { name: string; count: number }[];
-  };
+    total_games: number
+    by_status: Record<string, number>
+    average_rating: number | null
+    rated_count: number
+    completion_ratio: number
+    top_genres: { name: string; count: number }[]
+  }
   favorites: {
-    game_id: number;
-    game_name: string;
-    game_cover_url: string | null;
-  }[];
+    game_id: number
+    game_name: string
+    game_cover_url: string | null
+  }[]
   monthly: {
-    month: string;
-    label: string;
-    count: number;
-  }[];
+    month: string
+    label: string
+    count: number
+  }[]
   recent_diary: {
-    game_id: number;
-    game_name: string;
-    game_cover_url: string | null;
-    played_at: string;
-    status: string;
-    rating: number | null;
-    note: string | null;
-  }[];
+    game_id: number
+    game_name: string
+    game_cover_url: string | null
+    played_at: string
+    status: string
+    rating: number | null
+    note: string | null
+  }[]
   lists: {
-    id: number;
-    name: string;
-    description: string | null;
-    item_count: number;
-    preview_covers: string[];
-  }[];
+    id: number
+    name: string
+    description: string | null
+    item_count: number
+    preview_covers: string[]
+  }[]
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -49,38 +49,38 @@ const STATUS_COLORS: Record<string, string> = {
   Playing: "#3b82f6",
   "Want to Play": "#eab308",
   Dropped: "#ef4444",
-};
+}
 
 export default function PublicProfile() {
-  const { username } = useParams();
-  const navigate = useNavigate();
-  const [data, setData] = useState<PublicProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const { username } = useParams()
+  const navigate = useNavigate()
+  const [data, setData] = useState<PublicProfileData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
 
-  useTitle(data ? `${data.user.username}'s Profile` : "Profile");
+  useTitle(data ? `${data.user.username}'s Profile` : "Profile")
 
   useEffect(() => {
     api
       .get(`/profile/${username}`)
       .then((res) => setData(res.data))
       .catch((err) => {
-        if (err.response?.status === 404) setNotFound(true);
+        if (err.response?.status === 404) setNotFound(true)
       })
-      .finally(() => setLoading(false));
-  }, [username]);
+      .finally(() => setLoading(false))
+  }, [username])
 
   const getCoverUrl = (url: string | null) => {
-    if (!url) return null;
-    return url.startsWith("http") ? url : `https:${url}`;
-  };
+    if (!url) return null
+    return url.startsWith("http") ? url : `https:${url}`
+  }
 
   if (loading)
     return (
       <div className="min-h-screen bg-[var(--cp-bg)] text-[var(--cp-text-dim)] p-8 flex items-center justify-center">
         <div className="animate-pulse text-lg">Loading profile...</div>
       </div>
-    );
+    )
 
   if (notFound)
     return (
@@ -93,13 +93,13 @@ export default function PublicProfile() {
           ← Back to home
         </button>
       </div>
-    );
+    )
 
-  if (!data) return null;
+  if (!data) return null
 
-  const { user, stats, favorites, monthly, recent_diary, lists } = data;
-  const completionDash = 163.36 - (163.36 * stats.completion_ratio) / 100;
-  const maxMonthly = Math.max(...monthly.map((m) => m.count), 1);
+  const { user, stats, favorites, monthly, recent_diary, lists } = data
+  const completionDash = 163.36 - (163.36 * stats.completion_ratio) / 100
+  const maxMonthly = Math.max(...monthly.map((m) => m.count), 1)
 
   return (
     <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
@@ -324,5 +324,5 @@ export default function PublicProfile() {
         )}
       </div>
     </div>
-  );
+  )
 }

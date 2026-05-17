@@ -12,10 +12,10 @@ router = APIRouter()
 
 def _create_diary_entry(db: Session, user_id: int, entry: UserGame, new_status: str) -> None:
     """
-    Library entry'sinden otomatik diary kaydı yaratır.
-    Yalnızca `Playing` veya `Completed` status'leri için çağrılmalı — caller
-    transition kontrolünü yapar. game_name/game_cover_url library entry'sinde
-    cache'li olduğu için ekstra IGDB çağrısı gerekmiyor.
+    Creates an automatic diary entry from a library entry.
+    Should only be called for `Playing` or `Completed` statuses — the caller
+    is responsible for the transition check. game_name/game_cover_url are
+    cached on the library entry, so no extra IGDB call is needed.
     """
     diary = DiaryEntry(
         user_id=user_id,
@@ -74,7 +74,7 @@ async def add_game(
 
     db.add(new_entry)
 
-    # İlk eklemede status Playing/Completed ise diary'ye de düş
+    # If the initial status is Playing/Completed, also write to the diary
     if new_entry.status in ("Playing", "Completed"):
         _create_diary_entry(db, current_user.id, new_entry, new_entry.status)
 
@@ -225,8 +225,8 @@ def update_game(
         entry.rating = None  # type: ignore
         entry.review = None  # type: ignore
 
-    # Status değiştiyse ve hedef Playing/Completed ise diary entry yarat.
-    # Aynı status'a re-save (örn. sadece review eklendi) entry üretmiyor.
+    # If the status changed and the target is Playing/Completed, create a diary entry.
+    # A re-save into the same status (e.g. only a review was added) does not produce an entry.
     if old_status != new_status and new_status in ("Playing", "Completed"):
         _create_diary_entry(db, current_user.id, entry, new_status)
 

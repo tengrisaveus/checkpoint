@@ -1,97 +1,97 @@
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../AuthContext";
-import useTitle from "../hooks/useTitle";
-import { useEffect, useState } from "react";
-import api from "../api";
-import type { DiaryEntry, Game } from "../types";
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../AuthContext"
+import useTitle from "../hooks/useTitle"
+import { useEffect, useState } from "react"
+import api from "../api"
+import type { DiaryEntry, Game } from "../types"
 
 const STATUS_COLORS: Record<string, string> = {
   Completed: "#22c55e",
   Playing: "#3b82f6",
   "Want to Play": "#eab308",
   Dropped: "#ef4444",
-};
+}
 
 interface LibraryEntryWithGame {
-  game_id: number;
-  game_name: string;
-  game_cover_url: string | null;
-  status: string;
-  rating: number | null;
+  game_id: number
+  game_name: string
+  game_cover_url: string | null
+  status: string
+  rating: number | null
 }
 
 interface StatsData {
-  total_games: number;
-  by_status: Record<string, number>;
-  average_rating: number | null;
-  completion_ratio: number;
+  total_games: number
+  by_status: Record<string, number>
+  average_rating: number | null
+  completion_ratio: number
 }
 
 function getDateLabel(): string {
-  const now = new Date();
-  const month = now.toLocaleDateString("en-US", { month: "short" });
-  return `${month} ${now.getDate()}`;
+  const now = new Date()
+  const month = now.toLocaleDateString("en-US", { month: "short" })
+  return `${month} ${now.getDate()}`
 }
 
 export default function Home() {
-  const { user, loading, login } = useAuth();
-  const navigate = useNavigate();
-  const [recentGames, setRecentGames] = useState<LibraryEntryWithGame[]>([]);
-  const [recentDiary, setRecentDiary] = useState<DiaryEntry[]>([]);
-  const [stats, setStats] = useState<StatsData | null>(null);
-  const [demoLoading, setDemoLoading] = useState(false);
-  const [popularGames, setPopularGames] = useState<Game[]>([]);
-  const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
-  const [communityTab, setCommunityTab] = useState<"popular" | "upcoming">("popular");
+  const { user, loading, login } = useAuth()
+  const navigate = useNavigate()
+  const [recentGames, setRecentGames] = useState<LibraryEntryWithGame[]>([])
+  const [recentDiary, setRecentDiary] = useState<DiaryEntry[]>([])
+  const [stats, setStats] = useState<StatsData | null>(null)
+  const [demoLoading, setDemoLoading] = useState(false)
+  const [popularGames, setPopularGames] = useState<Game[]>([])
+  const [upcomingGames, setUpcomingGames] = useState<Game[]>([])
+  const [communityTab, setCommunityTab] = useState<"popular" | "upcoming">("popular")
 
-  useTitle(user ? "Home" : "Checkpoint — Track Your Games");
+  useTitle(user ? "Home" : "Checkpoint — Track Your Games")
 
   useEffect(() => {
-    if (!user) return;
-    api.get("/library").then((res) => setRecentGames(res.data)).catch(() => {});
-    api.get("/diary").then((res) => setRecentDiary(res.data.slice(0, 6))).catch(() => {});
-    api.get("/library/stats").then((res) => setStats(res.data)).catch(() => {});
-  }, [user]);
+    if (!user) return
+    api.get("/library").then((res) => setRecentGames(res.data)).catch(() => {})
+    api.get("/diary").then((res) => setRecentDiary(res.data.slice(0, 6))).catch(() => {})
+    api.get("/library/stats").then((res) => setStats(res.data)).catch(() => {})
+  }, [user])
 
   const handleDemo = async () => {
-    setDemoLoading(true);
+    setDemoLoading(true)
     try {
-      await login("demo@checkpoint.app", "demo123456");
+      await login("demo@checkpoint.app", "demo123456")
     } catch {
-      setDemoLoading(false);
+      setDemoLoading(false)
     }
-  };
+  }
 
   const getCoverUrl = (url: string | null) => {
-    if (!url) return null;
-    return url.startsWith("http") ? url : `https:${url}`;
-  };
+    if (!url) return null
+    return url.startsWith("http") ? url : `https:${url}`
+  }
 
   const getGameCoverUrl = (game: Game) => {
-    if (!game.cover?.url) return null;
-    return `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`;
-  };
+    if (!game.cover?.url) return null
+    return `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`
+  }
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-    });
-  };
+    })
+  }
 
   useEffect(() => {
-    if (!user) return;
-    api.get("/games/popular").then((res) => setPopularGames(res.data)).catch(() => {});
-    api.get("/games/upcoming").then((res) => setUpcomingGames(res.data)).catch(() => {});
-  }, [user]);
+    if (!user) return
+    api.get("/games/popular").then((res) => setPopularGames(res.data)).catch(() => {})
+    api.get("/games/upcoming").then((res) => setUpcomingGames(res.data)).catch(() => {})
+  }, [user])
 
   // Also fetch popular for landing
   useEffect(() => {
-    if (user) return;
-    api.get("/games/popular").then((res) => setPopularGames(res.data)).catch(() => {});
-  }, [user]);
+    if (user) return
+    api.get("/games/popular").then((res) => setPopularGames(res.data)).catch(() => {})
+  }, [user])
 
-  if (loading) return null;
+  if (loading) return null
 
   // ====== LOGGED OUT — EDITORIAL LANDING ======
   if (!user) {
@@ -134,7 +134,7 @@ export default function Home() {
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {popularGames.slice(0, 4).map((game) => {
-                  const cover = getGameCoverUrl(game);
+                  const cover = getGameCoverUrl(game)
                   return (
                     <div
                       key={game.id}
@@ -153,7 +153,7 @@ export default function Home() {
                         </div>
                       )}
                     </div>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function Home() {
             </p>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
               {popularGames.slice(4, 10).map((game) => {
-                const cover = getGameCoverUrl(game);
+                const cover = getGameCoverUrl(game)
                 return (
                   <div
                     key={game.id}
@@ -186,25 +186,25 @@ export default function Home() {
                       {game.name}
                     </p>
                   </div>
-                );
+                )
               })}
             </div>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   // ====== LOGGED IN — DASHBOARD ======
-  const playingGames = recentGames.filter((g) => g.status === "Playing");
-  const queueGames = recentGames.filter((g) => g.status === "Want to Play");
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
+  const playingGames = recentGames.filter((g) => g.status === "Playing")
+  const queueGames = recentGames.filter((g) => g.status === "Want to Play")
+  const weekAgo = new Date()
+  weekAgo.setDate(weekAgo.getDate() - 7)
   const thisWeekDiary = recentDiary.filter(
     (e) => new Date(e.played_at) >= weekAgo,
-  );
+  )
 
-  const communityGames = communityTab === "popular" ? popularGames : upcomingGames;
+  const communityGames = communityTab === "popular" ? popularGames : upcomingGames
 
   return (
     <div className="min-h-screen bg-[var(--cp-bg)] p-6 md:p-8">
@@ -360,8 +360,8 @@ export default function Home() {
                     <span className="text-[var(--cp-text-dim)] text-[12px]">Can't decide?</span>
                     <button
                       onClick={() => {
-                        const random = queueGames[Math.floor(Math.random() * queueGames.length)];
-                        navigate(`/game/${random.game_id}`);
+                        const random = queueGames[Math.floor(Math.random() * queueGames.length)]
+                        navigate(`/game/${random.game_id}`)
                       }}
                       className="text-[12px] text-[var(--cp-accent)] font-semibold hover:brightness-110 transition"
                     >
@@ -405,7 +405,7 @@ export default function Home() {
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: "thin" }}>
               {communityGames.slice(0, 10).map((game) => {
-                const cover = getGameCoverUrl(game);
+                const cover = getGameCoverUrl(game)
                 return (
                   <div
                     key={game.id}
@@ -427,7 +427,7 @@ export default function Home() {
                       {game.name}
                     </p>
                   </div>
-                );
+                )
               })}
             </div>
           </div>
@@ -472,5 +472,5 @@ export default function Home() {
         )}
       </div>
     </div>
-  );
+  )
 }

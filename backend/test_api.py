@@ -482,9 +482,9 @@ def test_diary_monthly():
 
 def test_completing_a_game_creates_diary_entry():
     """
-    Library entry status'u Completed'a transition ettiğinde diary'de eş
-    bir kayıt otomatik oluşmalı — manual session log kalktığı için bu
-    auto-creation feature'ının core invariant'i.
+    When a library entry's status transitions to Completed, a matching diary
+    entry should be created automatically — since manual session logging was
+    removed, this is the core invariant of the auto-creation feature.
     """
     token = get_token()
     headers = {"Authorization": f"Bearer {token}"}
@@ -494,7 +494,7 @@ def test_completing_a_game_creates_diary_entry():
         "status": "Playing",
     }, headers=headers)
 
-    # Playing → Completed transition diary entry üretmeli
+    # Playing → Completed transition should produce a diary entry
     client.put("/library/1022", json={
         "status": "Completed",
         "rating": 9,
@@ -502,7 +502,7 @@ def test_completing_a_game_creates_diary_entry():
 
     diary = client.get("/diary/", headers=headers).json()
     statuses = [d["status"] for d in diary]
-    assert "Playing" in statuses   # initial add'den
-    assert "Completed" in statuses # transition'dan
+    assert "Playing" in statuses   # from the initial add
+    assert "Completed" in statuses # from the transition
     completed_entry = next(d for d in diary if d["status"] == "Completed")
     assert completed_entry["rating"] == 9

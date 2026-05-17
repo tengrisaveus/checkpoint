@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from core.database import Base
-from models import *  # noqa: F401 – tüm modelleri yükle ki Base.metadata dolsun
+from models import *  # noqa: F401 – import all models so Base.metadata is populated
 
 from core.config import get_settings
 from sqlalchemy import create_engine

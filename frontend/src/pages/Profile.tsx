@@ -1,26 +1,26 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../api";
-import { useAuth } from "../AuthContext";
-import type { LibraryEntry, DiaryEntry } from "../types";
-import FavoritePicker from "../components/FavoritePicker";
-import Toast from "../components/Toast";
-import useTitle from "../hooks/useTitle";
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import api from "../api"
+import { useAuth } from "../AuthContext"
+import type { LibraryEntry, DiaryEntry } from "../types"
+import FavoritePicker from "../components/FavoritePicker"
+import Toast from "../components/Toast"
+import useTitle from "../hooks/useTitle"
 
 interface LibraryEntryWithGame extends LibraryEntry {
-  game_name: string;
-  game_cover_url: string | null;
-  is_favorite: boolean;
+  game_name: string
+  game_cover_url: string | null
+  is_favorite: boolean
 }
 
 interface StatsData {
-  total_games: number;
-  by_status: Record<string, number>;
-  average_rating: number | null;
-  rated_count: number;
-  reviewed_count: number;
-  completion_ratio: number;
-  top_genres: { name: string; count: number }[];
+  total_games: number
+  by_status: Record<string, number>
+  average_rating: number | null
+  rated_count: number
+  reviewed_count: number
+  completion_ratio: number
+  top_genres: { name: string; count: number }[]
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -28,34 +28,34 @@ const STATUS_COLORS: Record<string, string> = {
   Playing: "#3b82f6",
   "Want to Play": "#eab308",
   Dropped: "#ef4444",
-};
+}
 
 function monthsBetween(iso: string) {
-  const then = new Date(iso);
-  const now = new Date();
+  const then = new Date(iso)
+  const now = new Date()
   return (
     (now.getFullYear() - then.getFullYear()) * 12 +
     (now.getMonth() - then.getMonth())
-  );
+  )
 }
 
 function formatActivityDate(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const d = new Date(iso)
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }
 
 export default function Profile() {
-  useTitle("Profile");
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [library, setLibrary] = useState<LibraryEntryWithGame[]>([]);
-  const [favorites, setFavorites] = useState<LibraryEntryWithGame[]>([]);
-  const [stats, setStats] = useState<StatsData | null>(null);
-  const [diary, setDiary] = useState<DiaryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  useTitle("Profile")
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [library, setLibrary] = useState<LibraryEntryWithGame[]>([])
+  const [favorites, setFavorites] = useState<LibraryEntryWithGame[]>([])
+  const [stats, setStats] = useState<StatsData | null>(null)
+  const [diary, setDiary] = useState<DiaryEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [success, setSuccess] = useState("")
+  const [error, setError] = useState("")
 
   useEffect(() => {
     Promise.all([
@@ -65,66 +65,66 @@ export default function Profile() {
       api.get("/diary/"),
     ])
       .then(([libRes, favRes, statsRes, diaryRes]) => {
-        setLibrary(libRes.data);
-        setFavorites(favRes.data);
-        setStats(statsRes.data);
-        setDiary(diaryRes.data);
+        setLibrary(libRes.data)
+        setFavorites(favRes.data)
+        setStats(statsRes.data)
+        setDiary(diaryRes.data)
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => setLoading(false))
+  }, [])
 
   const getCoverUrl = (url: string | null) => {
-    if (!url) return null;
-    return url.startsWith("http") ? url : `https:${url}`;
-  };
+    if (!url) return null
+    return url.startsWith("http") ? url : `https:${url}`
+  }
 
   const handleAddFavorite = async (gameId: number) => {
-    const newFavIds = [...favorites.map((f) => f.game_id), gameId];
+    const newFavIds = [...favorites.map((f) => f.game_id), gameId]
     try {
-      await api.put("/library/favorites", newFavIds);
-      const added = library.find((e) => e.game_id === gameId);
-      if (added) setFavorites([...favorites, added]);
-      setPickerOpen(false);
-      setSuccess("Favorite added!");
+      await api.put("/library/favorites", newFavIds)
+      const added = library.find((e) => e.game_id === gameId)
+      if (added) setFavorites([...favorites, added])
+      setPickerOpen(false)
+      setSuccess("Favorite added!")
     } catch {
-      setError("Failed to update favorites");
+      setError("Failed to update favorites")
     }
-  };
+  }
 
   const handleRemoveFavorite = async (gameId: number) => {
     const newFavIds = favorites
       .filter((f) => f.game_id !== gameId)
-      .map((f) => f.game_id);
+      .map((f) => f.game_id)
     try {
-      await api.put("/library/favorites", newFavIds);
-      setFavorites(favorites.filter((f) => f.game_id !== gameId));
-      setSuccess("Favorite removed!");
+      await api.put("/library/favorites", newFavIds)
+      setFavorites(favorites.filter((f) => f.game_id !== gameId))
+      setSuccess("Favorite removed!")
     } catch {
-      setError("Failed to update favorites");
+      setError("Failed to update favorites")
     }
-  };
+  }
 
   if (loading)
     return (
       <div className="min-h-screen bg-[var(--cp-bg)] text-[var(--cp-text-dim)] p-8">
         Loading...
       </div>
-    );
+    )
 
-  const slots = [0, 1, 2, 3];
+  const slots = [0, 1, 2, 3]
   const completionDash = stats
     ? 163.36 - (163.36 * stats.completion_ratio) / 100
-    : 163.36;
+    : 163.36
 
-  const joinedIso = user?.created_at || "";
+  const joinedIso = user?.created_at || ""
   const joinedLabel = joinedIso
     ? new Date(joinedIso).toLocaleDateString("en-US", {
         month: "long",
         year: "numeric",
       })
-    : "";
-  const monthsMember = joinedIso ? monthsBetween(joinedIso) : 0;
+    : ""
+  const monthsMember = joinedIso ? monthsBetween(joinedIso) : 0
 
   const sidebarStats: [string, string | number][] = [
     ["Games", stats?.total_games ?? 0],
@@ -133,9 +133,9 @@ export default function Profile() {
     ["Backlog", stats?.by_status["Want to Play"] ?? 0],
     ["Avg rating", stats?.average_rating ? `★ ${stats.average_rating}` : "—"],
     ["Diary", diary.length],
-  ];
+  ]
 
-  const recentActivity = diary.slice(0, 6);
+  const recentActivity = diary.slice(0, 6)
 
   return (
     <div className="min-h-screen bg-[var(--cp-bg)]">
@@ -195,9 +195,9 @@ export default function Profile() {
             <div className="mt-6 mb-8 lg:mb-0">
               <button
                 onClick={() => {
-                  const url = `${window.location.origin}/u/${user?.username}`;
-                  navigator.clipboard.writeText(url);
-                  setSuccess("Profile link copied!");
+                  const url = `${window.location.origin}/u/${user?.username}`
+                  navigator.clipboard.writeText(url)
+                  setSuccess("Profile link copied!")
                 }}
                 className="w-full py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dim)] text-[11px] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-accent)] transition"
               >
@@ -214,7 +214,7 @@ export default function Profile() {
             </p>
             <div className="grid grid-cols-4 gap-2.5 mb-8">
               {slots.map((i) => {
-                const fav = favorites[i];
+                const fav = favorites[i]
                 if (fav) {
                   return (
                     <div key={fav.game_id} className="relative group">
@@ -242,7 +242,7 @@ export default function Profile() {
                         ✕
                       </button>
                     </div>
-                  );
+                  )
                 }
                 return (
                   <button
@@ -253,7 +253,7 @@ export default function Profile() {
                   >
                     +
                   </button>
-                );
+                )
               })}
             </div>
 
@@ -303,7 +303,7 @@ export default function Profile() {
                   </div>
 
                   {Object.entries(stats.by_status).map(([status, count]) => {
-                    const color = STATUS_COLORS[status] || "#6b7280";
+                    const color = STATUS_COLORS[status] || "#6b7280"
                     return (
                       <div
                         key={status}
@@ -331,7 +331,7 @@ export default function Profile() {
                           {count}
                         </span>
                       </div>
-                    );
+                    )
                   })}
                 </div>
               </>
@@ -345,15 +345,15 @@ export default function Profile() {
                 </p>
                 <div className="bg-[var(--cp-surf)] border border-[var(--cp-border)] rounded-xl p-2 mb-8">
                   {recentActivity.map((e, i) => {
-                    const isLast = i === recentActivity.length - 1;
-                    const statusColor = STATUS_COLORS[e.status];
+                    const isLast = i === recentActivity.length - 1
+                    const statusColor = STATUS_COLORS[e.status]
                     const note =
                       e.note?.trim()
                         ? `"${e.note}"`
                         : e.rating
                           ? `Rated ${"★".repeat(Math.round(e.rating / 2))}`
-                          : e.status;
-                    const cover = getCoverUrl(e.game_cover_url);
+                          : e.status
+                    const cover = getCoverUrl(e.game_cover_url)
                     return (
                       <div
                         key={e.id}
@@ -393,7 +393,7 @@ export default function Profile() {
                           </span>
                         )}
                       </div>
-                    );
+                    )
                   })}
                 </div>
               </>
@@ -423,5 +423,5 @@ export default function Profile() {
         />
       )}
     </div>
-  );
+  )
 }
