@@ -15,6 +15,7 @@ import Profile from "./pages/Profile"
 import Lists from "./pages/Lists"
 import ListDetail from "./pages/ListDetail"
 import PublicProfile from "./pages/PublicProfile"
+import Settings from "./pages/Settings"
 
 function App() {
   return (
@@ -66,6 +67,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ListDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />

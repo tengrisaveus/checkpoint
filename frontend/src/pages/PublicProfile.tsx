@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import api from "../api"
 import useTitle from "../hooks/useTitle"
+import SteamShowcase from "../components/SteamShowcase"
+import type { ConnectedAccount } from "../types"
 
 interface PublicProfileData {
   user: {
@@ -42,6 +44,7 @@ interface PublicProfileData {
     item_count: number
     preview_covers: string[]
   }[]
+  connections: ConnectedAccount[]
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -97,7 +100,7 @@ export default function PublicProfile() {
 
   if (!data) return null
 
-  const { user, stats, favorites, monthly, recent_diary, lists } = data
+  const { user, stats, favorites, monthly, recent_diary, lists, connections } = data
   const completionDash = 163.36 - (163.36 * stats.completion_ratio) / 100
   const maxMonthly = Math.max(...monthly.map((m) => m.count), 1)
 
@@ -289,6 +292,28 @@ export default function PublicProfile() {
                   </span>
                 </div>
               ))}
+            </div>
+          </>
+        )}
+
+        {/* Connected platforms */}
+        {connections && connections.length > 0 && (
+          <>
+            <p className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-3">Showcases</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+              {connections.map((c) => {
+                if (c.platform === "steam") {
+                  return (
+                    <SteamShowcase
+                      key={c.platform}
+                      displayName={c.display_name}
+                      avatarUrl={c.avatar_url}
+                      data={c.showcase_data}
+                    />
+                  )
+                }
+                return null
+              })}
             </div>
           </>
         )}

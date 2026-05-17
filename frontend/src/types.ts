@@ -73,3 +73,36 @@ export interface GameList {
 
 export const GAME_STATUSES = ["Playing", "Completed", "Want to Play", "Dropped"] as const
 export type GameStatus = typeof GAME_STATUSES[number]
+
+export interface SteamShowcaseGame {
+  app_id: number
+  name: string
+  playtime_minutes: number
+  playtime_2weeks_minutes?: number
+  image_url: string | null
+}
+
+export interface SteamShowcaseData {
+  private: boolean
+  total_games?: number
+  total_playtime_minutes?: number
+  top_games?: SteamShowcaseGame[]
+  recent_games?: SteamShowcaseGame[]
+  synced_at?: number
+}
+
+export interface ConnectedAccount {
+  platform: string
+  display_name: string | null
+  avatar_url: string | null
+  showcase_data: SteamShowcaseData | null
+  last_synced_at: string | null
+}
+
+export interface MyConnection {
+  platform: string
+  external_id: string
+  display_name: string | null
+  avatar_url: string | null
+  last_synced_at: string | null
+}
