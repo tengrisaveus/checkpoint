@@ -525,7 +525,10 @@ export default function GameDetail() {
                         value={playedAt}
                         max={new Date().toISOString().split("T")[0]}
                         onChange={(e) => setPlayedAt(e.target.value)}
-                        className="w-full p-2 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-sm"
+                        onKeyDown={(e) => e.preventDefault()}
+                        onClick={(e) => (e.currentTarget as HTMLInputElement).showPicker?.()}
+                        readOnly
+                        className="w-full p-2 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-sm cursor-pointer"
                       />
                     </div>
                   )}
