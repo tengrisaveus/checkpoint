@@ -5,31 +5,18 @@ import useTitle from "../hooks/useTitle"
 import CategoryChips, { type BrowseCategory } from "../components/browse/CategoryChips"
 import CoverCard from "../components/browse/CoverCard"
 import FilterBar, { type BrowseSort } from "../components/browse/FilterBar"
-import TrendingHero from "../components/browse/heroes/TrendingHero"
-import UpcomingHero from "../components/browse/heroes/UpcomingHero"
-import TopRatedHero from "../components/browse/heroes/TopRatedHero"
 import { CardSkeleton } from "../components/Skeleton"
-
-const PAGE_SIZE = 12
-const HERO_KEY = "browse-hero"
 
 const ENDPOINTS: Record<BrowseCategory, string> = {
   trending: "/games/trending",
   popular: "/games/popular",
   upcoming: "/games/upcoming",
   new: "/games/new-releases",
-  top: "/games/top-rated",
-  gems: "/games/hidden-gems",
 }
 
 const FALLBACK_ENDPOINT = "/games/popular"
 
-function readHero(): boolean {
-  const v = localStorage.getItem(HERO_KEY)
-  return v == null ? true : v === "1"
-}
-
-function applySort(games: Game[], sort: BrowseSort, tab: BrowseCategory): Game[] {
+function applySort(games: Game[], sort: BrowseSort): Game[] {
   const copy = [...games]
   switch (sort) {
     case "rating":
@@ -55,16 +42,6 @@ function applySort(games: Game[], sort: BrowseSort, tab: BrowseCategory): Game[]
     case "name":
       copy.sort((a, b) => a.name.localeCompare(b.name))
       break
-    case "default":
-    default:
-      if (tab === "top" || tab === "gems") {
-        copy.sort(
-          (a, b) =>
-            (b.aggregated_rating ?? b.rating ?? 0) -
-            (a.aggregated_rating ?? a.rating ?? 0),
-        )
-      }
-      break
   }
   return copy
 }
@@ -74,14 +51,8 @@ export default function Browse() {
   const [tab, setTab] = useState<BrowseCategory>("trending")
   const [activeGenre, setActiveGenre] = useState<string | null>(null)
   const [sort, setSort] = useState<BrowseSort>("default")
-  const [showHero, setShowHero] = useState<boolean>(readHero)
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
-  const [visible, setVisible] = useState(PAGE_SIZE)
-
-  useEffect(() => {
-    localStorage.setItem(HERO_KEY, showHero ? "1" : "0")
-  }, [showHero])
 
   useEffect(() => {
     let cancelled = false
@@ -117,7 +88,6 @@ export default function Browse() {
   const handleTabChange = (next: BrowseCategory) => {
     if (next === tab) return
     setLoading(true)
-    setVisible(PAGE_SIZE)
     setActiveGenre(null)
     setTab(next)
   }
@@ -128,8 +98,8 @@ export default function Browse() {
   }, [games, activeGenre])
 
   const sorted = useMemo(
-    () => applySort(genreFiltered, sort, tab),
-    [genreFiltered, sort, tab],
+    () => applySort(genreFiltered, sort),
+    [genreFiltered, sort],
   )
 
   const genres = useMemo(() => {
@@ -144,40 +114,17 @@ export default function Browse() {
       .sort((a, b) => b.count - a.count)
   }, [games])
 
-  const paged = sorted.slice(0, visible)
-
   return (
     <div className="min-h-screen bg-[var(--cp-bg)] py-8 md:py-10">
       <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-        <div className="flex items-end justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
           <h1 className="font-display text-3xl md:text-4xl text-[var(--cp-text)]">
             Browse games
           </h1>
-          <button
-            onClick={() => setShowHero((v) => !v)}
-            className={`shrink-0 text-[12px] font-semibold uppercase tracking-[.04em] px-3 py-1.5 rounded-sm border transition ${
-              showHero
-                ? "border-[var(--cp-accent)]/50 bg-[var(--cp-surf)] text-[var(--cp-text)]"
-                : "border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/40 hover:text-[var(--cp-text)]"
-            }`}
-          >
-            Featured
-          </button>
+          <div className="md:flex-1 md:max-w-[640px]">
+            <CategoryChips value={tab} onChange={handleTabChange} />
+          </div>
         </div>
-
-        <div className="mb-6">
-          <CategoryChips value={tab} onChange={handleTabChange} />
-        </div>
-
-        {!loading && showHero && tab === "trending" && (
-          <TrendingHero games={games} />
-        )}
-        {!loading && showHero && tab === "upcoming" && (
-          <UpcomingHero games={games} />
-        )}
-        {!loading && showHero && tab === "top" && (
-          <TopRatedHero games={applySort(games, "rating", "top")} />
-        )}
 
         <FilterBar
           genres={genres}
@@ -191,7 +138,7 @@ export default function Browse() {
         <div className="mt-6">
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {Array.from({ length: 12 }).map((_, i) => (
+              {Array.from({ length: 24 }).map((_, i) => (
                 <CardSkeleton key={i} />
               ))}
             </div>
@@ -202,44 +149,21 @@ export default function Browse() {
               </div>
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {paged.map((game, i) => {
-                  if (tab === "top") {
-                    return (
-                      <CoverCard
-                        key={game.id}
-                        game={game}
-                        variant="ranked"
-                        rank={i + 1}
-                      />
-                    )
-                  }
-                  if (tab === "upcoming") {
-                    return (
-                      <CoverCard key={game.id} game={game} variant="upcoming" />
-                    )
-                  }
-                  if (tab === "new") {
-                    return <CoverCard key={game.id} game={game} variant="new" />
-                  }
-                  return <CoverCard key={game.id} game={game} variant="default" />
-                })}
-              </div>
-              {visible < sorted.length && (
-                <div className="flex justify-center mt-8">
-                  <button
-                    onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                    className="text-[12px] font-semibold uppercase tracking-[.04em] px-4 py-2 rounded-sm border border-[var(--cp-border)] text-[var(--cp-text-dim)] hover:border-[var(--cp-accent)]/50 hover:text-[var(--cp-text)] transition"
-                  >
-                    Load more
-                  </button>
-                </div>
-              )}
-            </>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {sorted.map((game) => {
+                if (tab === "upcoming") {
+                  return (
+                    <CoverCard key={game.id} game={game} variant="upcoming" />
+                  )
+                }
+                if (tab === "new") {
+                  return <CoverCard key={game.id} game={game} variant="new" />
+                }
+                return <CoverCard key={game.id} game={game} variant="default" />
+              })}
+            </div>
           )}
         </div>
-
       </div>
     </div>
   )

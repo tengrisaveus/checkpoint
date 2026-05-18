@@ -6,8 +6,6 @@ from services.igdb import (
     get_new_releases,
     get_upcoming_games,
     get_trending_games,
-    get_top_rated_games,
-    get_hidden_gems,
     get_games_by_genre,
     get_similar_games,
 )
@@ -33,16 +31,6 @@ async def upcoming():
 @router.get("/trending")
 async def trending():
     return await get_trending_games()
-
-
-@router.get("/top-rated")
-async def top_rated():
-    return await get_top_rated_games()
-
-
-@router.get("/hidden-gems")
-async def hidden_gems():
-    return await get_hidden_gems()
 
 
 @router.get("/genre/{genre_id}")

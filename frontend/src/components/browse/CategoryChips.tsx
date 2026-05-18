@@ -3,16 +3,12 @@ export type BrowseCategory =
   | "popular"
   | "upcoming"
   | "new"
-  | "top"
-  | "gems"
 
 const CATEGORIES: { value: BrowseCategory; label: string }[] = [
   { value: "trending", label: "TRENDING" },
   { value: "popular", label: "POPULAR" },
   { value: "upcoming", label: "UPCOMING" },
   { value: "new", label: "NEW RELEASES" },
-  { value: "top", label: "TOP RATED" },
-  { value: "gems", label: "HIDDEN GEMS" },
 ]
 
 export default function CategoryChips({

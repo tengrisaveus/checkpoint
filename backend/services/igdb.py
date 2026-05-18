@@ -121,7 +121,7 @@ async def get_popular_games():
         f"where id = ({','.join(map(str, ids))}) & cover != null "
         f"& game_type = {MAIN_GAME_TYPES} "
         f"& total_rating_count > 20; "
-        f"sort total_rating_count desc; limit 20;",
+        f"sort total_rating_count desc; limit 50;",
     )
 
 
@@ -143,7 +143,7 @@ async def get_new_releases():
         f"& cover != null "
         f"& game_type = {MAIN_GAME_TYPES} "
         f"& total_rating_count > 20; "
-        f"sort total_rating_count desc; limit 20;",
+        f"sort total_rating_count desc; limit 50;",
     )
 
 
@@ -162,39 +162,7 @@ async def get_trending_games():
         f"& cover != null "
         f"& game_type = {MAIN_GAME_TYPES} "
         f"& hypes > 0; "
-        f"sort hypes desc; limit 24;",
-    )
-
-
-async def get_top_rated_games():
-    """
-    Top rated: aggregated_rating > 85 with enough reviews to be meaningful.
-    """
-    return await igdb_request(
-        "games",
-        f"fields name, cover.url, first_release_date, genres.name, "
-        f"platforms.name, aggregated_rating, total_rating_count; "
-        f"where aggregated_rating > 85 "
-        f"& rating_count > 50 "
-        f"& cover != null "
-        f"& game_type = {MAIN_GAME_TYPES}; "
-        f"sort aggregated_rating desc; limit 50;",
-    )
-
-
-async def get_hidden_gems():
-    """
-    Hidden gems: well-rated but under-the-radar.
-    """
-    return await igdb_request(
-        "games",
-        f"fields name, cover.url, first_release_date, genres.name, "
-        f"platforms.name, aggregated_rating, total_rating_count, rating_count; "
-        f"where aggregated_rating > 80 "
-        f"& rating_count < 200 "
-        f"& cover != null "
-        f"& game_type = {MAIN_GAME_TYPES}; "
-        f"sort aggregated_rating desc; limit 30;",
+        f"sort hypes desc; limit 50;",
     )
 
 
@@ -215,7 +183,7 @@ async def get_upcoming_games():
         f"& game_type = {MAIN_GAME_TYPES} "
         f"& version_parent = null "
         f"& hypes > 1; "
-        f"sort hypes desc; limit 20;",
+        f"sort hypes desc; limit 50;",
     )
 
 

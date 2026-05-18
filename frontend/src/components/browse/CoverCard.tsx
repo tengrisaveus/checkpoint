@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import type { Game } from "../../types"
 import { fallbackGradient, getYear } from "../../utils"
 
-type Variant = "default" | "ranked" | "upcoming" | "new"
+type Variant = "default" | "upcoming" | "new"
 
 function coverUrl(game: Game): string | null {
   if (!game.cover?.url) return null
@@ -20,11 +20,9 @@ function formatShortDate(timestamp?: number): string {
 export default function CoverCard({
   game,
   variant = "default",
-  rank,
 }: {
   game: Game
   variant?: Variant
-  rank?: number
 }) {
   const navigate = useNavigate()
   const cover = coverUrl(game)
@@ -63,19 +61,6 @@ export default function CoverCard({
             }}
           >
             {Math.round(rating)}
-          </div>
-        )}
-
-        {variant === "ranked" && rank != null && (
-          <div
-            className="absolute top-1 left-2 font-display text-[var(--cp-text)] leading-none select-none"
-            style={{
-              fontWeight: 500,
-              fontSize: "64px",
-              textShadow: "0 2px 12px rgba(0,0,0,0.7)",
-            }}
-          >
-            {rank}
           </div>
         )}
 
