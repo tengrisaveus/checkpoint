@@ -19,13 +19,12 @@ const STATUS_LABEL: Record<string, string> = {
   Dropped: "Dropped",
 }
 
-type SortMode = "recent" | "rating" | "name" | "hours" | "status"
+type SortMode = "recent" | "rating" | "name" | "status"
 type ViewMode = "grid" | "table" | "columns"
 
 interface LibraryEntryWithGame extends LibraryEntry {
   game_name: string
   game_cover_url: string | null
-  hours_played?: number | null
   release_year?: number | null
   developer?: string | null
   genre?: string | null
@@ -197,8 +196,6 @@ export default function Library() {
       copy.sort((a, b) => (b.rating || 0) - (a.rating || 0))
     } else if (sortMode === "name") {
       copy.sort((a, b) => a.game_name.localeCompare(b.game_name))
-    } else if (sortMode === "hours") {
-      copy.sort((a, b) => (b.hours_played || 0) - (a.hours_played || 0))
     } else if (sortMode === "status") {
       copy.sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status))
     }
@@ -344,7 +341,6 @@ export default function Library() {
                 <option value="recent">Recent</option>
                 <option value="rating">Rating</option>
                 <option value="name">A–Z</option>
-                <option value="hours">Hours</option>
                 <option value="status">Status</option>
               </select>
             )}
@@ -408,9 +404,7 @@ function GridView({
             {group.items.map((entry) => {
               const cover = getCoverUrl(entry.game_cover_url)
               const dateIso = entry.updated_at || entry.created_at
-              const meta = entry.hours_played && entry.hours_played > 0
-                ? `${entry.hours_played}h · ${new Date(dateIso).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-                : new Date(dateIso).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+              const meta = new Date(dateIso).toLocaleDateString("en-US", { month: "short", day: "numeric" })
               return (
                 <div
                   key={entry.id}
@@ -492,7 +486,7 @@ function TableView({
   onNavigate: (gameId: number) => void
   onUpdateStatus: (entryId: number, status: string) => void
 }) {
-  const gridCols = "grid-cols-[56px_minmax(0,1fr)_140px_90px_100px_90px]"
+  const gridCols = "grid-cols-[56px_minmax(0,1fr)_140px_90px_90px]"
   return (
     <div className="border border-[var(--cp-border)] rounded-md overflow-hidden">
       <div
@@ -502,7 +496,6 @@ function TableView({
         <SortHeader label="GAME" field="name" current={sortMode} onClick={onSort} />
         <SortHeader label="STATUS" field="status" current={sortMode} onClick={onSort} />
         <SortHeader label="RATING" field="rating" current={sortMode} onClick={onSort} />
-        <SortHeader label="HOURS" field="hours" current={sortMode} onClick={onSort} />
         <SortHeader label="UPDATED" field="recent" current={sortMode} onClick={onSort} />
       </div>
 
@@ -548,9 +541,6 @@ function TableView({
               style={{ color: entry.rating != null ? "#fbbf24" : "var(--cp-text-dimmer)" }}
             >
               {entry.rating != null ? `★ ${entry.rating}/10` : "—"}
-            </div>
-            <div className="font-mono text-[12.5px] text-[var(--cp-text-dim)]">
-              {entry.hours_played && entry.hours_played > 0 ? `${entry.hours_played}h` : "—"}
             </div>
             <div className="font-mono text-[12px] text-[var(--cp-text-dim)]">
               {shortDate(dateIso)}
@@ -667,8 +657,6 @@ function ColumnCard({
   let meta: { text: string; color: string }
   if (entry.rating != null) {
     meta = { text: `★ ${entry.rating}/10`, color: "#fbbf24" }
-  } else if (entry.hours_played && entry.hours_played > 0) {
-    meta = { text: `${entry.hours_played}h played`, color: "var(--cp-text-dim)" }
   } else {
     meta = { text: "Not started", color: "var(--cp-text-dimmer)" }
   }

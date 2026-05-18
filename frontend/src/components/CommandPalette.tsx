@@ -14,8 +14,6 @@ const EDITION_KEYWORDS = [
   "steelbook", "deluxe", "ultimate", "launch ed", "gold", "premium", "goty",
 ]
 
-const TRY_CHIPS = ["Trending", "New 2025", "My genres", "90+ score"]
-
 function getRecentSearches(): string[] {
   try {
     return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]")
@@ -210,42 +208,28 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
 
         <div ref={listRef} className="p-2 max-h-[400px] overflow-y-auto">
           {!query.trim() ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 px-3 py-3">
-              {recent.length > 0 && (
-                <div>
-                  <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
-                    Recent
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {recent.slice(0, 5).map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => setQuery(q)}
-                        className="px-2.5 py-1 rounded-[3px] bg-[var(--cp-surf-2)] border border-[var(--cp-border)] text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-accent)] hover:border-[var(--cp-accent)]/40 transition"
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div>
+            recent.length > 0 ? (
+              <div className="px-3 py-3">
                 <div className="text-[13px] text-[var(--cp-text-dim)] font-medium mb-2">
-                  Try
+                  Recent
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {TRY_CHIPS.map((c) => (
+                  {recent.slice(0, 5).map((q) => (
                     <button
-                      key={c}
-                      onClick={() => setQuery(c)}
-                      className="px-2.5 py-1 rounded-[3px] border border-[var(--cp-border)] text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-accent)] hover:border-[var(--cp-accent)]/40 transition"
+                      key={q}
+                      onClick={() => setQuery(q)}
+                      className="px-2.5 py-1 rounded-[3px] bg-[var(--cp-surf-2)] border border-[var(--cp-border)] text-[12px] text-[var(--cp-text-dim)] hover:text-[var(--cp-accent)] hover:border-[var(--cp-accent)]/40 transition"
                     >
-                      {c}
+                      {q}
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="px-4 py-12 text-center text-[13px] text-[var(--cp-text-dimmer)]">
+                Start typing to search games, developers, or genres.
+              </div>
+            )
           ) : loading ? (
             <div>
               <div className="text-[13px] text-[var(--cp-text-dim)] font-medium px-3 py-1.5">

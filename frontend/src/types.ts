@@ -33,13 +33,6 @@ export interface LibraryEntry {
   updated_at: string
 }
 
-export interface SteamReview {
-  score: number
-  total_positive: number
-  total_negative: number
-  total_reviews: number
-}
-
 export interface DiaryEntry {
   id: number
   game_id: number
