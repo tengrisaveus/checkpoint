@@ -6,7 +6,7 @@
 <!-- PROJECT TITLE -->
 <br />
 <div align="center">
-  <img src="images/logo.png" alt="Checkpoint logo" width="80">
+  <img src="images/logo.png" alt="Checkpoint logo" width="300">
   <h1 align="center">Checkpoint</h1>
 
   <p align="center">
