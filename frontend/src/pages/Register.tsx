@@ -1,7 +1,29 @@
 import { useState } from "react"
 import { useAuth } from "../AuthContext"
 import { useNavigate, Link } from "react-router-dom"
+import { AxiosError } from "axios"
 import useTitle from "../hooks/useTitle"
+
+type ValidationError = { loc: (string | number)[]; msg: string; type: string }
+
+function extractRegisterError(err: unknown): string {
+  if (err instanceof AxiosError) {
+    if (err.response?.status === 429) {
+      return "Too many attempts. Please wait a minute and try again."
+    }
+    const detail = err.response?.data?.detail
+    if (typeof detail === "string") return detail
+    if (Array.isArray(detail)) {
+      const first = detail[0] as ValidationError | undefined
+      if (first) {
+        const field = first.loc?.[first.loc.length - 1]
+        return field ? `${field}: ${first.msg}` : first.msg
+      }
+    }
+    if (!err.response) return "Network error. Check your connection and try again."
+  }
+  return "Registration failed. Please try again."
+}
 
 export default function Register() {
   useTitle("Register")
@@ -18,8 +40,8 @@ export default function Register() {
     try {
       await register(username, email, password)
       navigate("/")
-    } catch {
-      setError("Registration failed. Email or username may be taken.")
+    } catch (err) {
+      setError(extractRegisterError(err))
     }
   }
 
@@ -57,7 +79,7 @@ export default function Register() {
             <label className="text-[var(--cp-text-dim)] text-[12px] uppercase tracking-[.04em] font-semibold block mb-1.5">PASSWORD</label>
             <input
               type="password"
-              placeholder="Min 6 characters"
+              placeholder="Min 8 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-3 rounded-sm bg-transparent text-[var(--cp-text)] placeholder-[var(--cp-text-dimmer)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)]"
