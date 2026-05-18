@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 from main import app
 from core.database import Base, get_db
+from routers import library as library_router
 
 # Load .env so TEST_DATABASE_URL is available
 load_dotenv()
@@ -41,6 +42,21 @@ def setup_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def stub_igdb(monkeypatch):
+    # CI does not have real IGDB credentials, and library writes call
+    # get_game_detail to fetch a name/cover. Stub it so tests are hermetic.
+    async def fake_get_game_detail(game_id: int):
+        return [{
+            "id": game_id,
+            "name": f"Test Game {game_id}",
+            "cover": {"url": "//images.igdb.com/t_thumb/test.jpg"},
+            "genres": [{"name": "Action"}],
+        }]
+
+    monkeypatch.setattr(library_router, "get_game_detail", fake_get_game_detail)
 
 
 # ========== AUTH TESTS ==========
