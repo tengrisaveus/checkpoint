@@ -40,7 +40,6 @@
       </ul>
     </li>
     <li><a href="#testing">Testing</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -169,13 +168,6 @@ pytest -v
 ```
 
 42 tests covering authentication (register, login, duplicates, token flows), library CRUD with status transition rules, diary auto-creation invariants, profile, custom lists, favorites, library statistics, and the health endpoint. IGDB calls are stubbed via a `monkeypatch` autouse fixture, so the full suite runs hermetically in CI without external credentials. Tests use an isolated database (set via `TEST_DATABASE_URL`) with tables created and dropped per-test for guaranteed isolation.
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-* [IGDB](https://www.igdb.com/) / [Twitch Developers](https://dev.twitch.tv/) — game metadata and API access
-* [Best-README-Template](https://github.com/othneildrew/Best-README-Template) — README structure inspiration
-* [Shields.io](https://shields.io/) — badges
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [ci-shield]: https://img.shields.io/github/actions/workflow/status/tengrisaveus/checkpoint/ci.yml?branch=main&style=for-the-badge
