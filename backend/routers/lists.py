@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from core.database import get_db
 from core.auth import get_current_user
@@ -154,9 +155,10 @@ async def add_item_to_list(
     if game_info.get("cover") and game_info["cover"].get("url"):
         cover_url = game_info["cover"]["url"].replace("t_thumb", "t_cover_big")
 
-    max_pos = db.query(GameListItem).filter(
+    max_pos = db.query(func.max(GameListItem.position)).filter(
         GameListItem.list_id == list_id
-    ).count()
+    ).scalar()
+    position = (max_pos + 1) if max_pos is not None else 0
 
     new_item = GameListItem(
         list_id=list_id,
@@ -164,7 +166,7 @@ async def add_item_to_list(
         game_name=game_info["name"],
         game_cover_url=cover_url,
         note=item_data.note,
-        position=max_pos,
+        position=position,
     )
 
     db.add(new_item)

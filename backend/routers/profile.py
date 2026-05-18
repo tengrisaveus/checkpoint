@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import date, timedelta
+from datetime import date
 from core.database import get_db
 from models import User, UserGame, DiaryEntry, GameList, GameListItem
 
@@ -62,17 +62,29 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
 
     today = date.today()
     monthly = []
+    # Son 6 ayı eskiden yeniye doğru sıralı şekilde üretiyoruz. Eski
+    # `timedelta(days=30*i)` yaklaşımı ay sınırlarına saygı duymadığı için
+    # bazı ayları duplike, bazılarını eksik gösteriyordu (örn. Şubat eksik,
+    # Ocak iki kez). Burada manuel olarak ay/yıl decrement yapılıyor.
     for i in range(5, -1, -1):
-        d = today.replace(day=1) - timedelta(days=i * 30)
-        key = d.strftime("%Y-%m")
-        label = d.strftime("%b")
-        monthly.append({"month": key, "label": label, "count": monthly_map.get(key, 0)})
+        year = today.year
+        month = today.month - i
+        while month <= 0:
+            month += 12
+            year -= 1
+        key = f"{year:04d}-{month:02d}"
+        label_date = date(year, month, 1)
+        monthly.append({
+            "month": key,
+            "label": label_date.strftime("%b"),
+            "count": monthly_map.get(key, 0),
+        })
 
     recent_diary = (
         db.query(DiaryEntry)
         .filter(DiaryEntry.user_id == user.id)
         .order_by(DiaryEntry.played_at.desc())
-        .limit(10)
+        .limit(5)
         .all()
     )
     recent_diary_list = [
@@ -88,14 +100,15 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
         for d in recent_diary
     ]
 
-    lists = (
+    user_lists = (
         db.query(GameList)
         .filter(GameList.user_id == user.id)
         .order_by(GameList.updated_at.desc())
+        .limit(6)
         .all()
     )
     lists_data = []
-    for lst in lists:
+    for lst in user_lists:
         items = (
             db.query(GameListItem)
             .filter(GameListItem.list_id == lst.id)
