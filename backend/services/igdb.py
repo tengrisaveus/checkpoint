@@ -147,6 +147,57 @@ async def get_new_releases():
     )
 
 
+async def get_trending_games():
+    """
+    Trending: high hype on games released in the last ~60 days.
+    """
+    now = int(time.time())
+    sixty_days_ago = now - (60 * 24 * 60 * 60)
+    return await igdb_request(
+        "games",
+        f"fields name, cover.url, first_release_date, genres.name, "
+        f"platforms.name, aggregated_rating, total_rating_count, hypes; "
+        f"where first_release_date > {sixty_days_ago} "
+        f"& first_release_date < {now} "
+        f"& cover != null "
+        f"& game_type = {MAIN_GAME_TYPES} "
+        f"& hypes > 0; "
+        f"sort hypes desc; limit 24;",
+    )
+
+
+async def get_top_rated_games():
+    """
+    Top rated: aggregated_rating > 85 with enough reviews to be meaningful.
+    """
+    return await igdb_request(
+        "games",
+        f"fields name, cover.url, first_release_date, genres.name, "
+        f"platforms.name, aggregated_rating, total_rating_count; "
+        f"where aggregated_rating > 85 "
+        f"& rating_count > 50 "
+        f"& cover != null "
+        f"& game_type = {MAIN_GAME_TYPES}; "
+        f"sort aggregated_rating desc; limit 50;",
+    )
+
+
+async def get_hidden_gems():
+    """
+    Hidden gems: well-rated but under-the-radar.
+    """
+    return await igdb_request(
+        "games",
+        f"fields name, cover.url, first_release_date, genres.name, "
+        f"platforms.name, aggregated_rating, total_rating_count, rating_count; "
+        f"where aggregated_rating > 80 "
+        f"& rating_count < 200 "
+        f"& cover != null "
+        f"& game_type = {MAIN_GAME_TYPES}; "
+        f"sort aggregated_rating desc; limit 30;",
+    )
+
+
 async def get_upcoming_games():
     """
     Games releasing within the next 6 months.

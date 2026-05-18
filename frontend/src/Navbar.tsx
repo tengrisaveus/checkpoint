@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { useAuth } from "./AuthContext"
 import { useCommandPalette } from "./CommandPaletteContext"
 
@@ -7,6 +7,8 @@ export default function Navbar() {
   const { user, logout } = useAuth()
   const { open: openPalette } = useCommandPalette()
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+  const browseActive = location.pathname.startsWith("/browse")
 
   return (
     <nav className="bg-[var(--cp-surf)] border-b border-[var(--cp-border)]">
@@ -17,6 +19,16 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6">
+          <Link
+            to="/browse"
+            className={`transition text-sm ${
+              browseActive
+                ? "text-[var(--cp-text)] border-b border-[var(--cp-accent)] pb-0.5"
+                : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"
+            }`}
+          >
+            Browse
+          </Link>
           <button
             onClick={openPalette}
             className="flex items-center gap-2 text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm"
@@ -63,6 +75,17 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-[var(--cp-border)] px-6 py-4 space-y-3">
+          <Link
+            to="/browse"
+            onClick={() => setMenuOpen(false)}
+            className={`block transition text-sm ${
+              browseActive
+                ? "text-[var(--cp-text)]"
+                : "text-[var(--cp-text-dim)] hover:text-[var(--cp-text)]"
+            }`}
+          >
+            Browse
+          </Link>
           <button
             onClick={() => { setMenuOpen(false); openPalette() }}
             className="block text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition text-sm"

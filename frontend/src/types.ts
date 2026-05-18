@@ -17,6 +17,7 @@ export interface Game {
   storyline?: string
   rating?: number
   aggregated_rating?: number
+  hypes?: number
   screenshots?: { url: string }[]
   artworks?: { url: string }[]
   websites?: { url: string; category: number }[]

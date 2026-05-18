@@ -130,7 +130,7 @@ export default function Home() {
           <div className="flex items-baseline justify-between mb-6 border-b border-[var(--cp-border)] pb-2.5">
             <span className="text-[15px] text-[var(--cp-text)]">Popular right now</span>
             <button
-              onClick={() => navigate("/search")}
+              onClick={() => navigate("/browse")}
               className="text-[13px] text-[var(--cp-text-dim)] hover:text-[var(--cp-text)] transition"
             >
               Browse all →

@@ -63,3 +63,12 @@ body {
   display: inline-block;
   flex-shrink: 0;
 }
+
+/* Hide scrollbars on horizontally-scrolling chip rows */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

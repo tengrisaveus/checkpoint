@@ -4,6 +4,7 @@ import api from "../api"
 import { GAME_STATUSES } from "../types"
 import type { LibraryEntry } from "../types"
 import useTitle from "../hooks/useTitle"
+import { fallbackGradient } from "../utils"
 
 const STATUS_COLORS: Record<string, string> = {
   Playing: "#3b82f6",
@@ -55,18 +56,6 @@ function monthLabel(iso: string): string {
 
 function shortDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-}
-
-function fallbackGradient(gameId: number): string {
-  const palettes = [
-    "linear-gradient(165deg,#5a1a3a,#1a0a2e)",
-    "linear-gradient(160deg,#2a1a5a,#5a1a3a)",
-    "linear-gradient(180deg,#4c1d95,#831843)",
-    "linear-gradient(200deg,#1e3a8a,#4c1d95)",
-    "linear-gradient(175deg,#6b21a8,#312e81)",
-    "linear-gradient(195deg,#831843,#4c1d95)",
-  ]
-  return palettes[gameId % palettes.length]
 }
 
 function StatusChip({
