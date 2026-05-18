@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import api from "../api"
 import type { DiaryEntry } from "../types"
 import { ListSkeleton } from "../components/Skeleton"
 import useTitle from "../hooks/useTitle"
+import DiaryEntryModal from "../components/DiaryEntryModal"
 
 const STATUS_COLORS: Record<string, string> = {
   Completed: "#22c55e",
@@ -51,6 +52,7 @@ export default function Diary() {
   const [loading, setLoading] = useState(true)
   const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(new Date()))
   const [filter, setFilter] = useState<FilterMode>("all")
+  const [modalOpen, setModalOpen] = useState(false)
 
   useEffect(() => {
     api.get("/diary")
@@ -195,7 +197,7 @@ export default function Diary() {
               </button>
             </div>
             <button
-              onClick={() => navigate("/search")}
+              onClick={() => setModalOpen(true)}
               className="text-[13px] font-semibold px-4 py-1.5 border border-[var(--cp-accent)]/50 text-[var(--cp-accent)] hover:bg-[var(--cp-accent)]/10 rounded-sm transition whitespace-nowrap"
             >
               + New entry
@@ -246,12 +248,12 @@ export default function Diary() {
                 ? `Nothing in ${monthLongName}.`
                 : "No entries match this filter."}
             </p>
-            <Link
-              to="/search"
+            <button
+              onClick={() => setModalOpen(true)}
               className="mt-3 inline-block text-[13px] font-medium text-[var(--cp-accent)] hover:brightness-110 transition"
             >
               Log a session →
-            </Link>
+            </button>
           </div>
         ) : (
           <div>
@@ -290,6 +292,15 @@ export default function Diary() {
               )
             })}
           </div>
+        )}
+        {modalOpen && (
+          <DiaryEntryModal
+            onClose={() => setModalOpen(false)}
+            onCreated={(entry) => {
+              setEntries((prev) => [entry, ...prev])
+              setCurrentMonth(startOfMonth(parseDay(entry.played_at)))
+            }}
+          />
         )}
       </div>
     </div>

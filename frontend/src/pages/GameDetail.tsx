@@ -55,6 +55,9 @@ export default function GameDetail() {
   const [sessions, setSessions] = useState<DiaryEntry[]>([])
   const [listModalOpen, setListModalOpen] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
+  const [playedAt, setPlayedAt] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  )
 
   useTitle(game?.name || "Loading...")
 
@@ -115,6 +118,10 @@ export default function GameDetail() {
     setJustSaved(false)
   }, [status, rating, review])
 
+  const willCreateDiaryEntry =
+    (status === "Playing" || status === "Completed") &&
+    (!existingEntry || existingEntry.status !== status)
+
   const handleSave = async () => {
     if (!status) {
       setError("Pick a status first")
@@ -123,12 +130,16 @@ export default function GameDetail() {
     setSaving(true)
     const payloadRating = status === "Completed" ? rating : null
     const payloadReview = status === "Completed" ? review || null : null
+    // Only send played_at when the save will trigger a diary entry — otherwise
+    // the backend would ignore it anyway, but sending it would be misleading.
+    const payloadPlayedAt = willCreateDiaryEntry ? playedAt : undefined
     try {
       if (existingEntry) {
         await api.put(`/library/${id}`, {
           status,
           rating: payloadRating,
           review: payloadReview,
+          played_at: payloadPlayedAt,
         })
         setExistingEntry({
           ...existingEntry,
@@ -142,6 +153,7 @@ export default function GameDetail() {
           status,
           rating: payloadRating,
           review: payloadReview,
+          played_at: payloadPlayedAt,
         })
         setExistingEntry(res.data)
       }
@@ -497,6 +509,23 @@ export default function GameDetail() {
                         rows={3}
                         maxLength={2000}
                         className="w-full p-2.5 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 resize-none border border-[var(--cp-border)] text-sm leading-relaxed"
+                      />
+                    </div>
+                  )}
+
+                  {/* PLAYED ON — only relevant when this save will create a diary entry */}
+                  {willCreateDiaryEntry && (
+                    <div>
+                      <div className="flex items-baseline justify-between mb-2">
+                        <span className={RAIL_LABEL}>Played on</span>
+                        <span className={RAIL_HINT}>defaults to today</span>
+                      </div>
+                      <input
+                        type="date"
+                        value={playedAt}
+                        max={new Date().toISOString().split("T")[0]}
+                        onChange={(e) => setPlayedAt(e.target.value)}
+                        className="w-full p-2 rounded-sm bg-transparent text-[var(--cp-text)] outline-none focus:ring-1 focus:ring-[var(--cp-accent)]/50 border border-[var(--cp-border)] text-sm"
                       />
                     </div>
                   )}

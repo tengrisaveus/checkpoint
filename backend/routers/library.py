@@ -10,19 +10,27 @@ from services.igdb import get_game_detail
 router = APIRouter()
 
 
-def _create_diary_entry(db: Session, user_id: int, entry: UserGame, new_status: str) -> None:
+def _create_diary_entry(
+    db: Session,
+    user_id: int,
+    entry: UserGame,
+    new_status: str,
+    played_at: date | None = None,
+) -> None:
     """
     Creates an automatic diary entry from a library entry.
     Should only be called for `Playing` or `Completed` statuses — the caller
     is responsible for the transition check. game_name/game_cover_url are
     cached on the library entry, so no extra IGDB call is needed.
+    The played_at parameter lets the caller record a different date than
+    today (e.g. user backfilling a session they finished last week).
     """
     diary = DiaryEntry(
         user_id=user_id,
         game_id=entry.game_id,
         game_name=entry.game_name,
         game_cover_url=entry.game_cover_url,
-        played_at=date.today(),
+        played_at=played_at or date.today(),
         status=new_status,
         rating=entry.rating if new_status == "Completed" else None,
         note=None,
@@ -76,7 +84,9 @@ async def add_game(
 
     # If the initial status is Playing/Completed, also write to the diary
     if new_entry.status in ("Playing", "Completed"):
-        _create_diary_entry(db, current_user.id, new_entry, new_entry.status)
+        _create_diary_entry(
+            db, current_user.id, new_entry, new_entry.status, game_data.played_at
+        )
 
     db.commit()
     db.refresh(new_entry)
@@ -228,7 +238,9 @@ def update_game(
     # If the status changed and the target is Playing/Completed, create a diary entry.
     # A re-save into the same status (e.g. only a review was added) does not produce an entry.
     if old_status != new_status and new_status in ("Playing", "Completed"):
-        _create_diary_entry(db, current_user.id, entry, new_status)
+        _create_diary_entry(
+            db, current_user.id, entry, new_status, game_data.played_at
+        )
 
     db.commit()
     db.refresh(entry)

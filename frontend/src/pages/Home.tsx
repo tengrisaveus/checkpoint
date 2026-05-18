@@ -178,9 +178,22 @@ export default function Home() {
           <div className="flex items-center justify-between text-[13px] text-[var(--cp-text-dimmer)] border-t border-[var(--cp-border)] pt-6">
             <span>© Checkpoint</span>
             <div className="flex gap-5">
-              <a href="#" className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)] transition">About</a>
-              <a href="#" className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)] transition">API</a>
-              <a href="#" className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)] transition">GitHub</a>
+              <a
+                href="https://checkpoint-api-a06342829980.herokuapp.com/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)] transition"
+              >
+                API
+              </a>
+              <a
+                href="https://github.com/tengrisaveus/checkpoint"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--cp-text-dimmer)] hover:text-[var(--cp-text-dim)] transition"
+              >
+                GitHub
+              </a>
             </div>
           </div>
         </div>

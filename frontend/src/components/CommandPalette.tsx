@@ -292,12 +292,6 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
                         </div>
                       )}
                     </div>
-                    {active && (
-                      <div className="text-[12px] uppercase tracking-[.04em] text-[var(--cp-text-dim)] font-semibold flex items-center gap-1 hidden sm:flex">
-                        Open
-                        <Kbd>↵</Kbd>
-                      </div>
-                    )}
                   </div>
                 )
               })}
@@ -305,11 +299,7 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
-        <div className="border-t border-[var(--cp-border)] px-3.5 py-2.5 flex justify-between items-center text-[12px] text-[var(--cp-text-dim)]">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="flex items-center"><Kbd>↑</Kbd><Kbd>↓</Kbd> navigate</span>
-            <span className="flex items-center"><Kbd>↵</Kbd> open</span>
-          </div>
+        <div className="border-t border-[var(--cp-border)] px-3.5 py-2.5 flex justify-end items-center text-[12px] text-[var(--cp-text-dim)]">
           <span className="flex items-center"><Kbd>esc</Kbd> close</span>
         </div>
       </div>
