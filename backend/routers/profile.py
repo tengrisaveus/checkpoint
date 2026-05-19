@@ -62,10 +62,10 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
 
     today = date.today()
     monthly = []
-    # Son 6 ayı eskiden yeniye doğru sıralı şekilde üretiyoruz. Eski
-    # `timedelta(days=30*i)` yaklaşımı ay sınırlarına saygı duymadığı için
-    # bazı ayları duplike, bazılarını eksik gösteriyordu (örn. Şubat eksik,
-    # Ocak iki kez). Burada manuel olarak ay/yıl decrement yapılıyor.
+    # Build the last 6 months ordered oldest to newest. The previous
+    # `timedelta(days=30*i)` approach didn't respect month boundaries, so
+    # some months ended up duplicated and others missing (e.g. February
+    # missing, January twice). Decrementing month/year manually here.
     for i in range(5, -1, -1):
         year = today.year
         month = today.month - i

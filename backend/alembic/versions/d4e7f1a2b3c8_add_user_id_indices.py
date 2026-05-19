@@ -17,8 +17,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Tüm "current user'ın verisi" query'leri bu kolondan filter'lıyor —
-    # index'siz halinde her query full table scan oluyor.
+    # Every "current user's data" query filters on this column —
+    # without an index each query degenerates into a full table scan.
     op.create_index(op.f('ix_user_games_user_id'), 'user_games', ['user_id'], unique=False)
     op.create_index(op.f('ix_diary_entries_user_id'), 'diary_entries', ['user_id'], unique=False)
     op.create_index(op.f('ix_game_lists_user_id'), 'game_lists', ['user_id'], unique=False)

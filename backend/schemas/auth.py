@@ -3,11 +3,11 @@ from datetime import datetime
 
 
 class UserCreate(BaseModel):
-    # Sadece harf, rakam ve alt çizgi — " admin ", emoji, sırf nokta gibi
-    # gariplikleri en başta eliyor. min_length 3 zaten vardı.
+    # Letters, digits and underscore only — rejects oddities like " admin ",
+    # emoji, or just-a-dot up front. min_length 3 was already in place.
     username: str = Field(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_]+$")
     email: EmailStr
-    # NIST'in modern önerisi 8+ minimum; eski 6 çok zayıf signal'di.
+    # NIST's current recommendation is 8+ minimum; the previous 6 was a very weak signal.
     password: str = Field(min_length=8)
 
 
